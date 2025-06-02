@@ -1,0 +1,19 @@
+{
+  "AlarmName": "LifeBridge-Billing-Alert",
+  "AlarmDescription": "Alert when AWS charges exceed $5",
+  "ActionsEnabled": true,
+  "ComparisonOperator": "GreaterThanThreshold",
+  "EvaluationPeriods": 1,
+  "MetricName": "EstimatedCharges",
+  "Namespace": "AWS/Billing",
+  "Period": 86400,
+  "Statistic": "Maximum",
+  "Threshold": 5.0,
+  "Unit": "None",
+  "Dimensions": [
+    {
+      "Name": "Currency",
+      "Value": "USD"
+    }
+  ]
+}
