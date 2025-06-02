@@ -1,0 +1,74 @@
+service: lifebridge-backend
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    STAGE: ${self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - bedrock:InvokeModel
+        - bedrock:InvokeModelWithResponseStream
+        - bedrock:ListFoundationModels
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - polly:SynthesizeSpeech
+        - transcribe:StartTranscriptionJob
+        - transcribe:GetTranscriptionJob
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: '*'
+
+functions:
+  translate:
+    handler: dist/handlers/translate.handler
+    timeout: 30
+    events:
+      - http:
+          path: /translate
+          method: post
+          cors: true
+  
+  detectLanguage:
+    handler: dist/handlers/detectLanguage.handler
+    timeout: 15
+    events:
+      - http:
+          path: /detect-language
+          method: post
+          cors: true
+  
+  textToSpeech:
+    handler: dist/handlers/textToSpeech.handler
+    timeout: 20
+    events:
+      - http:
+          path: /text-to-speech
+          method: post
+          cors: true
+
+  emergencyPhrases:
+    handler: dist/handlers/emergencyPhrases.handler
+    timeout: 20
+    events:
+      - http:
+          path: /emergency-phrases
+          method: get
+          cors: true
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3001
+    host: localhost
