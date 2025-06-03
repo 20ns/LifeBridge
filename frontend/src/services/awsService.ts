@@ -1,6 +1,9 @@
 
 // Backend API Configuration
-const API_BASE_URL = 'https://5wubqhune7.execute-api.eu-north-1.amazonaws.com/dev';
+// Use local backend for development, deployed URL for production
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://5wubqhune7.execute-api.eu-north-1.amazonaws.com/dev'
+  : 'http://localhost:3001/dev';
 
 // Language mappings for better translation context
 const languageNames: { [key: string]: string } = {
