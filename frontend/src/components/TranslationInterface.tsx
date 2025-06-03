@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Send, Volume2, Copy, Check } from 'lucide-react';
-import { translateText, detectLanguage, speakText } from '../services/awsService';
+import { translateText, speakText } from '../services/awsService';
 
 interface TranslationInterfaceProps {
   sourceLanguage: string;
@@ -98,12 +98,10 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
 
   const stopListening = () => {
     setIsListening(false);
-  };
-
-  // Auto-translate when input changes (with debounce)
+  };  // Auto-translate when input changes (with debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (inputText.trim() && inputText.length > 3) {
+      if (inputText.trim() && inputText.length > 2) {
         handleTranslate();
       }
     }, 1000);
@@ -127,8 +125,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               </button>
             </div>
           </div>
-          
-          <textarea
+            <textarea
             ref={inputRef}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -136,6 +133,16 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             className="text-input"
             rows={4}
           />
+          
+          <div className="input-actions">
+            <button
+              onClick={handleTranslate}
+              className="translate-button"
+              disabled={!inputText.trim() || isTranslating}
+            >
+              {isTranslating ? 'Translating...' : 'Translate'}
+            </button>
+          </div>
           
           {isListening && (
             <div className="listening-indicator">

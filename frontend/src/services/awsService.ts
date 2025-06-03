@@ -41,19 +41,22 @@ export const translateText = async (
         sourceLanguage,
         targetLanguage
       })
-    });
-
-    if (!response.ok) {
+    });    if (!response.ok) {
       const errorData = await response.json();
       throw new Error(`Translation failed: ${errorData.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
+    console.log('API Response:', data);
+    
+    // Extract from the nested data structure returned by the backend
+    const translationData = data.data || data;
+    console.log('Translation Data:', translationData);
     
     return {
-      translatedText: data.translatedText,
-      confidence: data.confidence || 0.8,
-      detectedLanguage: sourceLanguage
+      translatedText: translationData.translatedText,
+      confidence: translationData.confidence || 0.8,
+      detectedLanguage: translationData.sourceLanguage || sourceLanguage
     };
     
   } catch (error) {
