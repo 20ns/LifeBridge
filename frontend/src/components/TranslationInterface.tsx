@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Send, Volume2, Copy, Check, Wifi, WifiOff } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
+import SpeechInterface from './SpeechInterface';
 
 interface TranslationInterfaceProps {
   sourceLanguage: string;
@@ -65,11 +66,13 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       setConfidence(lastTranslation.confidence);
     }
   }, [lastTranslation, realTimeMode]);
+  const handleTranslate = async (textToTranslate?: string) => {
+    const text = textToTranslate || inputText;
+    if (!text.trim()) return;
 
-  const handleTranslate = async () => {
-    if (!inputText.trim()) return;    setIsTranslating(true);
+    setIsTranslating(true);
     try {
-      const result = await translateText(inputText, sourceLanguage, targetLanguage, context);
+      const result = await translateText(text, sourceLanguage, targetLanguage, context);
       setTranslatedText(result.translatedText);
       setConfidence(result.confidence);
     } catch (error) {
@@ -107,39 +110,14 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       }
     }
   };
-
-  const startListening = () => {
-    if ('webkitSpeechRecognition' in window) {
-      const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = sourceLanguage;
-
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInputText(transcript);
-        setIsListening(false);
-      };
-
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognition.start();
+  // Handle speech-to-text result
+  const handleSpeechToText = (transcript: string) => {
+    setInputText(transcript);
+    // Auto-translate the speech result
+    if (transcript.trim()) {
+      handleTranslate(transcript);
     }
-  };
-
-  const stopListening = () => {
-    setIsListening(false);
-  };  // Auto-translate when input changes (with debounce)
+  };// Auto-translate when input changes (with debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputText.trim() && inputText.length > 2) {
@@ -155,16 +133,17 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       <div className="translation-card">
         <div className="input-section">          <div className="section-header">
             <h3>Source Text</h3>
-            <div className="input-controls">
-              <button
-                onClick={isListening ? stopListening : startListening}
-                className={`mic-button ${isListening ? 'listening' : ''}`}
-                title={isListening ? 'Stop listening' : 'Start voice input'}
-              >
-                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-              </button>
-            </div>
-          </div>          {/* Medical Context Selector */}
+          </div>
+
+          {/* Speech Interface */}
+          <div className="speech-section">
+            <SpeechInterface
+              language={sourceLanguage}
+              onSpeechToText={handleSpeechToText}
+              textToSpeak={translatedText}
+              className="mb-4"
+            />
+          </div>{/* Medical Context Selector */}
           <div className="context-selector">
             <label htmlFor="context-select">Medical Context:</label>
             <select 
@@ -197,10 +176,9 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             placeholder="Enter medical text to translate... (e.g., 'The patient has chest pain')"
             className="text-input"
             rows={4}
-          />
-            <div className="input-actions">
+          />            <div className="input-actions">
             <button
-              onClick={handleTranslate}
+              onClick={() => handleTranslate()}
               className="translate-button"
               disabled={!inputText.trim() || isTranslating || (realTimeMode && isRealTimeTranslating)}
             >
@@ -227,15 +205,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
                 <div className="error-indicator">
                   <span>⚠️ {realTimeError}</span>
                 </div>
-              )}
-            </div>
-          )}
-          
-          {isListening && (
-            <div className="listening-indicator">
-              <div className="pulse"></div>
-              <span>Listening...</span>
-            </div>
+              )}            </div>
           )}
         </div>
 

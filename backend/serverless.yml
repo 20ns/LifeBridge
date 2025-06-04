@@ -8,6 +8,8 @@ provider:
   stage: ${opt:stage, 'dev'}
   environment:
     STAGE: ${self:provider.stage}
+    AWS_REGION: us-east-1
+    TRANSCRIBE_BUCKET: lifebridge-transcribe-temp-${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -21,6 +23,19 @@ provider:
         - transcribe:StartTranscriptionJob
         - transcribe:GetTranscriptionJob
       Resource: '*'
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource:
+        - arn:aws:s3:::lifebridge-transcribe-temp-${self:provider.stage}/*
+    - Effect: Allow
+      Action:
+        - s3:CreateBucket
+        - s3:ListBucket
+      Resource:
+        - arn:aws:s3:::lifebridge-transcribe-temp-${self:provider.stage}
     - Effect: Allow
       Action:
         - logs:CreateLogGroup
@@ -37,7 +52,7 @@ functions:
           path: /translate
           method: post
           cors: true
-  
+
   detectLanguage:
     handler: dist/handlers/detectLanguage.handler
     timeout: 15
@@ -46,7 +61,7 @@ functions:
           path: /detect-language
           method: post
           cors: true
-  
+
   textToSpeech:
     handler: dist/handlers/textToSpeech.handler
     timeout: 20
@@ -65,8 +80,34 @@ functions:
           method: get
           cors: true
 
+  speechToText:
+    handler: dist/handlers/speechToText.handler
+    timeout: 60
+    events:
+      - http:
+          path: /speech-to-text
+          method: post
+          cors: true
+
 plugins:
   - serverless-offline
+
+resources:
+  Resources:
+    TranscribeBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: lifebridge-transcribe-temp-${self:provider.stage}
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteTranscriptionFiles
+              Status: Enabled
+              ExpirationInDays: 1
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
 
 custom:
   serverless-offline:
