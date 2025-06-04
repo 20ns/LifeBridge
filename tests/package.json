@@ -1,0 +1,29 @@
+{
+  "name": "lifebridge-tests",
+  "version": "1.0.0",
+  "description": "Test suite for LifeBridge medical translation platform",
+  "main": "run-tests.js",
+  "scripts": {
+    "test": "node run-tests.js",
+    "test:unit": "node run-tests.js unit",
+    "test:services": "node run-tests.js services", 
+    "test:integration": "node run-tests.js integration",
+    "test:bedrock": "node run-tests.js unit bedrock-nova-micro",
+    "test:medical": "node run-tests.js services medical-context",
+    "test:app": "node run-tests.js integration app-integration"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.0.0",
+    "node-fetch": "^2.6.1"
+  },
+  "keywords": [
+    "medical",
+    "translation", 
+    "aws",
+    "bedrock",
+    "healthcare",
+    "nova-micro"
+  ],
+  "author": "LifeBridge Team",
+  "license": "MIT"
+}
