@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { translateText } from '../services/translate';
+import { translateText } from '../services/bedrock';
 import { createResponse, createErrorResponse } from '../utils/response';
 
 // Emergency phrases data
