@@ -13,7 +13,7 @@ if ($LASTEXITCODE -eq 0) {
 
 # Test AWS Bedrock access
 Write-Host "Checking AWS Bedrock access..."
-aws bedrock list-foundation-models --region us-east-1
+aws bedrock list-foundation-models --region eu-north-1
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Bedrock access confirmed" -ForegroundColor Green
 } else {

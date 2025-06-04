@@ -1,7 +1,7 @@
 // Test AWS configuration and create S3 bucket
 const { S3Client, CreateBucketCommand, HeadBucketCommand } = require('@aws-sdk/client-s3');
 
-const REGION = 'us-east-1';
+const REGION = 'eu-north-1';
 const BUCKET_NAME = 'lifebridge-transcribe-temp-dev';
 
 const s3Client = new S3Client({
@@ -24,11 +24,13 @@ async function testAWSConfig() {
     } catch (error) {
       if (error.name === 'NotFound') {
         console.log('❌ Bucket does not exist, attempting to create...');
-        
-        // Create the bucket
+          // Create the bucket
         const createCommand = new CreateBucketCommand({
           Bucket: BUCKET_NAME,
-          // For us-east-1, don't specify CreateBucketConfiguration
+          // For eu-north-1, specify CreateBucketConfiguration
+          CreateBucketConfiguration: {
+            LocationConstraint: 'eu-north-1'
+          }
         });
         
         await s3Client.send(createCommand);

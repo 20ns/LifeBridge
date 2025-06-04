@@ -4,11 +4,11 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs18.x
-  region: us-east-1
+  region: eu-north-1
   stage: ${opt:stage, 'dev'}
   environment:
     STAGE: ${self:provider.stage}
-    AWS_REGION: us-east-1
+    AWS_REGION: eu-north-1
     TRANSCRIBE_BUCKET: lifebridge-transcribe-temp-${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow

@@ -10,11 +10,11 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { createResponse, createErrorResponse, validateRequestBody } from '../utils/response';
 
 const transcribeClient = new TranscribeClient({
-  region: process.env.AWS_REGION || 'us-east-1',
+  region: process.env.AWS_REGION || 'eu-north-1',
 });
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
+  region: process.env.AWS_REGION || 'eu-north-1',
 });
 
 // Language code mappings for Transcribe
