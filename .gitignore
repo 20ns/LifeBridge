@@ -200,6 +200,10 @@ config/production.json
 .yarn/install-state.gz
 .pnp.*
 
+# ===== GITHUB & VERSION CONTROL =====
+# GitHub Copilot instructions (keep private to repository)
+.github/copilot-instructions.md
+
 # ===== PROJECT SPECIFIC =====
 # Test files that shouldn't be committed
 test-backend.html
