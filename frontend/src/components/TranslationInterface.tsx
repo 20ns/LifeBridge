@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Send, Volume2, Copy, Check } from 'lucide-react';
+import { Mic, MicOff, Send, Volume2, Copy, Check, Wifi, WifiOff } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
+import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
 
 interface TranslationInterfaceProps {
   sourceLanguage: string;
@@ -20,8 +21,50 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   const [copied, setCopied] = useState(false);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>('general');
+  const [realTimeMode, setRealTimeMode] = useState(true);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Emergency quick phrases
+  const emergencyPhrases = [
+    { id: 1, text: 'Call an ambulance immediately!', icon: '🚑' },
+    { id: 2, text: 'Patient is unconscious', icon: '😵' },
+    { id: 3, text: 'Severe chest pain', icon: '💔' },
+    { id: 4, text: 'Difficulty breathing', icon: '🫁' },
+    { id: 5, text: 'Medical emergency', icon: '🚨' },
+    { id: 6, text: 'Call for help', icon: '📞' }
+  ];
+
+  // Real-time translation hook
+  const {
+    isConnected,
+    isTranslating: isRealTimeTranslating,
+    isTyping,
+    lastTranslation,
+    error: realTimeError,
+    sendTypingIndicator
+  } = useRealTimeTranslation({
+    sourceLanguage,
+    targetLanguage,
+    context
+  });
+
+  // Handle input changes with real-time translation
+  const handleInputChange = (value: string) => {
+    setInputText(value);
+    
+    if (realTimeMode && value.trim()) {
+      sendTypingIndicator(value);
+    }
+  };
+
+  // Update translated text when real-time translation completes
+  useEffect(() => {
+    if (lastTranslation && realTimeMode) {
+      setTranslatedText(lastTranslation.translatedText);
+      setConfidence(lastTranslation.confidence);
+    }
+  }, [lastTranslation, realTimeMode]);
 
   const handleTranslate = async () => {
     if (!inputText.trim()) return;    setIsTranslating(true);
@@ -121,9 +164,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
                 {isListening ? <MicOff size={20} /> : <Mic size={20} />}
               </button>
             </div>
-          </div>
-
-          {/* Medical Context Selector */}
+          </div>          {/* Medical Context Selector */}
           <div className="context-selector">
             <label htmlFor="context-select">Medical Context:</label>
             <select 
@@ -137,26 +178,58 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               <option value="consultation">👨‍⚕️ Patient Consultation</option>
               <option value="medication">💊 Medication/Dosage</option>
             </select>
-          </div>
-
-          <textarea
+            
+            {/* Real-time Mode Toggle */}
+            <div className="realtime-toggle">
+              <button
+                onClick={() => setRealTimeMode(!realTimeMode)}
+                className={`realtime-button ${realTimeMode ? 'active' : ''}`}
+                title={realTimeMode ? 'Disable real-time translation' : 'Enable real-time translation'}
+              >
+                {isConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
+                {realTimeMode ? 'Real-time ON' : 'Real-time OFF'}
+              </button>
+            </div>
+          </div>          <textarea
             ref={inputRef}
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
             placeholder="Enter medical text to translate... (e.g., 'The patient has chest pain')"
             className="text-input"
             rows={4}
           />
-          
-          <div className="input-actions">
+            <div className="input-actions">
             <button
               onClick={handleTranslate}
               className="translate-button"
-              disabled={!inputText.trim() || isTranslating}
+              disabled={!inputText.trim() || isTranslating || (realTimeMode && isRealTimeTranslating)}
             >
-              {isTranslating ? 'Translating...' : 'Translate'}
+              {isTranslating || (realTimeMode && isRealTimeTranslating) ? 'Translating...' : 'Translate'}
             </button>
           </div>
+          
+          {/* Status Indicators */}
+          {realTimeMode && (
+            <div className="status-indicators">
+              {isTyping && (
+                <div className="typing-indicator">
+                  <div className="pulse"></div>
+                  <span>Analyzing text...</span>
+                </div>
+              )}
+              {isRealTimeTranslating && (
+                <div className="translating-indicator">
+                  <div className="pulse"></div>
+                  <span>Translating in real-time...</span>
+                </div>
+              )}
+              {realTimeError && (
+                <div className="error-indicator">
+                  <span>⚠️ {realTimeError}</span>
+                </div>
+              )}
+            </div>
+          )}
           
           {isListening && (
             <div className="listening-indicator">
@@ -205,10 +278,28 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               </div>
             ) : (
               <p>{translatedText || 'Translation will appear here...'}</p>
-            )}
+            )}        </div>
+      </div>
+
+      {/* Emergency Quick Actions */}
+      {context === 'emergency' && (
+        <div className="emergency-quick-actions">
+          <h4>🚨 Emergency Quick Phrases</h4>
+          <div className="emergency-buttons">
+            {emergencyPhrases.map((phrase) => (
+              <button
+                key={phrase.id}
+                onClick={() => handleInputChange(phrase.text)}
+                className="emergency-button"
+                title={`Quick insert: ${phrase.text}`}
+              >
+                {phrase.icon} {phrase.text}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
+      )}
+    </div>
     </div>
   );
 };
