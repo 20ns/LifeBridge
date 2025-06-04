@@ -524,6 +524,59 @@ body {
   color: var(--neutral-800);
 }
 
+/* Medical Context Selector */
+.context-selector {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.context-selector label {
+  font-weight: 600;
+  color: var(--neutral-700);
+  font-size: 0.9rem;
+}
+
+.context-select {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--neutral-200);
+  border-radius: 0.5rem;
+  background: var(--white);
+  color: var(--neutral-800);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.context-select:hover {
+  border-color: var(--primary-blue);
+}
+
+.context-select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.context-select option {
+  padding: 0.5rem;
+  font-weight: 500;
+}
+
+/* Emergency context highlighting */
+.context-select[value="emergency"] {
+  border-color: var(--accent-red);
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.context-select[value="emergency"]:focus {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
 /* Footer */
 .app-footer {
   background: var(--neutral-800);

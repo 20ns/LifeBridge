@@ -14,21 +14,19 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   targetLanguage,
   isListening,
   setIsListening
-}) => {
-  const [inputText, setInputText] = useState('');
+}) => {  const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [confidence, setConfidence] = useState<number | null>(null);
+  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>('general');
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleTranslate = async () => {
-    if (!inputText.trim()) return;
-
-    setIsTranslating(true);
+    if (!inputText.trim()) return;    setIsTranslating(true);
     try {
-      const result = await translateText(inputText, sourceLanguage, targetLanguage);
+      const result = await translateText(inputText, sourceLanguage, targetLanguage, context);
       setTranslatedText(result.translatedText);
       setConfidence(result.confidence);
     } catch (error) {
@@ -112,8 +110,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   return (
     <div className="translation-interface">
       <div className="translation-card">
-        <div className="input-section">
-          <div className="section-header">
+        <div className="input-section">          <div className="section-header">
             <h3>Source Text</h3>
             <div className="input-controls">
               <button
@@ -125,7 +122,24 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               </button>
             </div>
           </div>
-            <textarea
+
+          {/* Medical Context Selector */}
+          <div className="context-selector">
+            <label htmlFor="context-select">Medical Context:</label>
+            <select 
+              id="context-select"
+              value={context} 
+              onChange={(e) => setContext(e.target.value as any)}
+              className="context-select"
+            >
+              <option value="general">🏥 General Medical</option>
+              <option value="emergency">🚨 Emergency/Critical</option>
+              <option value="consultation">👨‍⚕️ Patient Consultation</option>
+              <option value="medication">💊 Medication/Dosage</option>
+            </select>
+          </div>
+
+          <textarea
             ref={inputRef}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
