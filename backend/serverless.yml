@@ -8,7 +8,6 @@ provider:
   stage: ${opt:stage, 'dev'}
   environment:
     STAGE: ${self:provider.stage}
-    AWS_REGION: eu-north-1
     TRANSCRIBE_BUCKET: lifebridge-transcribe-temp-${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
