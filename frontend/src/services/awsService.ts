@@ -3,7 +3,7 @@
 // Use local backend for development, deployed URL for production
 const isProduction = typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
 const API_BASE_URL = isProduction
-  ? 'https://5wubqhune7.execute-api.eu-north-1.amazonaws.com/dev'
+  ? 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod'
   : 'http://localhost:3001/dev';
 
 // Language mappings for better translation context
