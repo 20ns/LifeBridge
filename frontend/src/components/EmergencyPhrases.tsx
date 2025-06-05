@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AlertTriangle, Volume2, Copy, Check } from 'lucide-react';
 import { getEmergencyPhrases, speakText } from '../services/awsService';
 
@@ -11,27 +11,8 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({ targetLanguage }) =
   const [loading, setLoading] = useState(true);
   const [copiedPhrase, setCopiedPhrase] = useState<number | null>(null);
 
-  // Load emergency phrases from backend
-  useEffect(() => {
-    const loadPhrases = async () => {
-      setLoading(true);
-      try {
-        const phrases = await getEmergencyPhrases(targetLanguage);
-        setEmergencyPhrases(phrases);
-      } catch (error) {
-        console.error('Failed to load emergency phrases:', error);
-        // Fallback to hardcoded phrases if backend fails
-        setEmergencyPhrases(fallbackPhrases);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPhrases();
-  }, [targetLanguage]);
-
   // Fallback phrases if backend is unavailable
-  const fallbackPhrases = [
+  const fallbackPhrases = useMemo(() => [
     {
       id: 1,
       category: 'Emergency',
@@ -67,7 +48,25 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({ targetLanguage }) =
       translated: 'Are you taking any medications?',
       severity: 'high'
     }
-  ];
+  ], []);
+
+  // Load emergency phrases from backend
+  useEffect(() => {
+    const loadPhrases = async () => {
+      setLoading(true);
+      try {
+        const phrases = await getEmergencyPhrases(targetLanguage);
+        setEmergencyPhrases(phrases);
+      } catch (error) {
+        console.error('Failed to load emergency phrases:', error);
+        // Fallback to hardcoded phrases if backend fails
+        setEmergencyPhrases(fallbackPhrases);
+      } finally {
+        setLoading(false);
+      }
+    };    loadPhrases();
+  }, [targetLanguage, fallbackPhrases]);
+
   const handleCopy = async (phraseId: number, text: string) => {
     try {
       await navigator.clipboard.writeText(text);

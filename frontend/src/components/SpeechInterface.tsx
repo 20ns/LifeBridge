@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Loader } from 'lucide-react';
+import { Mic, MicOff, Volume2, Loader } from 'lucide-react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { speakText } from '../services/awsService';
 

@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Send, Volume2, Copy, Check, Wifi, WifiOff } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Send, Volume2, Copy, Check, Wifi, WifiOff } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
 import SpeechInterface from './SpeechInterface';
@@ -64,9 +64,9 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     if (lastTranslation && realTimeMode) {
       setTranslatedText(lastTranslation.translatedText);
       setConfidence(lastTranslation.confidence);
-    }
-  }, [lastTranslation, realTimeMode]);
-  const handleTranslate = async (textToTranslate?: string) => {
+    }  }, [lastTranslation, realTimeMode]);
+  
+  const handleTranslate = useCallback(async (textToTranslate?: string) => {
     const text = textToTranslate || inputText;
     if (!text.trim()) return;
 
@@ -82,7 +82,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     } finally {
       setIsTranslating(false);
     }
-  };
+  }, [inputText, sourceLanguage, targetLanguage, context]);
 
   const handleCopy = async () => {
     if (translatedText) {
@@ -117,7 +117,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     if (transcript.trim()) {
       handleTranslate(transcript);
     }
-  };// Auto-translate when input changes (with debounce)
+  };  // Auto-translate when input changes (with debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputText.trim() && inputText.length > 2) {
@@ -126,7 +126,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [inputText, sourceLanguage, targetLanguage]);
+  }, [inputText, sourceLanguage, targetLanguage, handleTranslate]);
 
   return (
     <div className="translation-interface">
