@@ -1,9 +1,6 @@
 // Backend API Configuration
-// Use local backend for development, deployed URL for production
-const isProduction = typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
-const API_BASE_URL = isProduction
-  ? 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod'
-  : 'http://localhost:3001/dev';
+// Use deployed AWS API Gateway URL
+const API_BASE_URL = 'https://9t2to2akvf.execute-api.eu-north-1.amazonaws.com/dev';
 
 // Utility function to convert base64 to Blob
 const base64ToBlob = (base64: string, mimeType: string): Blob => {
