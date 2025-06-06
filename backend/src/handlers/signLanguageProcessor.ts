@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { createResponse, createErrorResponse, validateRequestBody } from '../utils/response';
+import { createResponse, createErrorResponse, validateRequestBody, validateSignLanguageData } from '../utils/response';
 
 interface SignLanguageData {
   landmarks: any[];
@@ -198,11 +198,15 @@ export const handler = async (
     }    // Validate request body
     if (!event.body) {
       return createErrorResponse(400, 'Request body is required');
-    }
-
-    const validation = validateRequestBody(event.body, ['gesture', 'landmarks', 'confidence']);
+    }    const validation = validateRequestBody(event.body, ['gesture', 'landmarks', 'confidence']);
     if (!validation.isValid) {
       return createErrorResponse(400, validation.error!);
+    }
+
+    // Additional validation for sign language specific data
+    const signValidation = validateSignLanguageData(validation.data);
+    if (!signValidation.isValid) {
+      return createErrorResponse(400, signValidation.error!);
     }
 
     const { gesture, landmarks, confidence, medicalContext, timestamp } = validation.data;
@@ -228,12 +232,14 @@ export const handler = async (
       confidence: analysisResult.confidence,
       context: medicalContext,
       timestamp: signData.timestamp
-    });
-
-    // Return enhanced processing result
+    });    // Return enhanced processing result
     return createResponse(200, {
       originalGesture: gesture,
-      processedData: analysisResult,
+      enhancedGesture: analysisResult.processedGesture,
+      medicalPriority: analysisResult.medicalPriority,
+      translationText: analysisResult.translationText,
+      recommendedActions: analysisResult.recommendedActions,
+      confidence: analysisResult.confidence,
       medicalContext,
       processingTimestamp: Date.now(),
       auditInfo: {
