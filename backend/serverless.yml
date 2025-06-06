@@ -113,13 +113,21 @@ functions:
           path: /triage-suggestion
           method: post
           cors: true
-
   contextualAdvice:
     handler: dist/handlers/amazonQ.getContextualAdvice
     timeout: 30
     events:
       - http:
           path: /contextual-advice
+          method: post
+          cors: true
+
+  signLanguageProcessor:
+    handler: dist/handlers/signLanguageProcessor.handler
+    timeout: 20
+    events:
+      - http:
+          path: /sign-language-process
           method: post
           cors: true
 
