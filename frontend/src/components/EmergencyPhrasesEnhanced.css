@@ -1,0 +1,602 @@
+/* Enhanced Emergency Phrases Styles */
+.emergency-phrases {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.emergency-phrases.large-layout {
+  padding: 40px;
+}
+
+.emergency-phrases.accessible-layout {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+/* Header */
+.emergency-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+  color: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3);
+}
+
+.emergency-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 15px;
+  animation: emergency-pulse 2s infinite;
+}
+
+@keyframes emergency-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.emergency-header h2 {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.emergency-header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.recently-used {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.recent-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Loading state */
+.phrases-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #ff4757;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Phrases container */
+.phrases-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.phrases-container.large-buttons {
+  gap: 40px;
+}
+
+/* Category styling */
+.phrase-category {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+
+.phrase-category:hover {
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid;
+  border-bottom-color: inherit;
+}
+
+.category-icon {
+  flex-shrink: 0;
+}
+
+.category-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.category-title.large-title {
+  font-size: 2rem;
+}
+
+/* Phrases grid */
+.phrases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 15px;
+}
+
+.phrases-grid.large-grid {
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 25px;
+}
+
+/* Emergency phrase buttons */
+.emergency-phrase-button {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-left: 5px solid;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.emergency-phrase-button:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+}
+
+.emergency-phrase-button:focus {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
+.emergency-phrase-button.large {
+  padding: 30px;
+  gap: 20px;
+  border-left-width: 8px;
+  border-radius: 20px;
+}
+
+.emergency-phrase-button.accessible {
+  padding: 25px;
+  gap: 18px;
+  border-left-width: 6px;
+}
+
+/* Severity-based styling */
+.emergency-phrase-button.severity-critical {
+  border-left-color: #ff4757;
+  background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+
+.emergency-phrase-button.severity-critical:hover {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffebeb 100%);
+  box-shadow: 0 8px 25px rgba(255, 71, 87, 0.2);
+}
+
+.emergency-phrase-button.severity-high {
+  border-left-color: #ff6b35;
+  background: linear-gradient(135deg, #fff 0%, #fff8f5 100%);
+}
+
+.emergency-phrase-button.severity-high:hover {
+  background: linear-gradient(135deg, #fff8f5 0%, #fff0e6 100%);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+}
+
+.emergency-phrase-button.severity-medium {
+  border-left-color: #3742fa;
+  background: linear-gradient(135deg, #fff 0%, #f5f6ff 100%);
+}
+
+.emergency-phrase-button.severity-medium:hover {
+  background: linear-gradient(135deg, #f5f6ff 0%, #ebebff 100%);
+  box-shadow: 0 8px 25px rgba(55, 66, 250, 0.2);
+}
+
+.emergency-phrase-button.severity-low {
+  border-left-color: #2ed573;
+  background: linear-gradient(135deg, #fff 0%, #f5fff8 100%);
+}
+
+.emergency-phrase-button.severity-low:hover {
+  background: linear-gradient(135deg, #f5fff8 0%, #ebffef 100%);
+  box-shadow: 0 8px 25px rgba(46, 213, 115, 0.2);
+}
+
+/* Phrase content */
+.phrase-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.phrase-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.emergency-phrase-button.large .phrase-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.phrase-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.phrase-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.phrase-text.large-text {
+  font-size: 1.4rem;
+  line-height: 1.5;
+}
+
+.phrase-original {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* Action buttons */
+.phrase-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  background: #f8f9fa;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.emergency-phrase-button.large .action-button {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+}
+
+.action-button:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.action-button.copy:hover {
+  background: #d4edda;
+  color: #155724;
+}
+
+.action-button.copy.success {
+  background: #28a745;
+  color: white;
+  animation: success-pulse 0.3s ease;
+}
+
+@keyframes success-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.action-button.speak:hover {
+  background: #cce7ff;
+  color: #004085;
+}
+
+.action-button.speak.speaking {
+  background: #007bff;
+  color: white;
+  animation: speaking-pulse 1s infinite;
+}
+
+@keyframes speaking-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Emergency contact button */
+.emergency-contact {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.emergency-contact-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 40px;
+  background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.emergency-contact-button.large {
+  padding: 30px 60px;
+  font-size: 1.5rem;
+  gap: 15px;
+}
+
+.emergency-contact-button:hover {
+  background: linear-gradient(135deg, #ff3838 0%, #ff2828 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(255, 71, 87, 0.5);
+}
+
+.emergency-contact-button:active {
+  transform: translateY(-1px);
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .emergency-icon,
+  .action-button,
+  .emergency-phrase-button,
+  .emergency-contact-button {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .emergency-phrase-button {
+    border: 2px solid #000;
+  }
+  
+  .action-button {
+    border: 1px solid #000;
+  }
+  
+  .emergency-contact-button {
+    border: 2px solid #000;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.emergency-phrase-button:focus-visible,
+.action-button:focus-visible,
+.emergency-contact-button:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 3px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .emergency-phrases {
+    padding: 15px;
+  }
+  
+  .emergency-phrases.large-layout {
+    padding: 25px;
+  }
+  
+  .emergency-header {
+    padding: 15px;
+  }
+  
+  .emergency-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .phrases-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .phrases-grid.large-grid {
+    gap: 20px;
+  }
+  
+  .emergency-phrase-button {
+    padding: 15px;
+  }
+  
+  .emergency-phrase-button.large {
+    padding: 25px;
+  }
+  
+  .phrase-header {
+    gap: 12px;
+  }
+  
+  .phrase-text {
+    font-size: 1rem;
+  }
+  
+  .phrase-text.large-text {
+    font-size: 1.3rem;
+  }
+  
+  .action-button {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .emergency-phrase-button.large .action-button {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .emergency-contact-button {
+    padding: 15px 30px;
+    font-size: 1rem;
+  }
+  
+  .emergency-contact-button.large {
+    padding: 20px 40px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .phrases-container {
+    gap: 20px;
+  }
+  
+  .phrase-category {
+    padding: 15px;
+  }
+  
+  .category-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .emergency-phrase-button {
+    padding: 12px;
+  }
+  
+  .phrase-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .phrase-actions {
+    justify-content: center;
+    margin-top: 5px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .emergency-phrases {
+    background: white;
+    color: black;
+  }
+  
+  .emergency-header {
+    background: white;
+    color: black;
+    border: 2px solid black;
+  }
+  
+  .emergency-phrase-button {
+    break-inside: avoid;
+    border: 1px solid black;
+    box-shadow: none;
+  }
+  
+  .phrase-actions {
+    display: none;
+  }
+  
+  .emergency-contact {
+    display: none;
+  }
+}
+
+/* Animation for critical phrases */
+.emergency-phrase-button.severity-critical {
+  position: relative;
+}
+
+.emergency-phrase-button.severity-critical::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #ff4757, #ff6b35, #ff4757);
+  border-radius: 14px;
+  z-index: -1;
+  opacity: 0;
+  animation: critical-glow 3s infinite;
+}
+
+@keyframes critical-glow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.3; }
+}
+
+/* Keyboard navigation enhancements */
+.emergency-phrase-button[tabindex="0"]:focus {
+  z-index: 10;
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .emergency-icon,
+  .phrase-icon,
+  .category-icon {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}

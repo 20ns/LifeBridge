@@ -1,40 +1,18 @@
 import React, { useState } from 'react';
 import './App.css';
-import TranslationInterface from './components/TranslationInterface';
-import EmergencyPhrases from './components/EmergencyPhrases';
+import MultiModalInterface from './components/MultiModalInterface';
 import LanguageSelector from './components/LanguageSelector';
-import SignLanguageInterface from './components/SignLanguageInterface';
-import { Heart, Globe, Mic, Volume2, Hand } from 'lucide-react';
+import { Heart, Settings, Shield } from 'lucide-react';
 
 function App() {
   const [sourceLanguage, setSourceLanguage] = useState('en');
   const [targetLanguage, setTargetLanguage] = useState('es');
-  const [isListening, setIsListening] = useState(false);
-  const [activeTab, setActiveTab] = useState<'text' | 'speech' | 'sign'>('text');
-  const [isTranslating, setIsTranslating] = useState(false);
+  const [performanceMode, setPerformanceMode] = useState<'standard' | 'optimized'>('optimized');
 
-  // Handle translation requests from different interfaces
-  const handleTranslationRequest = async (text: string, context: string) => {
-    setIsTranslating(true);
-    console.log(`Translation requested: "${text}" (context: ${context})`);
-    
-    try {
-      // This would integrate with the existing translation service
-      // For now, we'll simulate the translation process
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Translation completed');
-    } catch (error) {
-      console.error('Translation failed:', error);
-    } finally {
-      setIsTranslating(false);
-    }
-  };
-
-  // Handle emergency detection from sign language
-  const handleEmergencyDetected = (emergencyText: string) => {
-    console.log(`🚨 EMERGENCY DETECTED: ${emergencyText}`);
-    // This would trigger emergency protocols
-    alert(`EMERGENCY DETECTED: ${emergencyText}`);
+  // Handle language switching
+  const handleLanguageSwitch = () => {
+    setSourceLanguage(targetLanguage);
+    setTargetLanguage(sourceLanguage);
   };
 
   return (
@@ -46,92 +24,56 @@ function App() {
             <h1>LifeBridge AI</h1>
             <p className="subtitle">Medical Translation Platform</p>
           </div>
-          <div className="language-controls">
+          
+          <div className="header-controls">
             <LanguageSelector
               sourceLanguage={sourceLanguage}
               targetLanguage={targetLanguage}
               onSourceChange={setSourceLanguage}
               onTargetChange={setTargetLanguage}
             />
+            
+            <div className="performance-toggle">
+              <button
+                className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
+                onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
+                title="Toggle Performance Mode"
+              >
+                <Settings size={16} />
+                {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="main-content">
-        <div className="interface-tabs">
-          <button
-            className={`tab-button ${activeTab === 'text' ? 'active' : ''}`}
-            onClick={() => setActiveTab('text')}
-          >
-            <Globe size={20} />
-            Text Translation
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'speech' ? 'active' : ''}`}
-            onClick={() => setActiveTab('speech')}
-          >
-            <Mic size={20} />
-            Speech Translation
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'sign' ? 'active' : ''}`}
-            onClick={() => setActiveTab('sign')}
-          >
-            <Hand size={20} />
-            Sign Language
-          </button>
+        <div className="platform-description">
+          <div className="description-card">
+            <Shield className="desc-icon" />
+            <h2>Multi-Modal Medical Translation</h2>
+            <p>
+              Seamlessly switch between text, speech, and sign language translation modes. 
+              Optimized for emergency healthcare situations with real-time performance monitoring.
+            </p>
+          </div>
         </div>
 
-        <div className="interface-content">
-          {activeTab === 'text' && (
-            <div className="translation-container">
-              <TranslationInterface
-                sourceLanguage={sourceLanguage}
-                targetLanguage={targetLanguage}
-                isListening={isListening}
-                setIsListening={setIsListening}
-              />
-            </div>
-          )}
-
-          {activeTab === 'speech' && (
-            <div className="translation-container">
-              <TranslationInterface
-                sourceLanguage={sourceLanguage}
-                targetLanguage={targetLanguage}
-                isListening={isListening}
-                setIsListening={setIsListening}
-              />
-            </div>
-          )}
-
-          {activeTab === 'sign' && (
-            <div className="sign-language-container">
-              <SignLanguageInterface
-                onTranslationRequest={handleTranslationRequest}
-                onEmergencyDetected={handleEmergencyDetected}
-                isTranslating={isTranslating}
-                currentLanguage={targetLanguage}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="emergency-section">
-          <EmergencyPhrases
-            targetLanguage={targetLanguage}
-          />
-        </div>
+        <MultiModalInterface
+          sourceLanguage={sourceLanguage}
+          targetLanguage={targetLanguage}
+          onLanguageSwitch={handleLanguageSwitch}
+        />
       </main>
 
       <footer className="app-footer">
         <div className="footer-content">
           <p>© 2025 LifeBridge AI - Bridging Communication in Healthcare</p>
-          <div className="footer-icons">
-            <Globe size={16} />
-            <Mic size={16} />
-            <Hand size={16} />
-            <Volume2 size={16} />
+          <div className="footer-stats">
+            <span>🌍 Multi-Modal</span>
+            <span>🚨 Emergency Ready</span>
+            <span>⚡ Optimized</span>
+            <span>♿ Accessible</span>
           </div>
         </div>
       </footer>
