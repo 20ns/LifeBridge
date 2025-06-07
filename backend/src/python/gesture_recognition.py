@@ -1,9 +1,22 @@
 
 import json
+import os
 import boto3
 import joblib
-import numpy as np
 from typing import Dict, Any, List
+
+# Try to import ML dependencies, fallback if not available
+try:
+    import numpy as np
+    ML_DEPENDENCIES_AVAILABLE = True
+except ImportError:
+    ML_DEPENDENCIES_AVAILABLE = False
+    # Create a minimal numpy-like interface for basic operations
+    class SimpleNumpy:
+        @staticmethod
+        def max(arr):
+            return max(arr) if isinstance(arr, list) else 0.5
+    np = SimpleNumpy()
 
 # Lambda function for medical gesture recognition
 def lambda_handler(event, context):
@@ -21,6 +34,25 @@ def lambda_handler(event, context):
                 'body': json.dumps({
                     'error': 'No landmarks provided',
                     'medical_priority': 'unknown'
+                })
+            }
+          # Check if ML dependencies are available
+        if not ML_DEPENDENCIES_AVAILABLE:
+            # Return a fallback response when ML libraries aren't available
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({
+                    'gesture': 'help',  # Default to high priority gesture
+                    'confidence': 0.5,
+                    'medical_priority': 'high',
+                    'urgency_score': 8,
+                    'description': 'Fallback mode - ML dependencies not available',
+                    'timestamp': context.aws_request_id,
+                    'mode': 'fallback'
                 })
             }
         

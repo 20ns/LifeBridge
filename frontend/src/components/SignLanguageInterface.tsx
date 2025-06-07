@@ -20,6 +20,7 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
     detectedSigns,
     currentText,
     confidenceScore,
+    mlMode,
     startDetection,
     stopDetection,
     handleSignDetected,
@@ -76,6 +77,16 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
     <div className="sign-language-interface">
       <div className="interface-header">
         <h3>Medical Sign Language Translator</h3>
+        <div className="status-indicators">
+          <div className={`ml-mode-indicator ${mlMode}`}>
+            <span className="indicator-icon">
+              {mlMode === 'ml' ? '🤖' : '⚙️'}
+            </span>
+            <span className="indicator-text">
+              {mlMode === 'ml' ? 'Enhanced ML' : 'Basic Mode'}
+            </span>
+          </div>
+        </div>
         <div className="controls">
           <button
             onClick={isActive ? stopDetection : startDetection}

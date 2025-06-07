@@ -37,12 +37,14 @@ provider:
         - s3:DeleteObject
       Resource:
         - arn:aws:s3:::lifebridge-transcribe-temp-${self:provider.stage}/*
+        - arn:aws:s3:::lifebridge-ml-models-${self:provider.stage}/*
     - Effect: Allow
       Action:
         - s3:CreateBucket
         - s3:ListBucket
       Resource:
         - arn:aws:s3:::lifebridge-transcribe-temp-${self:provider.stage}
+        - arn:aws:s3:::lifebridge-ml-models-${self:provider.stage}
     - Effect: Allow
       Action:
         - logs:CreateLogGroup
@@ -113,6 +115,7 @@ functions:
           path: /triage-suggestion
           method: post
           cors: true
+
   contextualAdvice:
     handler: dist/handlers/amazonQ.getContextualAdvice
     timeout: 30
@@ -131,12 +134,26 @@ functions:
           method: post
           cors: true
 
+  gestureRecognitionML:
+    handler: src/python/gesture_recognition.lambda_handler
+    runtime: python3.9
+    timeout: 30
+    environment:
+      MODEL_BUCKET: lifebridge-ml-models-${self:provider.stage}
+      MODEL_KEY: gesture_recognition/model.joblib
+    events:
+      - http:
+          path: /gesture-recognition-ml
+          method: post
+          cors: true
+
 plugins:
   - serverless-offline
+  - serverless-python-requirements
 
 resources:
   Resources:
-    # TranscribeBucket already exists, no need to recreate
+    # TranscribeBucket already exists; no need to recreate
     # TranscribeBucket:
     #   Type: AWS::S3::Bucket
     #   Properties:
@@ -146,6 +163,15 @@ resources:
     #         - Id: DeleteTranscriptionFiles
     #           Status: Enabled
     #           ExpirationInDays: 1
+    #     PublicAccessBlockConfiguration:
+    #       BlockPublicAcls: true
+    #       BlockPublicPolicy: true
+    #       IgnorePublicAcls: true
+    #       RestrictPublicBuckets: true    # MLModelsBucket already exists, no need to recreate
+    # MLModelsBucket:
+    #   Type: AWS::S3::Bucket
+    #   Properties:
+    #     BucketName: lifebridge-ml-models-${self:provider.stage}
     #     PublicAccessBlockConfiguration:
     #       BlockPublicAcls: true
     #       BlockPublicPolicy: true
