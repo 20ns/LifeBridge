@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { createResponse, createErrorResponse, validateRequestBody, validateSignLanguageData } from '../utils/response';
+import { translateText } from '../services/bedrock';
 
 interface SignLanguageData {
   landmarks: any[];
@@ -254,6 +255,182 @@ export const handler = async (
     
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return createErrorResponse(500, 'Sign language processing failed', errorMessage);
+  }
+};
+
+// Connect sign language to translation pipeline
+export const signToTranslation = async (
+  event: APIGatewayProxyEvent,
+  context: Context
+): Promise<APIGatewayProxyResult> => {
+  console.log('Sign-to-translation request:', JSON.stringify(event, null, 2));
+
+  try {
+    // Handle CORS preflight requests
+    if (event.httpMethod === 'OPTIONS') {
+      return createResponse(200, {}, 'CORS preflight');
+    }
+
+    if (event.httpMethod !== 'POST') {
+      return createErrorResponse(405, 'Method not allowed');
+    }
+
+    if (!event.body) {
+      return createErrorResponse(400, 'Request body is required');
+    }
+
+    const validation = validateRequestBody(event.body, ['gesture', 'landmarks', 'confidence', 'targetLanguage']);
+    if (!validation.isValid) {
+      return createErrorResponse(400, validation.error!);
+    }
+
+    const { gesture, landmarks, confidence, medicalContext, targetLanguage, sourceLanguage = 'en' } = validation.data;
+
+    // First process the sign language gesture
+    const signData: SignLanguageData = {
+      landmarks,
+      gesture,
+      confidence,
+      timestamp: Date.now(),
+      medicalContext
+    };
+
+    const analysisResult = enhanceGestureAnalysis(gesture, landmarks, medicalContext);
+    
+    // Extract the text from sign language processing
+    const textToTranslate = analysisResult.translationText;
+    
+    // If target language is English, just return the sign analysis
+    if (targetLanguage.toLowerCase() === 'en' || targetLanguage.toLowerCase() === 'english') {
+      return createResponse(200, {
+        signAnalysis: analysisResult,
+        translationResult: {
+          translatedText: textToTranslate,
+          sourceLanguage: 'en',
+          targetLanguage: 'en',
+          confidence: analysisResult.confidence
+        },
+        processingTimestamp: Date.now()
+      }, 'Sign processed (no translation needed)');
+    }
+
+    // Translate the text to target language
+    console.log(`Translating sign text: "${textToTranslate}" to ${targetLanguage}`);
+    const translationResult = await translateText(
+      textToTranslate, 
+      sourceLanguage, 
+      targetLanguage, 
+      medicalContext || 'medical'
+    );
+
+    return createResponse(200, {
+      signAnalysis: {
+        originalGesture: gesture,
+        enhancedGesture: analysisResult.processedGesture,
+        medicalPriority: analysisResult.medicalPriority,
+        translationText: analysisResult.translationText,
+        recommendedActions: analysisResult.recommendedActions,
+        confidence: analysisResult.confidence,
+        medicalContext
+      },
+      translationResult: {
+        ...translationResult,
+        sourceText: textToTranslate
+      },
+      processingTimestamp: Date.now(),
+      auditInfo: {
+        signConfidence: analysisResult.confidence,
+        translationConfidence: translationResult.confidence || 0.9,
+        medicalPriority: analysisResult.medicalPriority,
+        processingTime: Date.now() - signData.timestamp
+      }
+    }, 'Sign language translated successfully');
+
+  } catch (error) {
+    console.error('Sign-to-translation error:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return createErrorResponse(500, 'Sign-to-translation failed', errorMessage);
+  }
+};
+
+// Batch sign processing for continuous detection
+export const batchSignProcessing = async (
+  event: APIGatewayProxyEvent,
+  context: Context
+): Promise<APIGatewayProxyResult> => {
+  console.log('Batch sign processing request:', JSON.stringify(event, null, 2));
+
+  try {
+    if (event.httpMethod === 'OPTIONS') {
+      return createResponse(200, {}, 'CORS preflight');
+    }
+
+    if (event.httpMethod !== 'POST') {
+      return createErrorResponse(405, 'Method not allowed');
+    }
+
+    if (!event.body) {
+      return createErrorResponse(400, 'Request body is required');
+    }
+
+    const { signSequence, medicalContext, targetLanguage = 'en' } = JSON.parse(event.body);
+
+    if (!signSequence || !Array.isArray(signSequence) || signSequence.length === 0) {
+      return createErrorResponse(400, 'Sign sequence is required and must be a non-empty array');
+    }
+
+    const processedSigns = [];
+    const combinedText = [];
+    let overallConfidence = 0;
+    let highestPriority = 'low';
+
+    for (const sign of signSequence) {
+      const analysisResult = enhanceGestureAnalysis(sign.gesture, sign.landmarks, medicalContext);
+      processedSigns.push({
+        ...sign,
+        analysis: analysisResult
+      });
+      
+      combinedText.push(analysisResult.translationText);
+      overallConfidence += analysisResult.confidence;
+      
+      // Update priority to highest found
+      const priorities = ['low', 'medium', 'high', 'critical'];
+      if (priorities.indexOf(analysisResult.medicalPriority) > priorities.indexOf(highestPriority)) {
+        highestPriority = analysisResult.medicalPriority;
+      }
+    }
+
+    overallConfidence = overallConfidence / signSequence.length;
+    const fullText = combinedText.join('. ');
+
+    // Translate combined text if needed
+    let translationResult = null;
+    if (targetLanguage.toLowerCase() !== 'en' && targetLanguage.toLowerCase() !== 'english') {
+      translationResult = await translateText(
+        fullText,
+        'en',
+        targetLanguage,
+        medicalContext || 'medical'
+      );
+    }
+
+    return createResponse(200, {
+      processedSigns,
+      combinedText: fullText,
+      translationResult,
+      overallConfidence,
+      medicalPriority: highestPriority,
+      processingTimestamp: Date.now(),
+      signCount: signSequence.length
+    }, 'Batch sign processing completed');
+
+  } catch (error) {
+    console.error('Batch sign processing error:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return createErrorResponse(500, 'Batch sign processing failed', errorMessage);
   }
 };
 

@@ -61,11 +61,11 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     signDetectionLatency: 0,
     cacheHitRate: 85,
     offlineMode: false
-  });
-  const [isListening, setIsListening] = useState(false);
+  });  const [isListening, setIsListening] = useState(false);
   const [showPerformancePanel, setShowPerformancePanel] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [translatedText, setTranslatedText] = useState('');
 
   // Caching mechanism
   const translationCache = useRef<Map<string, any>>(new Map());
@@ -386,17 +386,20 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
                 realTimeMode={true}
                 voiceActivityDetection={true}
               />
-            )}
-              {activeMode === 'sign' && (
+            )}              {activeMode === 'sign' && (
               <SignLanguageInterface
                 onEmergencyDetected={() => handleEmergencyMode(true)}
                 onTranslationRequest={(text, context) => {
                   const startTime = Date.now();
-                  // Handle sign language translation
-                  trackPerformance('signDetection', startTime);
+                  // Handle sign language translation - simulate API call
+                  setTimeout(() => {
+                    setTranslatedText(`Translated: ${text}`);
+                    trackPerformance('signDetection', startTime);
+                  }, 1000);
                 }}
                 isTranslating={false}
                 currentLanguage={targetLanguage}
+                translatedText={translatedText}
               />
             )}
               {activeMode === 'emergency' && (

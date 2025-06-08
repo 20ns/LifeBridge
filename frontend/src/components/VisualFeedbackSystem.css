@@ -1,0 +1,469 @@
+/* Visual Feedback System Styles */
+.visual-feedback-system {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+  border: 1px solid #dee2e6;
+}
+
+.visual-feedback-system.inactive {
+  background: #f8f9fa;
+  border-color: #ced4da;
+}
+
+/* Feedback Controls */
+.feedback-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.audio-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: white;
+  color: #495057;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.audio-toggle.enabled {
+  background: #d4edda;
+  border-color: #28a745;
+  color: #155724;
+}
+
+.audio-toggle.disabled {
+  background: #f8d7da;
+  border-color: #dc3545;
+  color: #721c24;
+}
+
+.audio-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Detection Status */
+.detection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 1rem;
+}
+
+.status-indicator {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-indicator.active .pulse-ring {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #28a745;
+  border-radius: 50%;
+  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
+.status-indicator.active .pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #28a745;
+  border-radius: 50%;
+  animation: pulse-dot 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.status-text {
+  font-weight: 500;
+  color: #28a745;
+  font-size: 0.9rem;
+}
+
+.inactive-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+  font-style: italic;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Current Sign Display */
+.current-sign-display {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sign-info {
+  margin-bottom: 0.75rem;
+}
+
+.sign-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 0.25rem 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sign-translation {
+  color: #495057;
+  margin: 0;
+  font-style: italic;
+}
+
+.emergency-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8d7da;
+  border: 1px solid #dc3545;
+  border-radius: 6px;
+  color: #721c24;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  animation: emergency-flash 1s infinite;
+}
+
+@keyframes emergency-flash {
+  0%, 100% { background: #f8d7da; }
+  50% { background: #f5c6cb; }
+}
+
+/* Confidence Display */
+.confidence-display {
+  margin-top: 0.5rem;
+}
+
+.confidence-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.confidence-bar {
+  width: 100%;
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confidence-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 3px;
+}
+
+/* Feedback Messages */
+.feedback-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.feedback-message {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  border-left: 4px solid #6c757d;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  animation: slide-in 0.3s ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.feedback-message.success {
+  border-left-color: #28a745;
+  background: linear-gradient(135deg, #fff 0%, #f8fff9 100%);
+}
+
+.feedback-message.warning {
+  border-left-color: #ffc107;
+  background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
+}
+
+.feedback-message.error {
+  border-left-color: #dc3545;
+  background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+
+.feedback-message.info {
+  border-left-color: #17a2b8;
+  background: linear-gradient(135deg, #fff 0%, #f0fffe 100%);
+}
+
+.feedback-message.emergency {
+  border: 2px solid #dc3545;
+  background: linear-gradient(135deg, #fff5f5 0%, #f8d7da 100%);
+  animation: emergency-message 1s infinite;
+}
+
+@keyframes emergency-message {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+  50% { box-shadow: 0 0 10px 2px rgba(220, 53, 69, 0.4); }
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.message-title {
+  font-weight: 600;
+  margin: 0;
+  color: #2c3e50;
+  flex-grow: 1;
+}
+
+.dismiss-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.dismiss-btn:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.message-text {
+  margin: 0;
+  color: #495057;
+  line-height: 1.4;
+}
+
+.message-confidence {
+  margin-top: 0.5rem;
+}
+
+.message-timestamp {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+/* Message Type Colors */
+.feedback-message.success .message-header svg {
+  color: #28a745;
+}
+
+.feedback-message.warning .message-header svg {
+  color: #ffc107;
+}
+
+.feedback-message.error .message-header svg {
+  color: #dc3545;
+}
+
+.feedback-message.info .message-header svg {
+  color: #17a2b8;
+}
+
+/* Visual Cues */
+.visual-cues {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+}
+
+.gesture-hints h5 {
+  margin: 0 0 0.75rem 0;
+  color: #495057;
+  font-weight: 600;
+}
+
+.hint-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.hint-item {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-left: 3px solid #6c757d;
+  background: #f8f9fa;
+}
+
+.hint-item.critical {
+  border-left-color: #dc3545;
+  background: #fff5f5;
+  color: #721c24;
+}
+
+.hint-item.high {
+  border-left-color: #fd7e14;
+  background: #fff3e0;
+  color: #8a4412;
+}
+
+.hint-item.medium {
+  border-left-color: #20c997;
+  background: #f0fffe;
+  color: #0f5132;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .visual-feedback-system {
+    padding: 0.75rem;
+  }
+
+  .detection-status {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .current-sign-display {
+    padding: 0.75rem;
+  }
+
+  .sign-name {
+    font-size: 1.1rem;
+  }
+
+  .feedback-message {
+    padding: 0.75rem;
+  }
+
+  .hint-list {
+    grid-template-columns: 1fr;
+  }
+
+  .feedback-controls {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .message-header {
+    flex-wrap: wrap;
+  }
+
+  .message-title {
+    flex-basis: 100%;
+    margin-bottom: 0.25rem;
+  }
+
+  .hint-item {
+    text-align: center;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .pulse-ring,
+  .pulse-dot,
+  .emergency-flash,
+  .emergency-message,
+  .slide-in {
+    animation: none !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .visual-feedback-system {
+    border: 2px solid #000;
+  }
+
+  .feedback-message {
+    border: 2px solid #000;
+  }
+
+  .confidence-bar {
+    border: 1px solid #000;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .visual-feedback-system {
+    background: #343a40;
+    border-color: #495057;
+    color: #f8f9fa;
+  }
+
+  .current-sign-display,
+  .feedback-message,
+  .visual-cues {
+    background: #495057;
+    border-color: #6c757d;
+  }
+
+  .sign-name {
+    color: #f8f9fa;
+  }
+
+  .message-title {
+    color: #f8f9fa;
+  }
+}

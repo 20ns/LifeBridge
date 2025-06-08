@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SignLanguageDetector from './SignLanguageDetector';
+import SignAnimationPlayer from './SignAnimationPlayer';
+import VisualFeedbackSystem from './VisualFeedbackSystem';
 import { useSignLanguageDetection } from '../hooks/useSignLanguageDetection';
 
 interface SignLanguageInterfaceProps {
@@ -7,13 +9,15 @@ interface SignLanguageInterfaceProps {
   onEmergencyDetected: (emergencyText: string) => void;
   isTranslating?: boolean;
   currentLanguage?: string;
+  translatedText?: string;
 }
 
 const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
   onTranslationRequest,
   onEmergencyDetected,
   isTranslating = false,
-  currentLanguage = 'en'
+  currentLanguage = 'en',
+  translatedText = ''
 }) => {
   const {
     isActive,
@@ -30,9 +34,18 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
     getDetectionStats,
     isEmergencyDetected
   } = useSignLanguageDetection();
-
   const [autoTranslate, setAutoTranslate] = useState(false);
   const [lastTranslationTime, setLastTranslationTime] = useState(0);
+  const [showAnimationPlayer, setShowAnimationPlayer] = useState(false);
+
+  // Visual feedback for current detection state
+  const feedbackData = {
+    confidence: confidenceScore,
+    isDetecting: isActive,
+    currentGesture: detectedSigns.length > 0 ? detectedSigns[detectedSigns.length - 1].gesture : '',
+    isEmergency: isEmergencyDetected(),
+    detectionState: isActive ? (confidenceScore > 0.7 ? 'good' : 'detecting') : 'inactive'
+  };
 
   // Auto-translate when sign is detected
   useEffect(() => {
@@ -106,14 +119,23 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
             Auto-translate
           </label>
         </div>
-      </div>
-
-      {isActive && (
-        <SignLanguageDetector
-          onSignDetected={handleSignDetected}
-          isActive={isActive}
-          medicalContext={getMedicalContext()}
-        />
+      </div>      {isActive && (
+        <>
+          <SignLanguageDetector
+            onSignDetected={handleSignDetected}
+            isActive={isActive}
+            medicalContext={getMedicalContext()}
+          />
+            <VisualFeedbackSystem
+            signData={{
+              gesture: feedbackData.currentGesture,
+              confidence: feedbackData.confidence,
+              medicalPriority: isEmergencyDetected() ? 'critical' : 'medium',
+              translationText: currentText
+            }}
+            isActive={isActive}
+          />
+        </>
       )}
 
       <div className="detection-results">
@@ -138,14 +160,27 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
               >
                 {isTranslating ? 'Translating...' : `Translate to ${currentLanguage.toUpperCase()}`}
               </button>
-              
-              <button
+                <button
                 onClick={clearHistory}
                 className="clear-btn"
               >
                 Clear
               </button>
+              
+              <button
+                onClick={() => setShowAnimationPlayer(!showAnimationPlayer)}
+                className="animation-toggle-btn"
+              >
+                {showAnimationPlayer ? 'Hide' : 'Show'} Sign Animation
+              </button>
             </div>
+          </div>
+        )}
+
+        {showAnimationPlayer && translatedText && (
+          <div className="animation-section">
+            <h4>Text-to-Sign Animation:</h4>
+            <SignAnimationPlayer text={translatedText} />
           </div>
         )}
 
