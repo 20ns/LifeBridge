@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Volume2, Copy, Check, Play, Pause, RotateCcw, Brain, Shield, Zap } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { EMERGENCY_SCENARIOS, QUICK_ACTION_TEMPLATES, EmergencyScenario } from '../data/emergencyScenarios';
+import '../styles/emergency-scenarios.css';
 
 interface EmergencyScenarioWorkflowProps {
   sourceLanguage: string;
@@ -163,14 +164,21 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
       default: return 'bg-gray-100 border-gray-300 text-gray-800';
     }
   };
-
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <AlertTriangle className="w-6 h-6 text-red-600" />
-          <h3 className="text-xl font-bold text-gray-900">Emergency Scenario Workflows</h3>
-        </div>
+    <div className="emergency-container">
+      <div className="emergency-header">
+        <h1 className="flex items-center justify-center gap-3">
+          <AlertTriangle className="w-8 h-8" />
+          Emergency Scenario Workflows
+        </h1>
+      </div>
+
+      <div className="emergency-alert-banner">
+        🚨 MEDICAL EMERGENCY TRANSLATION SYSTEM - FOR HEALTHCARE PROFESSIONALS ONLY
+      </div>
+
+      <div className="workflow-section">
+        <div className="flex items-center justify-between mb-6">
         {isTranslating && (
           <div className="flex items-center gap-2 text-blue-600">
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
