@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { AlertTriangle, Volume2, Copy, Check, Phone, Heart, Zap, Shield, Clock } from 'lucide-react';
 import { getEmergencyPhrases, speakText } from '../services/awsService';
+import '../styles/emergency-themes.css';
 import './EmergencyPhrasesEnhanced.css';
 
 interface EmergencyPhrasesProps {
@@ -8,13 +9,19 @@ interface EmergencyPhrasesProps {
   targetLanguage: string;
   largeButtons?: boolean;
   accessibilityMode?: boolean;
+  isEmergencyMode?: boolean;
+  currentTheme?: 'light' | 'dark' | 'high-contrast';
+  textSize?: 'normal' | 'large' | 'extra-large';
 }
 
 const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({ 
   sourceLanguage = 'en',
   targetLanguage,
   largeButtons = false,
-  accessibilityMode = false
+  accessibilityMode = false,
+  isEmergencyMode = false,
+  currentTheme = 'light',
+  textSize = 'normal'
 }) => {
   const [emergencyPhrases, setEmergencyPhrases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -215,7 +222,6 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
       setTimeout(() => setSpeakingPhrase(null), 3000);
     }
   }, [targetLanguage, accessibilityMode, handlePhraseUsed]);
-
   // Emergency phrase button component
   const EmergencyButton: React.FC<{
     phrase: any;
@@ -226,9 +232,19 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
     const isCurrentlySpeaking = speakingPhrase === phrase.id;
     const buttonSize = largeButtons ? 'large' : accessibilityMode ? 'accessible' : 'normal';
     
+    // Map severity to emergency button classes
+    const getEmergencyButtonClass = (severity: string) => {
+      switch (severity) {
+        case 'critical': return 'emergency-btn-critical';
+        case 'urgent': return 'emergency-btn-urgent';
+        case 'high': return 'emergency-btn-urgent';
+        default: return 'emergency-btn-primary';
+      }
+    };
+    
     return (
       <div 
-        className={`emergency-phrase-button ${buttonSize} severity-${phrase.severity || 'medium'}`}
+        className={`emergency-card emergency-focus-visible ${getEmergencyButtonClass(phrase.severity || 'medium')} ${buttonSize} severity-${phrase.severity || 'medium'}`}
         style={{ borderLeftColor: categoryColor }}
         role="button"
         tabIndex={0}
@@ -260,10 +276,9 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
             )}
           </div>
         </div>
-        
-        <div className="phrase-actions">
+          <div className="phrase-actions">
           <button
-            className={`action-button copy ${isCurrentlyCopied ? 'success' : ''}`}
+            className={`emergency-btn-secondary emergency-action-btn ${isCurrentlyCopied ? 'success' : ''}`}
             onClick={() => copyToClipboard(phrase.translated || phrase.english, phrase.id)}
             aria-label={`Copy phrase: ${phrase.english}`}
             disabled={isCurrentlyCopied}
@@ -275,7 +290,7 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
           </button>
           
           <button
-            className={`action-button speak ${isCurrentlySpeaking ? 'speaking' : ''}`}
+            className={`emergency-btn-secondary emergency-action-btn ${isCurrentlySpeaking ? 'speaking' : ''}`}
             onClick={() => speakPhrase(phrase.translated || phrase.english, phrase.id)}
             aria-label={`Speak phrase: ${phrase.english}`}
             disabled={isCurrentlySpeaking}
@@ -321,27 +336,28 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
       </div>
     );
   }
-
   return (
-    <div className={`emergency-phrases ${largeButtons ? 'large-layout' : ''} ${accessibilityMode ? 'accessible-layout' : ''}`}>
-      <div className="emergency-header">
+    <div className={`emergency-container ${isEmergencyMode ? 'emergency-mode' : ''} ${
+      currentTheme === 'dark' ? 'emergency-theme-dark' : 
+      currentTheme === 'high-contrast' ? 'emergency-theme-high-contrast' : 
+      'emergency-theme-light'
+    } size-${textSize} ${largeButtons ? 'large-layout' : ''} ${accessibilityMode ? 'accessible-layout' : ''}`}>
+      <div className="emergency-header emergency-section">
         <AlertTriangle className="emergency-icon" />
         <h2>Emergency Medical Phrases</h2>
         <p>Pre-translated emergency phrases ready for immediate use</p>
         
         {/* Quick access to recently used phrases */}
         {lastUsedPhrases.length > 0 && (
-          <div className="recently-used">
+          <div className="recently-used emergency-status emergency-status-info">
             <Clock className="recent-icon" />
             <span>Recently Used: {lastUsedPhrases.length} phrases</span>
           </div>
         )}
-      </div>
-
-      <div className={`phrases-container ${largeButtons ? 'large-buttons' : ''}`}>
+      </div>      <div className={`emergency-grid emergency-grid-2 emergency-section ${largeButtons ? 'large-buttons' : ''}`}>
         {Object.entries(emergencyCategories).map(([categoryName, category]) => (
-          <div key={categoryName} className="phrase-category">
-            <div className="category-header" style={{ borderColor: category.color }}>
+          <div key={categoryName} className="phrase-category emergency-section">
+            <div className="category-header emergency-status emergency-status-info" style={{ borderColor: category.color }}>
               <category.icon 
                 className="category-icon" 
                 style={{ color: category.color }}
@@ -352,7 +368,7 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
               </h3>
             </div>
             
-            <div className={`phrases-grid ${largeButtons ? 'large-grid' : ''}`}>
+            <div className={`emergency-grid emergency-grid-1 ${largeButtons ? 'large-grid' : ''}`}>
               {category.phrases.map((phrase: any) => (
                 <EmergencyButton
                   key={phrase.id}
@@ -364,18 +380,16 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Emergency contact button */}
-      <div className="emergency-contact">
+      </div>      {/* Emergency contact button */}
+      <div className="emergency-section emergency-contact">
         <button 
-          className={`emergency-contact-button ${largeButtons ? 'large' : ''}`}
+          className={`emergency-btn-critical emergency-contact-button emergency-pulse ${largeButtons ? 'large' : ''}`}
           onClick={() => {
             if (window.confirm('Do you want to call emergency services (911)?')) {
               window.location.href = 'tel:911';
             }
           }}
-          aria-label="Call emergency services"
+          aria-label="Call emergency services - Critical emergency action"
         >
           <Phone size={largeButtons ? 32 : 24} />
           <span className={largeButtons ? 'large-text' : ''}>CALL 911</span>

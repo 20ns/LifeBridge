@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import './App.css';
 import MultiModalInterface from './components/MultiModalInterface';
 import LanguageSelector from './components/LanguageSelector';
-import { Heart, Settings, Shield } from 'lucide-react';
+import EmergencyUITestPage from './components/EmergencyUITestPage';
+import { Heart, Settings, Shield, TestTube, Home } from 'lucide-react';
 
 function App() {
   const [sourceLanguage, setSourceLanguage] = useState('en');
   const [targetLanguage, setTargetLanguage] = useState('es');
   const [performanceMode, setPerformanceMode] = useState<'standard' | 'optimized'>('optimized');
+  const [activeTab, setActiveTab] = useState<'main' | 'test'>('main');
 
   // Handle language switching
   const handleLanguageSwitch = () => {
@@ -24,46 +26,70 @@ function App() {
             <h1>LifeBridge AI</h1>
             <p className="subtitle">Medical Translation Platform</p>
           </div>
-          
-          <div className="header-controls">
-            <LanguageSelector
-              sourceLanguage={sourceLanguage}
-              targetLanguage={targetLanguage}
-              onSourceChange={setSourceLanguage}
-              onTargetChange={setTargetLanguage}
-            />
-            
-            <div className="performance-toggle">
+            <div className="header-controls">
+            <div className="tab-navigation">
               <button
-                className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
-                onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
-                title="Toggle Performance Mode"
+                className={`tab-btn ${activeTab === 'main' ? 'active' : ''}`}
+                onClick={() => setActiveTab('main')}
               >
-                <Settings size={16} />
-                {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
+                <Home size={16} />
+                Main App
+              </button>
+              <button
+                className={`tab-btn ${activeTab === 'test' ? 'active' : ''}`}
+                onClick={() => setActiveTab('test')}
+              >
+                <TestTube size={16} />
+                UI Testing
               </button>
             </div>
+            
+            {activeTab === 'main' && (
+              <>
+                <LanguageSelector
+                  sourceLanguage={sourceLanguage}
+                  targetLanguage={targetLanguage}
+                  onSourceChange={setSourceLanguage}
+                  onTargetChange={setTargetLanguage}
+                />
+                
+                <div className="performance-toggle">
+                  <button
+                    className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
+                    onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
+                    title="Toggle Performance Mode"
+                  >
+                    <Settings size={16} />
+                    {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
-      </header>
+      </header>      <main className="main-content">
+        {activeTab === 'main' ? (
+          <>
+            <div className="platform-description">
+              <div className="description-card">
+                <Shield className="desc-icon" />
+                <h2>Multi-Modal Medical Translation</h2>
+                <p>
+                  Seamlessly switch between text, speech, and sign language translation modes. 
+                  Optimized for emergency healthcare situations with real-time performance monitoring.
+                </p>
+              </div>
+            </div>
 
-      <main className="main-content">
-        <div className="platform-description">
-          <div className="description-card">
-            <Shield className="desc-icon" />
-            <h2>Multi-Modal Medical Translation</h2>
-            <p>
-              Seamlessly switch between text, speech, and sign language translation modes. 
-              Optimized for emergency healthcare situations with real-time performance monitoring.
-            </p>
-          </div>
-        </div>
-
-        <MultiModalInterface
-          sourceLanguage={sourceLanguage}
-          targetLanguage={targetLanguage}
-          onLanguageSwitch={handleLanguageSwitch}
-        />
+            <MultiModalInterface
+              sourceLanguage={sourceLanguage}
+              targetLanguage={targetLanguage}
+              onLanguageSwitch={handleLanguageSwitch}
+            />
+          </>
+        ) : (
+          <EmergencyUITestPage />
+        )}
       </main>
 
       <footer className="app-footer">

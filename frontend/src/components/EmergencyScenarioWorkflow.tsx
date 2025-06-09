@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Volume2, Copy, Check, Play, Pause, RotateCcw, Brain, Shield, Zap } from 'lucide-react';
+import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Volume2, Copy, Check, Play, Pause, RotateCcw, Brain, Shield, Zap, Eye, Settings } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { EMERGENCY_SCENARIOS, QUICK_ACTION_TEMPLATES, EmergencyScenario } from '../data/emergencyScenarios';
+import EmergencyUIControls from './EmergencyUIControls';
 import '../styles/emergency-scenarios.css';
+import '../styles/emergency-themes.css';
 
 interface EmergencyScenarioWorkflowProps {
   sourceLanguage: string;
   targetLanguage: string;
   onPhraseSelect: (phrase: string) => void;
+  isEmergencyMode?: boolean;
+  accessibilityMode?: boolean;
 }
 
 const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
   sourceLanguage,
   targetLanguage,
-  onPhraseSelect
-}) => {
-  const [activeScenario, setActiveScenario] = useState<string | null>(null);
+  onPhraseSelect,
+  isEmergencyMode = false,
+  accessibilityMode = false
+}) => {  const [activeScenario, setActiveScenario] = useState<string | null>(null);
   const [translatedPhrases, setTranslatedPhrases] = useState<{ [key: string]: string }>({});
   const [isTranslating, setIsTranslating] = useState(false);
   const [copiedPhrase, setCopiedPhrase] = useState<string | null>(null);
@@ -23,6 +28,9 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
   const [workflowTimer, setWorkflowTimer] = useState<NodeJS.Timeout | null>(null);
   const [isWorkflowRunning, setIsWorkflowRunning] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'high-contrast'>('light');
+  const [textSize, setTextSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
+  const [enhancedAccessibility, setEnhancedAccessibility] = useState(accessibilityMode);
 
   // Auto-translate phrases when scenario changes
   useEffect(() => {
@@ -163,44 +171,52 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
       case 'moderate': return 'bg-yellow-100 border-yellow-300 text-yellow-800';
       default: return 'bg-gray-100 border-gray-300 text-gray-800';
     }
-  };
-  return (
-    <div className="emergency-container">
+  };  return (
+    <div className={`emergency-container emergency-mode ${currentTheme === 'dark' ? 'emergency-theme-dark' : currentTheme === 'high-contrast' ? 'emergency-theme-high-contrast' : 'emergency-theme-light'} size-${textSize}`}>
+      {/* Emergency UI Controls */}
+      <EmergencyUIControls
+        onThemeChange={setCurrentTheme}
+        onSizeChange={setTextSize}
+        onAccessibilityChange={setEnhancedAccessibility}
+        isEmergencyMode={isEmergencyMode}
+      />
+
       <div className="emergency-header">
-        <h1 className="flex items-center justify-center gap-3">
+        <h1 className="emergency-heading-1 emergency-flex emergency-center gap-3">
           <AlertTriangle className="w-8 h-8" />
           Emergency Scenario Workflows
         </h1>
-      </div>
-
-      <div className="emergency-alert-banner">
+      </div>      <div className="emergency-alert-banner emergency-status emergency-status-critical">
         🚨 MEDICAL EMERGENCY TRANSLATION SYSTEM - FOR HEALTHCARE PROFESSIONALS ONLY
       </div>
-
+      
       <div className="workflow-section">
         <div className="flex items-center justify-between mb-6">
-        {isTranslating && (
-          <div className="flex items-center gap-2 text-blue-600">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-            <span className="text-sm">Translating...</span>
-          </div>
-        )}
-      </div>
-
-      {/* Scenario Selection Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {EMERGENCY_SCENARIOS.map((scenario) => (
-          <button
-            key={scenario.id}
-            onClick={() => handleScenarioSelect(scenario.id)}
-            className={`p-4 border-2 rounded-lg text-left transition-all hover:shadow-md ${
-              activeScenario === scenario.id
-                ? 'border-red-500 bg-red-50'
-                : 'border-gray-200 hover:border-red-300'
-            }`}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              {scenario.icon}
+          {isTranslating && (
+            <div className="flex items-center gap-2 text-blue-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+              <span className="text-sm">Translating...</span>
+            </div>
+          )}
+        </div>
+        
+        {/* Scenario Selection Grid */}
+        <div className="emergency-grid emergency-grid-3 emergency-section">
+          {EMERGENCY_SCENARIOS.map((scenario) => (
+            <button
+              key={scenario.id}
+              onClick={() => handleScenarioSelect(scenario.id)}
+              className={`emergency-card emergency-focus-visible ${
+                scenario.severity === 'critical' ? 'emergency-card-critical' : 
+                scenario.severity === 'urgent' ? 'emergency-card-urgent' : ''
+              } ${
+                activeScenario === scenario.id
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-200 hover:border-red-300'
+              } p-4 text-left transition-all hover:shadow-md`}
+              aria-pressed={activeScenario === scenario.id}
+            >            <div className="flex items-center gap-3 mb-2">
+              <scenario.icon className="w-6 h-6 text-red-500" />
               <div>
                 <h4 className="font-semibold text-gray-900">{scenario.title}</h4>
                 <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(scenario.severity)}`}>
@@ -467,9 +483,7 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
             </div>
           )}
         </div>
-      )}
-
-      {/* Instructions */}
+      )}      {/* Instructions */}
       {!activeScenario && (
         <div className="text-center py-8 text-gray-500">
           <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
@@ -477,6 +491,7 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
           <p className="text-sm">Choose a medical emergency scenario above to access guided workflows and translated phrases.</p>
         </div>
       )}
+      </div>
     </div>
   );
 };
