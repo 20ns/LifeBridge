@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Smartphone, Tablet, Monitor, Maximize2, Eye, Settings } from 'lucide-react';
+import { Smartphone, Tablet, Monitor, Maximize2, Eye, Settings, Accessibility } from 'lucide-react';
 import EmergencyScenarioWorkflow from './EmergencyScenarioWorkflow';
 import EmergencyPhrasesEnhanced from './EmergencyPhrasesEnhanced';
 import EmergencyUIControls from './EmergencyUIControls';
+import AccessibilityTestingSuite from './AccessibilityTestingSuite';
 import '../styles/emergency-themes.css';
 
 interface TestDevice {
@@ -35,7 +36,7 @@ const EmergencyUITestPage: React.FC = () => {
   const [selectedDevice, setSelectedDevice] = useState<TestDevice>(TEST_DEVICES[0]);
   const [isResponsive, setIsResponsive] = useState(false);
   const [viewportSize, setViewportSize] = useState({ width: window.innerWidth, height: window.innerHeight });
-  const [testComponent, setTestComponent] = useState<'scenarios' | 'phrases'>('scenarios');
+  const [testComponent, setTestComponent] = useState<'scenarios' | 'phrases' | 'accessibility'>('scenarios');
   const [sourceLanguage] = useState('en');
   const [targetLanguage] = useState('es');
 
@@ -137,14 +138,12 @@ const EmergencyUITestPage: React.FC = () => {
                 ))}
               </optgroup>
             </select>
-          </div>
-
-          {/* Component Selection */}
+          </div>          {/* Component Selection */}
           <div>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>
               Test Component:
             </label>
-            <div className="emergency-grid emergency-grid-2" style={{ gap: '0.5rem' }}>
+            <div className="emergency-grid emergency-grid-3" style={{ gap: '0.5rem' }}>
               <button
                 onClick={() => setTestComponent('scenarios')}
                 className={`emergency-btn-secondary ${testComponent === 'scenarios' ? 'emergency-btn-primary' : ''}`}
@@ -158,6 +157,14 @@ const EmergencyUITestPage: React.FC = () => {
                 style={{ fontSize: '0.875rem', padding: '0.5rem' }}
               >
                 Phrases
+              </button>
+              <button
+                onClick={() => setTestComponent('accessibility')}
+                className={`emergency-btn-secondary ${testComponent === 'accessibility' ? 'emergency-btn-primary' : ''}`}
+                style={{ fontSize: '0.875rem', padding: '0.5rem' }}
+              >
+                <Accessibility className="inline mr-1" size={16} />
+                A11y Tests
               </button>
             </div>
           </div>
@@ -182,8 +189,7 @@ const EmergencyUITestPage: React.FC = () => {
         <div style={getContainerStyle()}>
           {/* Emergency UI Controls - Always visible */}
           <EmergencyUIControls />
-          
-          {/* Test Component */}
+            {/* Test Component */}
           {testComponent === 'scenarios' ? (
             <EmergencyScenarioWorkflow
               sourceLanguage={sourceLanguage}
@@ -192,7 +198,7 @@ const EmergencyUITestPage: React.FC = () => {
               isEmergencyMode={true}
               accessibilityMode={false}
             />
-          ) : (
+          ) : testComponent === 'phrases' ? (
             <EmergencyPhrasesEnhanced
               sourceLanguage={sourceLanguage}
               targetLanguage={targetLanguage}
@@ -200,6 +206,8 @@ const EmergencyUITestPage: React.FC = () => {
               largeButtons={selectedDevice.category === 'mobile'}
               accessibilityMode={false}
             />
+          ) : (
+            <AccessibilityTestingSuite />
           )}
         </div>
       </div>
