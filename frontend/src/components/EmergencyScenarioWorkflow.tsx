@@ -1,20 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Volume2, Copy, Check } from 'lucide-react';
+import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Volume2, Copy, Check, Play, Pause, RotateCcw, Brain, Shield, Zap } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
-
-interface EmergencyScenario {
-  id: string;
-  category: 'cardiac' | 'respiratory' | 'neurological' | 'trauma' | 'pediatric' | 'obstetric';
-  severity: 'critical' | 'urgent' | 'moderate';
-  icon: React.ReactNode;
-  title: string;
-  phrases: string[];
-  quickActions: {
-    assessment: string[];
-    treatment: string[];
-    communication: string[];
-  };
-}
+import { EMERGENCY_SCENARIOS, QUICK_ACTION_TEMPLATES, EmergencyScenario } from '../data/emergencyScenarios';
 
 interface EmergencyScenarioWorkflowProps {
   sourceLanguage: string;
@@ -31,169 +18,57 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
   const [translatedPhrases, setTranslatedPhrases] = useState<{ [key: string]: string }>({});
   const [isTranslating, setIsTranslating] = useState(false);
   const [copiedPhrase, setCopiedPhrase] = useState<string | null>(null);
+  const [activeWorkflowStep, setActiveWorkflowStep] = useState(0);
+  const [workflowTimer, setWorkflowTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isWorkflowRunning, setIsWorkflowRunning] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
-  // Emergency scenarios with medical workflows
-  const emergencyScenarios: EmergencyScenario[] = [
-    {
-      id: 'cardiac-arrest',
-      category: 'cardiac',
-      severity: 'critical',
-      icon: <Heart className="w-6 h-6 text-red-500" />,
-      title: 'Cardiac Emergency',
-      phrases: [
-        "Patient is unresponsive and not breathing normally",
-        "Starting CPR immediately",
-        "Call emergency services now",
-        "Patient has chest pain radiating to left arm",
-        "Pulse is weak and irregular",
-        "Blood pressure is critically low"
-      ],
-      quickActions: {
-        assessment: [
-          "Check pulse and breathing",
-          "Assess level of consciousness",
-          "Monitor vital signs",
-          "Check for chest pain severity"
-        ],
-        treatment: [
-          "Begin CPR if no pulse",
-          "Prepare AED if available",
-          "Give aspirin if conscious and no allergies",
-          "Elevate legs if hypotensive"
-        ],
-        communication: [
-          "Patient needs immediate cardiac care",
-          "ETA for ambulance?",
-          "Contact cardiologist on call",
-          "Prepare for emergency transport"
-        ]
-      }
-    },
-    {
-      id: 'respiratory-distress',
-      category: 'respiratory',
-      severity: 'urgent',
-      icon: <Activity className="w-6 h-6 text-blue-500" />,
-      title: 'Respiratory Emergency',
-      phrases: [
-        "Patient has severe difficulty breathing",
-        "Respiratory rate is very high",
-        "Oxygen saturation is low",
-        "Patient cannot speak in full sentences",
-        "Using accessory muscles to breathe",
-        "Wheezing and shortness of breath"
-      ],
-      quickActions: {
-        assessment: [
-          "Check oxygen saturation",
-          "Count respiratory rate",
-          "Listen to lung sounds",
-          "Assess for cyanosis"
-        ],
-        treatment: [
-          "Administer oxygen immediately",
-          "Position upright or tripod",
-          "Prepare bronchodilator if asthma",
-          "Consider epinephrine if anaphylaxis"
-        ],
-        communication: [
-          "Patient needs respiratory support",
-          "Prepare intubation equipment",
-          "Contact pulmonologist",
-          "Alert respiratory therapy"
-        ]
-      }
-    },
-    {
-      id: 'stroke-symptoms',
-      category: 'neurological',
-      severity: 'critical',
-      icon: <Thermometer className="w-6 h-6 text-purple-500" />,
-      title: 'Stroke/Neurological Emergency',
-      phrases: [
-        "Patient shows signs of stroke",
-        "Facial drooping on one side",
-        "Arm weakness or numbness",
-        "Speech is slurred or confused",
-        "Sudden severe headache",
-        "Loss of balance or coordination"
-      ],
-      quickActions: {
-        assessment: [
-          "Perform FAST stroke assessment",
-          "Check blood glucose level",
-          "Assess neurological status",
-          "Note time of symptom onset"
-        ],
-        treatment: [
-          "Keep patient calm and still",
-          "Monitor airway and breathing",
-          "Nothing by mouth",
-          "Prepare for immediate transport"
-        ],
-        communication: [
-          "Stroke alert activated",
-          "Time of onset was [TIME]",
-          "Contact stroke team immediately",
-          "Prepare for CT scan"
-        ]
-      }
-    },
-    {
-      id: 'pediatric-emergency',
-      category: 'pediatric',
-      severity: 'urgent',
-      icon: <Heart className="w-6 h-6 text-pink-500" />,
-      title: 'Pediatric Emergency',
-      phrases: [
-        "Child is having difficulty breathing",
-        "High fever with altered consciousness",
-        "Seizure activity in progress",
-        "Child is not responding normally",
-        "Severe dehydration signs",
-        "Possible poisoning or ingestion"
-      ],
-      quickActions: {
-        assessment: [
-          "Check pediatric vital signs",
-          "Assess hydration status",
-          "Look for rash or bruising",
-          "Check fontanelle if infant"
-        ],
-        treatment: [
-          "Use age-appropriate equipment",
-          "Calculate medication doses by weight",
-          "Maintain body temperature",
-          "Comfort and calm the child"
-        ],
-        communication: [
-          "Pediatric emergency team needed",
-          "Child weighs approximately [WEIGHT] kg",
-          "Parents/guardians are present",
-          "Contact pediatrician on call"
-        ]
-      }
+  // Auto-translate phrases when scenario changes
+  useEffect(() => {
+    if (activeScenario && sourceLanguage !== targetLanguage) {
+      translateScenarioPhrases();
     }
-  ];
+  }, [activeScenario, sourceLanguage, targetLanguage]);
 
-  // Translate phrases for selected scenario
-  const translateScenarioPhrases = async (scenario: EmergencyScenario) => {
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (workflowTimer) {
+        clearInterval(workflowTimer);
+      }
+    };
+  }, [workflowTimer]);
+
+  const translateScenarioPhrases = async () => {
+    const scenario = EMERGENCY_SCENARIOS.find(s => s.id === activeScenario);
+    if (!scenario) return;
+
     setIsTranslating(true);
-    const allPhrases = [
-      ...scenario.phrases,
-      ...scenario.quickActions.assessment,
-      ...scenario.quickActions.treatment,
-      ...scenario.quickActions.communication
-    ];
-
     const translations: { [key: string]: string } = {};
-    
+
     try {
-      for (const phrase of allPhrases) {
-        const result = await translateText(phrase, sourceLanguage, targetLanguage, 'emergency');
+      // Translate main phrases
+      for (const phrase of scenario.phrases) {
+        const result = await translateText(phrase, sourceLanguage, targetLanguage);
         translations[phrase] = result.translatedText;
       }
-      
+
+      // Translate quick action phrases
+      for (const [category, actions] of Object.entries(scenario.quickActions)) {
+        for (const action of actions) {
+          const result = await translateText(action, sourceLanguage, targetLanguage);
+          translations[action] = result.translatedText;
+        }
+      }
+
+      // Translate communication flow phrases
+      for (const step of scenario.communicationFlow) {
+        for (const phrase of step.phrases) {
+          const result = await translateText(phrase, sourceLanguage, targetLanguage);
+          translations[phrase] = result.translatedText;
+        }
+      }
+
       setTranslatedPhrases(translations);
     } catch (error) {
       console.error('Translation error:', error);
@@ -202,21 +77,22 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
     }
   };
 
-  // Handle scenario selection
   const handleScenarioSelect = (scenarioId: string) => {
     setActiveScenario(scenarioId);
-    const scenario = emergencyScenarios.find(s => s.id === scenarioId);
-    if (scenario) {
-      translateScenarioPhrases(scenario);
+    setActiveWorkflowStep(0);
+    setCompletedSteps([]);
+    setIsWorkflowRunning(false);
+    if (workflowTimer) {
+      clearInterval(workflowTimer);
+      setWorkflowTimer(null);
     }
   };
 
-  // Handle phrase selection and speaking
   const handlePhraseClick = async (phrase: string) => {
-    const translatedPhrase = translatedPhrases[phrase] || phrase;
-    onPhraseSelect(translatedPhrase);
+    onPhraseSelect(phrase);
     
-    // Auto-speak the translated phrase
+    // Auto-speak if translation available
+    const translatedPhrase = translatedPhrases[phrase] || phrase;
     try {
       await speakText(translatedPhrase, targetLanguage);
     } catch (error) {
@@ -224,7 +100,6 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
     }
   };
 
-  // Copy phrase to clipboard
   const handleCopyPhrase = async (phrase: string) => {
     const translatedPhrase = translatedPhrases[phrase] || phrase;
     try {
@@ -236,113 +111,317 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
     }
   };
 
-  const activeScenarioData = emergencyScenarios.find(s => s.id === activeScenario);
+  const startWorkflow = () => {
+    const scenario = EMERGENCY_SCENARIOS.find(s => s.id === activeScenario);
+    if (!scenario) return;
+
+    setIsWorkflowRunning(true);
+    setActiveWorkflowStep(0);
+    setCompletedSteps([]);
+
+    // Auto-advance through workflow steps
+    const timer = setInterval(() => {
+      setActiveWorkflowStep(current => {
+        const next = current + 1;
+        if (next >= scenario.communicationFlow.length) {
+          clearInterval(timer);
+          setIsWorkflowRunning(false);
+          return current;
+        }
+        return next;
+      });
+    }, 15000); // 15 seconds per step
+
+    setWorkflowTimer(timer);
+  };
+
+  const stopWorkflow = () => {
+    if (workflowTimer) {
+      clearInterval(workflowTimer);
+      setWorkflowTimer(null);
+    }
+    setIsWorkflowRunning(false);
+  };
+
+  const resetWorkflow = () => {
+    stopWorkflow();
+    setActiveWorkflowStep(0);
+    setCompletedSteps([]);
+  };
+
+  const markStepCompleted = (stepIndex: number) => {
+    setCompletedSteps(prev => [...prev, stepIndex]);
+  };
+
+  const activeScenarioData = EMERGENCY_SCENARIOS.find(s => s.id === activeScenario);
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'bg-red-100 border-red-300 text-red-800';
+      case 'urgent': return 'bg-orange-100 border-orange-300 text-orange-800';
+      case 'moderate': return 'bg-yellow-100 border-yellow-300 text-yellow-800';
+      default: return 'bg-gray-100 border-gray-300 text-gray-800';
+    }
+  };
 
   return (
-    <div className="emergency-scenario-workflow">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-red-500" />
-          Emergency Scenario Workflows
-        </h3>
-        
-        {/* Scenario Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-          {emergencyScenarios.map((scenario) => (
-            <button
-              key={scenario.id}
-              onClick={() => handleScenarioSelect(scenario.id)}
-              className={`
-                p-4 rounded-lg border-2 transition-all text-left
-                ${activeScenario === scenario.id
-                  ? 'border-red-500 bg-red-50'
-                  : 'border-gray-200 hover:border-red-300 hover:bg-red-25'
-                }
-                ${scenario.severity === 'critical' ? 'border-red-400' : 
-                  scenario.severity === 'urgent' ? 'border-orange-400' : 'border-yellow-400'}
-              `}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                {scenario.icon}
-                <span className="font-medium">{scenario.title}</span>
-                <span className={`
-                  px-2 py-1 rounded text-xs font-medium
-                  ${scenario.severity === 'critical' ? 'bg-red-100 text-red-700' :
-                    scenario.severity === 'urgent' ? 'bg-orange-100 text-orange-700' :
-                    'bg-yellow-100 text-yellow-700'}
-                `}>
-                  {scenario.severity}
+    <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <AlertTriangle className="w-6 h-6 text-red-600" />
+          <h3 className="text-xl font-bold text-gray-900">Emergency Scenario Workflows</h3>
+        </div>
+        {isTranslating && (
+          <div className="flex items-center gap-2 text-blue-600">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+            <span className="text-sm">Translating...</span>
+          </div>
+        )}
+      </div>
+
+      {/* Scenario Selection Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {EMERGENCY_SCENARIOS.map((scenario) => (
+          <button
+            key={scenario.id}
+            onClick={() => handleScenarioSelect(scenario.id)}
+            className={`p-4 border-2 rounded-lg text-left transition-all hover:shadow-md ${
+              activeScenario === scenario.id
+                ? 'border-red-500 bg-red-50'
+                : 'border-gray-200 hover:border-red-300'
+            }`}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              {scenario.icon}
+              <div>
+                <h4 className="font-semibold text-gray-900">{scenario.title}</h4>
+                <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(scenario.severity)}`}>
+                  {scenario.severity.toUpperCase()}
                 </span>
               </div>
-            </button>
-          ))}
-        </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">{scenario.description}</p>
+            <p className="text-xs text-red-600 font-medium">{scenario.timeframe}</p>
+          </button>
+        ))}
       </div>
 
       {/* Active Scenario Details */}
       {activeScenarioData && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-4">
-            {activeScenarioData.icon}
-            <h4 className="text-xl font-semibold">{activeScenarioData.title}</h4>
-            {isTranslating && (
-              <div className="flex items-center gap-2 text-blue-600">
-                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm">Translating...</span>
+        <div className="space-y-6">
+          {/* Scenario Header */}
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-lg font-bold text-red-800">
+                {activeScenarioData.title} - Active Workflow
+              </h4>
+              <div className="flex gap-2">
+                {!isWorkflowRunning ? (
+                  <button
+                    onClick={startWorkflow}
+                    className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                  >
+                    <Play className="w-4 h-4" />
+                    Start Workflow
+                  </button>
+                ) : (
+                  <button
+                    onClick={stopWorkflow}
+                    className="flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                  >
+                    <Pause className="w-4 h-4" />
+                    Stop Workflow
+                  </button>
+                )}
+                <button
+                  onClick={resetWorkflow}
+                  className="flex items-center gap-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset
+                </button>
               </div>
-            )}
+            </div>
+
+            {/* Critical Indicators */}
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <h6 className="font-medium text-red-700 mb-2">Critical Symptoms:</h6>
+                <ul className="text-sm text-red-600 space-y-1">
+                  {activeScenarioData.symptoms.map((symptom, index) => (
+                    <li key={index}>• {symptom}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h6 className="font-medium text-red-700 mb-2">Critical Indicators:</h6>
+                <ul className="text-sm text-red-600 space-y-1">
+                  {activeScenarioData.criticalIndicators.map((indicator, index) => (
+                    <li key={index}>• {indicator}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
 
-          {/* Emergency Phrases */}
-          <div className="mb-6">
-            <h5 className="font-medium text-gray-700 mb-3">Key Emergency Phrases</h5>
-            <div className="grid gap-2">
-              {activeScenarioData.phrases.map((phrase, index) => (
-                <div key={index} className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <button
-                    onClick={() => handlePhraseClick(phrase)}
-                    className="flex-1 text-left hover:bg-red-100 p-2 rounded transition-colors"
-                  >
-                    <div className="font-medium text-gray-800">{phrase}</div>
-                    {translatedPhrases[phrase] && (
-                      <div className="text-gray-600 mt-1 italic">
-                        {translatedPhrases[phrase]}
+          {/* Communication Workflow */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h5 className="font-bold text-blue-800 mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Emergency Communication Workflow
+            </h5>
+            
+            <div className="space-y-3">
+              {activeScenarioData.communicationFlow.map((step, index) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    index === activeWorkflowStep && isWorkflowRunning
+                      ? 'border-blue-500 bg-blue-100'
+                      : completedSteps.includes(index)
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-300 bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h6 className="font-medium text-gray-800">
+                      Step {step.step}: {step.action}
+                    </h6>
+                    <div className="flex gap-2">
+                      {step.timeLimit && (
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                          {step.timeLimit}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => markStepCompleted(index)}
+                        className={`text-xs px-2 py-1 rounded transition-colors ${
+                          completedSteps.includes(index)
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-600 hover:bg-green-100'
+                        }`}
+                      >
+                        {completedSteps.includes(index) ? '✓ Done' : 'Mark Done'}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {step.phrases.map((phrase, phraseIndex) => (
+                      <div
+                        key={phraseIndex}
+                        className="flex items-center justify-between bg-white p-2 rounded border"
+                      >
+                        <div className="flex-1">
+                          <div className="font-medium text-sm">{phrase}</div>
+                          {translatedPhrases[phrase] && (
+                            <div className="text-xs text-gray-600 mt-1">
+                              {translatedPhrases[phrase]}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => handlePhraseClick(phrase)}
+                            className="p-2 hover:bg-blue-100 rounded transition-colors"
+                            title="Use phrase"
+                          >
+                            <Play className="w-4 h-4 text-blue-600" />
+                          </button>
+                          
+                          <button
+                            onClick={() => handleCopyPhrase(phrase)}
+                            className="p-2 hover:bg-blue-100 rounded transition-colors"
+                            title="Copy translation"
+                          >
+                            {copiedPhrase === phrase ? (
+                              <Check className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <Copy className="w-4 h-4 text-gray-600" />
+                            )}
+                          </button>
+                          
+                          <button
+                            onClick={() => speakText(translatedPhrases[phrase] || phrase, targetLanguage)}
+                            className="p-2 hover:bg-blue-100 rounded transition-colors"
+                            title="Speak translation"
+                          >
+                            <Volume2 className="w-4 h-4 text-gray-600" />
+                          </button>
+                        </div>
                       </div>
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={() => handleCopyPhrase(phrase)}
-                    className="p-2 hover:bg-red-100 rounded transition-colors"
-                    title="Copy translation"
-                  >
-                    {copiedPhrase === phrase ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <Copy className="w-4 h-4 text-gray-600" />
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={() => speakText(translatedPhrases[phrase] || phrase, targetLanguage)}
-                    className="p-2 hover:bg-red-100 rounded transition-colors"
-                    title="Speak translation"
-                  >
-                    <Volume2 className="w-4 h-4 text-gray-600" />
-                  </button>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Quick Actions Workflow */}
+          {/* Emergency Phrases */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h5 className="font-bold text-yellow-800 mb-4 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Emergency Phrases
+            </h5>
+            
+            <div className="grid gap-2">
+              {activeScenarioData.phrases.map((phrase, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-white p-3 rounded border hover:bg-yellow-50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">{phrase}</div>
+                    {translatedPhrases[phrase] && (
+                      <div className="text-xs text-gray-600 mt-1">
+                        {translatedPhrases[phrase]}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2 ml-4">
+                    <button
+                      onClick={() => handlePhraseClick(phrase)}
+                      className="p-2 hover:bg-yellow-100 rounded transition-colors"
+                      title="Use phrase"
+                    >
+                      <Play className="w-4 h-4 text-yellow-600" />
+                    </button>
+                    
+                    <button
+                      onClick={() => handleCopyPhrase(phrase)}
+                      className="p-2 hover:bg-yellow-100 rounded transition-colors"
+                      title="Copy translation"
+                    >
+                      {copiedPhrase === phrase ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Copy className="w-4 h-4 text-gray-600" />
+                      )}
+                    </button>
+                    
+                    <button
+                      onClick={() => speakText(translatedPhrases[phrase] || phrase, targetLanguage)}
+                      className="p-2 hover:bg-yellow-100 rounded transition-colors"
+                      title="Speak translation"
+                    >
+                      <Volume2 className="w-4 h-4 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
           <div className="grid md:grid-cols-3 gap-4">
             {Object.entries(activeScenarioData.quickActions).map(([category, actions]) => (
-              <div key={category} className="bg-gray-50 p-4 rounded-lg">
+              <div key={category} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <h6 className="font-medium text-gray-700 mb-3 capitalize flex items-center gap-2">
-                  {category === 'assessment' && <Clock className="w-4 h-4" />}
-                  {category === 'treatment' && <Heart className="w-4 h-4" />}
-                  {category === 'communication' && <Phone className="w-4 h-4" />}
+                  {category === 'assessment' && <Clock className="w-4 h-4 text-blue-600" />}
+                  {category === 'treatment' && <Heart className="w-4 h-4 text-red-600" />}
+                  {category === 'communication' && <Phone className="w-4 h-4 text-green-600" />}
                   {category}
                 </h6>
                 <div className="space-y-2">
@@ -364,6 +443,30 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
               </div>
             ))}
           </div>
+
+          {/* Contraindications Warning */}
+          {activeScenarioData.contraindications.length > 0 && (
+            <div className="bg-red-100 border border-red-300 rounded-lg p-4">
+              <h6 className="font-bold text-red-800 mb-2 flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Critical Contraindications
+              </h6>
+              <ul className="text-sm text-red-700 space-y-1">
+                {activeScenarioData.contraindications.map((contraindication, index) => (
+                  <li key={index}>⚠️ {contraindication}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Instructions */}
+      {!activeScenario && (
+        <div className="text-center py-8 text-gray-500">
+          <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <p className="text-lg font-medium mb-2">Select an Emergency Scenario</p>
+          <p className="text-sm">Choose a medical emergency scenario above to access guided workflows and translated phrases.</p>
         </div>
       )}
     </div>
