@@ -3,7 +3,7 @@ import { PollyClient, SynthesizeSpeechCommand, OutputFormat, VoiceId } from '@aw
 import { createResponse, createErrorResponse, validateRequestBody } from '../utils/response';
 
 const pollyClient = new PollyClient({
-  region: process.env.AWS_REGION || 'us-east-1',
+  region: process.env.AWS_REGION || 'eu-north-1',
 });
 
 // Voice mappings for different languages

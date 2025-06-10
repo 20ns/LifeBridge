@@ -1,0 +1,44 @@
+{
+  "model_info": {
+    "accuracy": 1.0,
+    "model_size_kb": 623.6044921875,
+    "training_samples": 1120,
+    "gestures": [
+      "emergency",
+      "help",
+      "pain",
+      "medicine",
+      "water",
+      "yes",
+      "no"
+    ],
+    "medical_priorities": {
+      "emergency": "critical",
+      "help": "critical",
+      "pain": "high",
+      "medicine": "medium",
+      "water": "medium",
+      "yes": "low",
+      "no": "low"
+    }
+  },
+  "aws_deployment": {
+    "lambda_runtime": "python3.9",
+    "memory_mb": 512,
+    "timeout_seconds": 30,
+    "environment_variables": {
+      "MODEL_BUCKET": "${S3_BUCKET}",
+      "MODEL_KEY": "models/medical_gesture_model.joblib"
+    },
+    "required_layers": [
+      "arn:aws:lambda:eu-north-1:336392948345:layer:AWSSDKPandas-Python39:1"
+    ]
+  },
+  "integration_steps": [
+    "1. Deploy Lambda function with provided code",
+    "2. Set up API Gateway endpoint",
+    "3. Update React frontend to use new endpoint",
+    "4. Test with medical professionals",
+    "5. Monitor accuracy and performance"
+  ]
+}

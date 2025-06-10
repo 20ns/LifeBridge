@@ -16,7 +16,7 @@ Write-Host "AWS CLI is configured" -ForegroundColor Green
 Write-Host "Creating CloudWatch billing alert..."
 
 # Create the alarm using AWS CLI with proper JSON file input
-aws cloudwatch put-metric-alarm --cli-input-json file://billing-alert.json --region us-east-1
+aws cloudwatch put-metric-alarm --cli-input-json file://billing-alert.json --region eu-north-1
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Billing alert deployed successfully!" -ForegroundColor Green

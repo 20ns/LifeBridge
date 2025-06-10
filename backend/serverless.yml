@@ -3,11 +3,12 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs18.x
-  region: us-east-1
+  runtime: nodejs20.x
+  region: eu-north-1
   stage: ${opt:stage, 'dev'}
   environment:
     STAGE: ${self:provider.stage}
+    TRANSCRIBE_BUCKET: lifebridge-transcribe-temp-${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -17,10 +18,33 @@ provider:
       Resource: '*'
     - Effect: Allow
       Action:
+        - qbusiness:Chat
+        - qbusiness:ChatSync
+        - qbusiness:ListApplications
+        - qbusiness:GetApplication
+        - qbusiness:ListConversations
+      Resource: '*'
+    - Effect: Allow
+      Action:
         - polly:SynthesizeSpeech
         - transcribe:StartTranscriptionJob
         - transcribe:GetTranscriptionJob
       Resource: '*'
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource:
+        - arn:aws:s3:::lifebridge-transcribe-temp-${self:provider.stage}/*
+        - arn:aws:s3:::lifebridge-ml-models-${self:provider.stage}/*
+    - Effect: Allow
+      Action:
+        - s3:CreateBucket
+        - s3:ListBucket
+      Resource:
+        - arn:aws:s3:::lifebridge-transcribe-temp-${self:provider.stage}
+        - arn:aws:s3:::lifebridge-ml-models-${self:provider.stage}
     - Effect: Allow
       Action:
         - logs:CreateLogGroup
@@ -37,7 +61,7 @@ functions:
           path: /translate
           method: post
           cors: true
-  
+
   detectLanguage:
     handler: dist/handlers/detectLanguage.handler
     timeout: 15
@@ -46,7 +70,7 @@ functions:
           path: /detect-language
           method: post
           cors: true
-  
+
   textToSpeech:
     handler: dist/handlers/textToSpeech.handler
     timeout: 20
@@ -65,8 +89,111 @@ functions:
           method: get
           cors: true
 
+  speechToText:
+    handler: dist/handlers/speechToText.handler
+    timeout: 60
+    events:
+      - http:
+          path: /speech-to-text
+          method: post
+          cors: true
+
+  emergencyProtocol:
+    handler: dist/handlers/amazonQ.getEmergencyProtocol
+    timeout: 30
+    events:
+      - http:
+          path: /emergency-protocol
+          method: post
+          cors: true
+
+  triageSuggestion:
+    handler: dist/handlers/amazonQ.getTriageSuggestion
+    timeout: 30
+    events:
+      - http:
+          path: /triage-suggestion
+          method: post
+          cors: true
+
+  contextualAdvice:
+    handler: dist/handlers/amazonQ.getContextualAdvice
+    timeout: 30
+    events:
+      - http:
+          path: /contextual-advice
+          method: post
+          cors: true
+  signLanguageProcessor:
+    handler: dist/handlers/signLanguageProcessor.handler
+    timeout: 20
+    events:
+      - http:
+          path: /sign-language-process
+          method: post
+          cors: true
+
+  signToTranslation:
+    handler: dist/handlers/signLanguageProcessor.signToTranslation
+    timeout: 30
+    events:
+      - http:
+          path: /sign-to-translation
+          method: post
+          cors: true
+
+  batchSignProcessing:
+    handler: dist/handlers/signLanguageProcessor.batchSignProcessing
+    timeout: 45
+    events:
+      - http:
+          path: /batch-sign-processing
+          method: post
+          cors: true
+
+  gestureRecognitionML:
+    handler: src/python/gesture_recognition.lambda_handler
+    runtime: python3.9
+    timeout: 30
+    environment:
+      MODEL_BUCKET: lifebridge-ml-models-${self:provider.stage}
+      MODEL_KEY: gesture_recognition/model.joblib
+    events:
+      - http:
+          path: /gesture-recognition-ml
+          method: post
+          cors: true
+
 plugins:
   - serverless-offline
+  - serverless-python-requirements
+
+resources:
+  Resources:
+    # TranscribeBucket already exists; no need to recreate
+    # TranscribeBucket:
+    #   Type: AWS::S3::Bucket
+    #   Properties:
+    #     BucketName: lifebridge-transcribe-temp-${self:provider.stage}
+    #     LifecycleConfiguration:
+    #       Rules:
+    #         - Id: DeleteTranscriptionFiles
+    #           Status: Enabled
+    #           ExpirationInDays: 1
+    #     PublicAccessBlockConfiguration:
+    #       BlockPublicAcls: true
+    #       BlockPublicPolicy: true
+    #       IgnorePublicAcls: true
+    #       RestrictPublicBuckets: true    # MLModelsBucket already exists, no need to recreate
+    # MLModelsBucket:
+    #   Type: AWS::S3::Bucket
+    #   Properties:
+    #     BucketName: lifebridge-ml-models-${self:provider.stage}
+    #     PublicAccessBlockConfiguration:
+    #       BlockPublicAcls: true
+    #       BlockPublicPolicy: true
+    #       IgnorePublicAcls: true
+    #       RestrictPublicBuckets: true
 
 custom:
   serverless-offline:

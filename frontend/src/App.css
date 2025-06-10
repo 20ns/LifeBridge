@@ -233,6 +233,40 @@ body {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.input-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.translate-button {
+  background: var(--primary-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.translate-button:hover:not(:disabled) {
+  background: var(--primary-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.translate-button:disabled {
+  background: var(--neutral-300);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .listening-indicator {
   display: flex;
   align-items: center;
@@ -490,6 +524,59 @@ body {
   color: var(--neutral-800);
 }
 
+/* Medical Context Selector */
+.context-selector {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.context-selector label {
+  font-weight: 600;
+  color: var(--neutral-700);
+  font-size: 0.9rem;
+}
+
+.context-select {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--neutral-200);
+  border-radius: 0.5rem;
+  background: var(--white);
+  color: var(--neutral-800);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.context-select:hover {
+  border-color: var(--primary-blue);
+}
+
+.context-select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.context-select option {
+  padding: 0.5rem;
+  font-weight: 500;
+}
+
+/* Emergency context highlighting */
+.context-select[value="emergency"] {
+  border-color: var(--accent-red);
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.context-select[value="emergency"]:focus {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
 /* Footer */
 .app-footer {
   background: var(--neutral-800);
@@ -514,7 +601,343 @@ body {
   opacity: 0.7;
 }
 
-/* Responsive Design */
+/* Real-time Translation Features */
+.realtime-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.realtime-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--neutral-300);
+  border-radius: 0.5rem;
+  background: var(--white);
+  color: var(--neutral-700);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.realtime-button:hover {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+}
+
+.realtime-button.active {
+  border-color: var(--secondary-green);
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--secondary-green);
+}
+
+.realtime-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Status Indicators */
+.status-indicators {
+  margin-top: 0.75rem;
+}
+
+.typing-indicator,
+.translating-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  background: rgba(37, 99, 235, 0.05);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  font-size: 0.85rem;
+  color: var(--primary-blue);
+  margin-bottom: 0.5rem;
+}
+
+.error-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  background: rgba(220, 38, 38, 0.05);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  font-size: 0.85rem;
+  color: var(--accent-red);
+  margin-bottom: 0.5rem;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Real-time connection status */
+.context-selector {
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Emergency Quick Actions */
+.emergency-quick-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(220, 38, 38, 0.05);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 0.5rem;
+}
+
+.emergency-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--accent-red);
+  color: var(--white);
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emergency-button:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.emergency-button:active {
+  transform: translateY(0);
+}
+
+/* Interface Tabs Styles */
+.interface-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--neutral-600);
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.tab-button:hover {
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  transform: translateY(-2px);
+}
+
+.tab-button.active {
+  background: var(--primary-blue);
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.tab-button.active:hover {
+  background: var(--primary-blue-dark);
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 0.5rem;
+  margin-right: 1rem;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  color: var(--white);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.tab-btn.active {
+  background: var(--white);
+  color: var(--primary-blue);
+  border-color: var(--white);
+}
+
+.tab-btn.active:hover {
+  background: var(--neutral-50);
+}
+
+/* WCAG 2.1 AA Accessibility Enhancements */
+
+/* Skip Links */
+.skip-links {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  z-index: 10000;
+}
+
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  color: #fff;
+  background: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 0 0 4px 0;
+  transition: all 0.2s ease;
+}
+
+.skip-link:focus {
+  position: static;
+  left: auto;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  z-index: 10001;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Screen Reader Only Content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.sr-only:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  background-color: #000;
+  color: #fff;
+  border-radius: 4px;
+  z-index: 10000;
+}
+
+/* Enhanced Focus Indicators - WCAG 2.1 AA Compliant */
+*:focus {
+  outline: 3px solid #4A90E2;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+  transition: outline 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus {
+  outline: 3px solid #4A90E2;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.2);
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+  *:focus {
+    outline: 4px solid #000;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.8);
+  }
+  
+  .tab-btn {
+    border: 2px solid #000;
+  }
+  
+  .tab-btn:hover {
+    background-color: #000;
+    color: #fff;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Touch Target Enhancements - WCAG 2.1 AA (44px minimum) */
+.tab-btn {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
@@ -555,4 +978,49 @@ body {
     margin-left: 0;
     align-self: flex-end;
   }
+
+  .interface-tabs {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .tab-button {
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .tab-navigation {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .header-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
+
+/* Sign Language Interface Media Queries */
+@media (max-width: 768px) {
+  .interface-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .controls {
+    justify-content: space-between;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Import component-specific styles */
+@import './components/SignAnimationPlayer.css';
+@import './components/VisualFeedbackSystem.css';

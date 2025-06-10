@@ -1,6 +1,31 @@
-
 // Backend API Configuration
-const API_BASE_URL = 'https://5wubqhune7.execute-api.eu-north-1.amazonaws.com/dev';
+// Use deployed AWS API Gateway URL
+const API_BASE_URL = 'https://9t2to2akvf.execute-api.eu-north-1.amazonaws.com/dev';
+
+// Utility function to convert base64 to Blob
+const base64ToBlob = (base64: string, mimeType: string): Blob => {
+  const binaryString = window.atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mimeType });
+};
+
+// Utility function to convert Blob to base64
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      // Remove the data URL prefix (e.g., "data:audio/webm;base64,")
+      const base64Data = base64String.split(',')[1];
+      resolve(base64Data);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
 
 // Language mappings for better translation context
 const languageNames: { [key: string]: string } = {
@@ -22,10 +47,71 @@ export interface TranslationResult {
   detectedLanguage?: string;
 }
 
+export interface EmergencyProtocol {
+  id: string;
+  category: 'cardiac' | 'respiratory' | 'neurological' | 'trauma' | 'pediatric' | 'obstetric';
+  severity: 'critical' | 'urgent' | 'moderate';
+  title: string;
+  immediateActions: string[];
+  timeframe: string;
+  equipment: string[];
+  contraindications: string[];
+  followup: string[];
+}
+
+export interface TriageSuggestion {
+  priority: 'P1' | 'P2' | 'P3' | 'P4';
+  reasoning: string;
+  timeframe: string;
+  immediateActions: string[];
+  referrals: string[];
+  monitoring: string[];
+  followupRequired: boolean;
+}
+
+export interface ContextualAdvice {
+  culturalConsiderations: string[];
+  criticalTerminology: string[];
+  potentialMisunderstandings: string[];
+  verificationSteps: string[];
+  safetyConsiderations: string[];
+}
+
+export interface EmergencyProtocol {
+  id: string;
+  category: 'cardiac' | 'respiratory' | 'neurological' | 'trauma' | 'pediatric' | 'obstetric';
+  severity: 'critical' | 'urgent' | 'moderate';
+  title: string;
+  immediateActions: string[];
+  timeframe: string;
+  equipment: string[];
+  contraindications: string[];
+  followup: string[];
+}
+
+export interface TriageSuggestion {
+  priority: 'P1' | 'P2' | 'P3' | 'P4';
+  reasoning: string;
+  timeframe: string;
+  immediateActions: string[];
+  referrals: string[];
+  monitoring: string[];
+  followupRequired: boolean;
+}
+
+export interface ContextualAdvice {
+  culturalConsiderations: string[];
+  criticalTerminology: string[];
+  potentialMisunderstandings: string[];
+  verificationSteps: string[];
+  safetyConsiderations: string[];
+}
+
 export const translateText = async (
   text: string, 
   sourceLanguage: string, 
-  targetLanguage: string
+  targetLanguage: string,
+  context?: 'emergency' | 'consultation' | 'medication' | 'general'
 ): Promise<TranslationResult> => {
   try {
     const response = await fetch(`${API_BASE_URL}/translate`, {
@@ -36,21 +122,25 @@ export const translateText = async (
       body: JSON.stringify({
         text,
         sourceLanguage,
-        targetLanguage
+        targetLanguage,
+        context: context || 'general'
       })
-    });
-
-    if (!response.ok) {
+    });if (!response.ok) {
       const errorData = await response.json();
       throw new Error(`Translation failed: ${errorData.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
+    console.log('API Response:', data);
+    
+    // Extract from the nested data structure returned by the backend
+    const translationData = data.data || data;
+    console.log('Translation Data:', translationData);
     
     return {
-      translatedText: data.translatedText,
-      confidence: data.confidence || 0.8,
-      detectedLanguage: sourceLanguage
+      translatedText: translationData.translatedText,
+      confidence: translationData.confidence || 0.8,
+      detectedLanguage: translationData.sourceLanguage || sourceLanguage
     };
     
   } catch (error) {
@@ -106,8 +196,7 @@ export const speakText = async (text: string, language: string): Promise<void> =
       },
       body: JSON.stringify({ 
         text, 
-        language,
-        outputFormat: 'mp3'
+        language
       })
     });
 
@@ -117,16 +206,25 @@ export const speakText = async (text: string, language: string): Promise<void> =
 
     const data = await response.json();
     
-    if (data.audioUrl) {
-      // Play audio from AWS Polly
-      const audio = new Audio(data.audioUrl);
+    if (data.audioBase64) {
+      // Create audio from base64 data
+      const audioBlob = base64ToBlob(data.audioBase64, 'audio/mpeg');
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
       return new Promise((resolve, reject) => {
-        audio.onended = () => resolve();
-        audio.onerror = () => reject(new Error('Audio playback failed'));
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl); // Clean up
+          resolve();
+        };
+        audio.onerror = () => {
+          URL.revokeObjectURL(audioUrl); // Clean up
+          reject(new Error('Audio playback failed'));
+        };
         audio.play().catch(reject);
       });
     } else {
-      throw new Error('No audio URL returned from backend');
+      throw new Error('No audio data returned from backend');
     }
     
   } catch (error) {
@@ -176,5 +274,268 @@ export const getEmergencyPhrases = async (language?: string): Promise<any[]> => 
   } catch (error) {
     console.error('Error fetching emergency phrases:', error);
     return [];
+  }
+};
+
+// Enhanced speech recognition using AWS Transcribe with medical context
+export const transcribeAudio = async (
+  audioBlob: Blob, 
+  language: string, 
+  medicalContext?: string
+): Promise<{ transcript: string; confidence: number }> => {
+  try {
+    // Convert blob to base64
+    const audioData = await blobToBase64(audioBlob);
+    
+    // Start transcription job with medical context
+    const response = await fetch(`${API_BASE_URL}/speech-to-text`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        audioData: audioData.split(',')[1], // Remove data URL prefix
+        language,
+        medicalContext
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to start transcription');
+    }
+
+    const startData = await response.json();
+    const jobId = startData.data?.jobId || startData.jobId;
+
+    // Poll for completion with enhanced results
+    return await pollTranscriptionResult(jobId);
+    
+  } catch (error) {
+    console.error('Speech transcription error:', error);
+    throw new Error(`Speech recognition failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Enhanced poll transcription job status with medical context
+const pollTranscriptionResult = async (jobId: string, maxAttempts: number = 30): Promise<{ transcript: string; confidence: number }> => {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/speech-to-text`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check transcription status');
+      }
+
+      const data = await response.json();
+      
+      // Handle the nested response structure
+      const resultData = data.data || data;
+      
+      if (resultData.status === 'COMPLETED') {
+        return {
+          transcript: resultData.transcript || '',
+          confidence: resultData.confidence || 0.8
+        };
+      }
+      
+      if (resultData.status === 'FAILED') {
+        throw new Error('Transcription job failed');
+      }      // Wait 2 seconds before next poll
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+    } catch (error) {
+      console.error(`Polling attempt ${attempt + 1} failed:`, error);
+      if (attempt === maxAttempts - 1) {
+        throw error;
+      }
+    }
+  }
+  
+  throw new Error('Transcription job timed out');
+};
+
+// Amazon Q Emergency Protocol Functions
+export const getEmergencyProtocol = async (
+  symptoms: string,
+  patientAge?: number,
+  medicalHistory?: string[],
+  severity?: 'critical' | 'urgent' | 'moderate'
+): Promise<{ recommendations: EmergencyProtocol; source: string; confidence: number }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/emergency-protocol`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        symptoms,
+        patientAge,
+        medicalHistory,
+        severity
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get emergency protocol');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Emergency protocol error:', error);
+    throw error;
+  }
+};
+
+export const getTriageSuggestion = async (
+  chiefComplaint: string,
+  vitalSigns?: {
+    heartRate?: number;
+    bloodPressure?: string;
+    temperature?: number;
+    respiratoryRate?: number;
+    oxygenSaturation?: number;
+  },
+  painScale?: number
+): Promise<{ triage: TriageSuggestion; source: string; confidence: number }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/triage-suggestion`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chiefComplaint,
+        vitalSigns,
+        painScale
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get triage suggestion');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Triage suggestion error:', error);
+    throw error;
+  }
+};
+
+export const getContextualAdvice = async (
+  medicalText: string,
+  sourceLanguage: string,
+  targetLanguage: string,
+  context: 'emergency' | 'consultation' | 'medication' | 'general'
+): Promise<{ advice: ContextualAdvice; source: string; confidence: number }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/contextual-advice`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        medicalText,
+        sourceLanguage,
+        targetLanguage,
+        context
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get contextual advice');
+    }
+
+    return await response.json();  } catch (error) {
+    console.error('Contextual advice error:', error);
+    throw error;
+  }
+};
+
+// Sign Language to Translation Service
+export interface SignToTranslationResult {
+  detectedSign: string;
+  translatedText: string;
+  confidence: number;
+  medicalContext: string;
+  isEmergency: boolean;
+}
+
+export interface BatchSignResult {
+  signs: Array<{
+    gesture: string;
+    confidence: number;
+    timestamp: number;
+  }>;
+  combinedText: string;
+  translatedText: string;
+  medicalContext: string;
+  isEmergency: boolean;
+}
+
+export const signToTranslation = async (
+  signData: {
+    gesture: string;
+    confidence: number;
+    timestamp: number;
+  },
+  targetLanguage: string = 'en'
+): Promise<SignToTranslationResult> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sign-to-translation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        signData,
+        targetLanguage
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to translate sign language');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Sign to translation error:', error);
+    throw error;
+  }
+};
+
+export const batchSignProcessing = async (
+  signs: Array<{
+    gesture: string;
+    confidence: number;
+    timestamp: number;
+  }>,
+  targetLanguage: string = 'en'
+): Promise<BatchSignResult> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/batch-sign-processing`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        signs,
+        targetLanguage
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to process batch signs');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Batch sign processing error:', error);
+    throw error;
   }
 };
