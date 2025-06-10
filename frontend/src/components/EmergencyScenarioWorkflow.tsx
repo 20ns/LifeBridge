@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Volume2, Copy, Check, Play, Pause, RotateCcw, Brain, Shield, Zap, Eye, Settings } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { AlertTriangle, Heart, Phone, Clock, Volume2, Copy, Check, Play, Pause, RotateCcw, Shield } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
-import { EMERGENCY_SCENARIOS, QUICK_ACTION_TEMPLATES, EmergencyScenario } from '../data/emergencyScenarios';
+import { EMERGENCY_SCENARIOS } from '../data/emergencyScenarios';
 import EmergencyUIControls from './EmergencyUIControls';
 import '../styles/emergency-scenarios.css';
 import '../styles/emergency-themes.css';
@@ -27,28 +27,11 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
   const [activeWorkflowStep, setActiveWorkflowStep] = useState(0);
   const [workflowTimer, setWorkflowTimer] = useState<NodeJS.Timeout | null>(null);
   const [isWorkflowRunning, setIsWorkflowRunning] = useState(false);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'high-contrast'>('light');
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'high-contrast'>('light');
   const [textSize, setTextSize] = useState<'normal' | 'large' | 'extra-large'>('normal');
-  const [enhancedAccessibility, setEnhancedAccessibility] = useState(accessibilityMode);
+  const [enhancedAccessibility, setEnhancedAccessibility] = useState(false);
 
-  // Auto-translate phrases when scenario changes
-  useEffect(() => {
-    if (activeScenario && sourceLanguage !== targetLanguage) {
-      translateScenarioPhrases();
-    }
-  }, [activeScenario, sourceLanguage, targetLanguage]);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (workflowTimer) {
-        clearInterval(workflowTimer);
-      }
-    };
-  }, [workflowTimer]);
-
-  const translateScenarioPhrases = async () => {
+  const translateScenarioPhrases = useCallback(async () => {
     const scenario = EMERGENCY_SCENARIOS.find(s => s.id === activeScenario);
     if (!scenario) return;
 
@@ -63,7 +46,7 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
       }
 
       // Translate quick action phrases
-      for (const [category, actions] of Object.entries(scenario.quickActions)) {
+      for (const [, actions] of Object.entries(scenario.quickActions)) {
         for (const action of actions) {
           const result = await translateText(action, sourceLanguage, targetLanguage);
           translations[action] = result.translatedText;
@@ -84,7 +67,22 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
     } finally {
       setIsTranslating(false);
     }
-  };
+  }, [activeScenario, sourceLanguage, targetLanguage]);
+
+  // Auto-translate phrases when scenario changes
+  useEffect(() => {
+    if (activeScenario && sourceLanguage !== targetLanguage) {
+      translateScenarioPhrases();
+    }
+  }, [activeScenario, sourceLanguage, targetLanguage, translateScenarioPhrases]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (workflowTimer) {
+        clearInterval(workflowTimer);
+      }
+    };  }, [workflowTimer]);
 
   const handleScenarioSelect = (scenarioId: string) => {
     setActiveScenario(scenarioId);
@@ -172,7 +170,7 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
       default: return 'bg-gray-100 border-gray-300 text-gray-800';
     }
   };  return (
-    <div className={`emergency-container emergency-mode ${currentTheme === 'dark' ? 'emergency-theme-dark' : currentTheme === 'high-contrast' ? 'emergency-theme-high-contrast' : 'emergency-theme-light'} size-${textSize}`}>
+    <div className={`emergency-container emergency-mode ${currentTheme === 'dark' ? 'emergency-theme-dark' : currentTheme === 'high-contrast' ? 'emergency-theme-high-contrast' : 'emergency-theme-light'} size-${textSize} ${enhancedAccessibility ? 'enhanced-accessibility' : ''}`}>
       {/* Emergency UI Controls */}
       <EmergencyUIControls
         onThemeChange={setCurrentTheme}

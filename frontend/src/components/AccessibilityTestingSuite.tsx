@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
-  Eye, EyeOff, Volume2, VolumeX, Keyboard, MousePointer, 
-  Contrast, Type, Focus, CheckCircle, AlertTriangle, Info,
-  Monitor, Smartphone, Tablet, Settings, Accessibility
+  CheckCircle, AlertTriangle, Accessibility
 } from 'lucide-react';
 import '../styles/emergency-themes.css';
 
