@@ -1,253 +1,466 @@
-/* Enhanced Emergency Phrases Styles */
-.emergency-phrases {
+/* Modern Emergency Phrases Styles */
+.emergency-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
 }
 
-.emergency-phrases.large-layout {
+.emergency-container.large-layout {
   padding: 40px;
 }
 
-.emergency-phrases.accessible-layout {
+.emergency-container.accessible-layout {
   font-size: 1.2rem;
   line-height: 1.6;
 }
 
-/* Header */
+/* Modern Header */
 .emergency-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+  margin-bottom: 40px;
+  padding: 32px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: white;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(220, 38, 38, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.emergency-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/><circle cx="20" cy="80" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="80" r="2" fill="white" opacity="0.1"/></svg>');
+  pointer-events: none;
 }
 
 .emergency-icon {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 15px;
-  animation: emergency-pulse 2s infinite;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  animation: emergency-pulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  z-index: 1;
+  position: relative;
 }
 
 @keyframes emergency-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05); 
+    opacity: 0.9;
+  }
 }
 
 .emergency-header h2 {
-  margin: 0 0 10px 0;
-  font-size: 2rem;
-  font-weight: 700;
+  margin: 0 0 12px 0;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  position: relative;
 }
 
 .emergency-header p {
   margin: 0;
-  opacity: 0.9;
-  font-size: 1.1rem;
+  opacity: 0.95;
+  font-size: 1.125rem;
+  font-weight: 500;
+  max-width: 600px;
+  z-index: 1;
+  position: relative;
 }
 
-.recently-used {
-  display: flex;
+/* Status Indicator */
+.emergency-status {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  margin-top: 15px;
-  padding: 10px 15px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  font-size: 0.9rem;
-}
-
-.recent-icon {
-  width: 16px;
-  height: 16px;
-}
-
-/* Loading state */
-.phrases-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #ff4757;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Phrases container */
-.phrases-container {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-.phrases-container.large-buttons {
-  gap: 40px;
-}
-
-/* Category styling */
-.phrase-category {
-  background: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e8e8e8;
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 
-.phrase-category:hover {
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+.emergency-status:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }
 
+.emergency-status-info {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.recent-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Modern Grid System */
+.emergency-section {
+  margin-bottom: 32px;
+}
+
+.emergency-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.emergency-grid-1 {
+  grid-template-columns: 1fr;
+}
+
+.emergency-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+}
+
+.emergency-grid.large-buttons {
+  gap: 32px;
+}
+
+.emergency-grid.large-grid {
+  gap: 40px;
+}
+
+/* Category Cards */
+.phrase-category {
+  background: transparent; /* Removed cream background */
+  backdrop-filter: none; /* Removed blur effect that might contribute to "cream" look */
+  border: none; /* Removed light border */
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); /* Kept shadow, review if it looks odd on transparent */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.phrase-category:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  background: transparent; /* Consistent with non-hover state */
+}
+
+/* Category Header - Modern Colored Design */
 .category-header {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 3px solid;
-  border-bottom-color: inherit;
+  gap: 20px;
+  margin-bottom: 28px;
+  padding: 18px 24px;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+}
+
+.category-header:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.category-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent; /* Changed from light gradient to transparent */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.category-header:hover::before {
+  opacity: 1;
 }
 
 .category-icon {
   flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  z-index: 2;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.category-header:hover .category-icon {
+  transform: scale(1.15) rotate(5deg);
 }
 
 .category-title {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: white;
+  background: transparent; /* Ensure no background from global styles */
+  letter-spacing: -0.02em;
+  z-index: 2;
+  position: relative;
+  text-shadow: none; /* Removed text shadow */
+  transition: all 0.3s ease;
 }
 
 .category-title.large-title {
-  font-size: 2rem;
+  font-size: 1.625rem;
 }
 
-/* Phrases grid */
-.phrases-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 15px;
+.category-header:hover .category-title {
+  text-shadow: none; /* Removed text shadow on hover */
 }
 
-.phrases-grid.large-grid {
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 25px;
+/* Critical Emergency Header - Red Theme */
+.emergency-container .phrase-category:nth-child(1) .category-header {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 80%, #991b1b 100%) !important;
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.25) !important;
+  border: none !important;
 }
 
-/* Emergency phrase buttons */
-.emergency-phrase-button {
+.emergency-container .phrase-category:nth-child(1) .category-header:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 80%, #b91c1c 100%) !important;
+  box-shadow: 0 8px 30px rgba(220, 38, 38, 0.4) !important;
+}
+
+/* Pain Assessment Header - Orange Theme */
+.emergency-container .phrase-category:nth-child(2) .category-header {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 80%, #b45309 100%) !important;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25) !important;
+  border: none !important;
+}
+
+.emergency-container .phrase-category:nth-child(2) .category-header:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 80%, #d97706 100%) !important;
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Medical History Header - Blue Theme */
+.emergency-container .phrase-category:nth-child(3) .category-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 80%, #1d4ed8 100%) !important;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25) !important;
+  border: none !important;
+}
+
+.emergency-container .phrase-category:nth-child(3) .category-header:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 80%, #2563eb 100%) !important;
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Vital Signs Header - Green Theme */
+.emergency-container .phrase-category:nth-child(4) .category-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 80%, #047857 100%) !important;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25) !important;
+  border: none !important;
+}
+
+.emergency-container .phrase-category:nth-child(4) .category-header:hover {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 80%, #059669 100%) !important;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Modern Emergency Cards */
+.emergency-card {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding: 20px;
-  background: white;
-  border: 1px solid #e0e0e0;
+  gap: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
   border-left: 5px solid;
-  border-radius: 12px;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   position: relative;
+  overflow: hidden;
 }
 
-.emergency-phrase-button:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  transform: translateY(-3px);
+.emergency-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.2) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
-.emergency-phrase-button:focus {
-  outline: 3px solid #667eea;
-  outline-offset: 2px;
+.emergency-card:hover::before {
+  opacity: 1;
 }
 
-.emergency-phrase-button.large {
-  padding: 30px;
+.emergency-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px);
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+}
+
+.emergency-card.large {
+  padding: 32px;
   gap: 20px;
   border-left-width: 8px;
-  border-radius: 20px;
+  border-radius: 24px;
 }
 
-.emergency-phrase-button.accessible {
-  padding: 25px;
+.emergency-card.accessible {
+  padding: 28px;
   gap: 18px;
   border-left-width: 6px;
 }
 
-/* Severity-based styling */
-.emergency-phrase-button.severity-critical {
-  border-left-color: #ff4757;
-  background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+/* Emergency Button Styles */
+.emergency-btn-critical {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  position: relative;
+  overflow: hidden;
 }
 
-.emergency-phrase-button.severity-critical:hover {
-  background: linear-gradient(135deg, #fff5f5 0%, #ffebeb 100%);
-  box-shadow: 0 8px 25px rgba(255, 71, 87, 0.2);
+.emergency-btn-critical::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
-.emergency-phrase-button.severity-high {
-  border-left-color: #ff6b35;
-  background: linear-gradient(135deg, #fff 0%, #fff8f5 100%);
+.emergency-btn-critical:hover::before {
+  left: 100%;
 }
 
-.emergency-phrase-button.severity-high:hover {
-  background: linear-gradient(135deg, #fff8f5 0%, #fff0e6 100%);
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+.emergency-btn-urgent {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
 }
 
-.emergency-phrase-button.severity-medium {
-  border-left-color: #3742fa;
-  background: linear-gradient(135deg, #fff 0%, #f5f6ff 100%);
+.emergency-btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
 }
 
-.emergency-phrase-button.severity-medium:hover {
-  background: linear-gradient(135deg, #f5f6ff 0%, #ebebff 100%);
-  box-shadow: 0 8px 25px rgba(55, 66, 250, 0.2);
+.emergency-btn-secondary {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  transition: all 0.3s ease;
 }
 
-.emergency-phrase-button.severity-low {
-  border-left-color: #2ed573;
-  background: linear-gradient(135deg, #fff 0%, #f5fff8 100%);
+.emergency-btn-secondary:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.emergency-phrase-button.severity-low:hover {
-  background: linear-gradient(135deg, #f5fff8 0%, #ebffef 100%);
-  box-shadow: 0 8px 25px rgba(46, 213, 115, 0.2);
+.emergency-btn-secondary.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-color: #059669;
 }
 
-/* Phrase content */
+.emergency-btn-secondary.speaking {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border-color: #7c3aed;
+  animation: speaking-pulse 1s ease-in-out infinite;
+}
+
+@keyframes speaking-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Severity-based card styling */
+.severity-critical {
+  border-left-color: #dc2626;
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+}
+
+.severity-critical:hover {
+  background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%);
+  box-shadow: 0 12px 32px rgba(220, 38, 38, 0.15);
+}
+
+.severity-urgent,
+.severity-high {
+  border-left-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.severity-urgent:hover,
+.severity-high:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.15);
+}
+
+.severity-medium {
+  border-left-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+}
+
+.severity-medium:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15);
+}
+
+.severity-low {
+  border-left-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+}
+
+.severity-low:hover {
+  background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.15);
+}
+
+/* Phrase Content */
 .phrase-header {
   display: flex;
   align-items: flex-start;
-  gap: 15px;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
 }
 
 .phrase-icon {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 3px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
-.emergency-phrase-button.large .phrase-icon {
+.emergency-card.large .phrase-icon {
   width: 32px;
   height: 32px;
 }
@@ -258,46 +471,159 @@
 }
 
 .phrase-text {
-  font-size: 1.1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  color: #333;
-  line-height: 1.4;
+  color: #1e293b;
+  line-height: 1.5;
   margin-bottom: 8px;
+  letter-spacing: -0.01em;
 }
 
 .phrase-text.large-text {
-  font-size: 1.4rem;
-  line-height: 1.5;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 700;
 }
 
 .phrase-original {
   font-size: 0.9rem;
-  color: #666;
+  color: #64748b;
   font-style: italic;
-  line-height: 1.3;
+  line-height: 1.4;
+  opacity: 0.8;
 }
 
-/* Action buttons */
+/* Action Buttons */
 .phrase-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
-.action-button {
+.emergency-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 10px;
-  background: #f8f9fa;
-  color: #495057;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  overflow: hidden;
+}
+
+.emergency-action-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+.emergency-action-btn:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+.emergency-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Emergency Contact */
+.emergency-contact {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  margin-top: 40px;
+}
+
+.emergency-contact-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px 40px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 50px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3);
+}
+
+.emergency-contact-button.large {
+  padding: 24px 48px;
+  font-size: 1.5rem;
+  gap: 20px;
+}
+
+.emergency-contact-button:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(220, 38, 38, 0.4);
+}
+
+.emergency-pulse {
+  animation: emergency-call-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes emergency-call-pulse {
+  0%, 100% { 
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3), 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  50% { 
+    box-shadow: 0 16px 40px rgba(220, 38, 38, 0.4), 0 0 0 20px rgba(220, 38, 38, 0);
+  }
+}
+
+/* Loading State */
+.phrases-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  gap: 20px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #dc2626;
+  border-radius: 50%;
+  animation: modern-spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes modern-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Focus and Accessibility */
+.emergency-focus-visible:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 3px;
+  border-radius: 16px;
+}
+
+.emergency-card:focus-visible {
+  z-index: 10;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2);
 }
 
 .emergency-phrase-button.large .action-button {
@@ -401,65 +727,67 @@
   }
 }
 
-@media (prefers-contrast: high) {
-  .emergency-phrase-button {
-    border: 2px solid #000;
-  }
-  
-  .action-button {
-    border: 1px solid #000;
-  }
-  
-  .emergency-contact-button {
-    border: 2px solid #000;
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .emergency-grid-2 {
+    grid-template-columns: 1fr;
   }
 }
 
-/* Focus visible for keyboard navigation */
-.emergency-phrase-button:focus-visible,
-.action-button:focus-visible,
-.emergency-contact-button:focus-visible {
-  outline: 3px solid #667eea;
-  outline-offset: 3px;
-}
-
-/* Mobile responsiveness */
 @media (max-width: 768px) {
-  .emergency-phrases {
-    padding: 15px;
+  .emergency-container {
+    padding: 16px;
   }
   
-  .emergency-phrases.large-layout {
-    padding: 25px;
+  .emergency-container.large-layout {
+    padding: 24px;
   }
   
   .emergency-header {
-    padding: 15px;
+    padding: 24px;
+    margin-bottom: 32px;
   }
   
   .emergency-header h2 {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
   
-  .phrases-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .emergency-header p {
+    font-size: 1rem;
   }
   
-  .phrases-grid.large-grid {
+  .emergency-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .emergency-grid {
     gap: 20px;
   }
   
-  .emergency-phrase-button {
-    padding: 15px;
+  .emergency-card {
+    padding: 20px;
   }
   
-  .emergency-phrase-button.large {
-    padding: 25px;
+  .emergency-card.large {
+    padding: 24px;
+  }  .category-header {
+    padding: 16px 20px;
+    gap: 16px;
+    margin-bottom: 24px;
   }
   
-  .phrase-header {
-    gap: 12px;
+  .category-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .category-title {
+    font-size: 1.25rem;
+  }
+  
+  .category-title.large-title {
+    font-size: 1.375rem;
   }
   
   .phrase-text {
@@ -467,65 +795,186 @@
   }
   
   .phrase-text.large-text {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
   }
   
-  .action-button {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .emergency-phrase-button.large .action-button {
-    width: 48px;
-    height: 48px;
+  .emergency-action-btn {
+    width: 44px;
+    height: 44px;
   }
   
   .emergency-contact-button {
-    padding: 15px 30px;
-    font-size: 1rem;
+    padding: 16px 32px;
+    font-size: 1.125rem;
   }
   
   .emergency-contact-button.large {
     padding: 20px 40px;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
   }
 }
 
 @media (max-width: 480px) {
-  .phrases-container {
-    gap: 20px;
-  }
-  
-  .phrase-category {
-    padding: 15px;
-  }
-  
-  .category-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .emergency-phrase-button {
+  .emergency-container {
     padding: 12px;
+  }
+  
+  .emergency-header {
+    padding: 20px;
+  }
+  
+  .emergency-header h2 {
+    font-size: 1.75rem;
+  }
+  
+  .emergency-card {
+    padding: 16px;
   }
   
   .phrase-header {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
   }
   
   .phrase-actions {
     justify-content: center;
-    margin-top: 5px;
+    margin-top: 8px;
+  }    .category-header {
+    padding: 14px 18px;
+    gap: 14px;
+    margin-bottom: 20px;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+  
+  .category-icon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .category-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+  
+  .emergency-contact-button {
+    padding: 14px 28px;
+    font-size: 1rem;
   }
 }
 
-/* Print styles */
+/* Dark Mode Compatibility */
+.emergency-theme-dark .emergency-container {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+.emergency-theme-dark .phrase-category {
+  background: rgba(45, 45, 45, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.emergency-theme-dark .emergency-card {
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  border-color: #4a4a4a;
+  color: #f8fafc;
+}
+
+.emergency-theme-dark .phrase-text {
+  color: #f8fafc;
+}
+
+.emergency-theme-dark .phrase-original {
+  color: #cbd5e1;
+}
+
+/* Dark mode preserves category colors but makes them darker */
+.emergency-theme-dark .emergency-container .phrase-category:nth-child(1) .category-header {
+  background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 80%, #6b1717 100%) !important;
+}
+
+.emergency-theme-dark .emergency-container .phrase-category:nth-child(2) .category-header {
+  background: linear-gradient(135deg, #b45309 0%, #92400e 80%, #78350f 100%) !important;
+}
+
+.emergency-theme-dark .emergency-container .phrase-category:nth-child(3) .category-header {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 80%, #1e3a8a 100%) !important;
+}
+
+.emergency-theme-dark .emergency-container .phrase-category:nth-child(4) .category-header {
+  background: linear-gradient(135deg, #047857 0%, #065f46 80%, #064e3b 100%) !important;
+}
+
+/* High Contrast Mode */
+.emergency-theme-high-contrast .emergency-card {
+  border: 2px solid #ffffff;
+  background: #000000;
+  color: #ffffff;
+}
+
+.emergency-theme-high-contrast .phrase-text {
+  color: #ffffff;
+}
+
+.emergency-theme-high-contrast .emergency-action-btn {
+  border: 1px solid #ffffff;
+}
+
+.emergency-theme-high-contrast .emergency-contact-button {
+  border: 2px solid #ffffff;
+}
+
+/* High contrast mode keeps category colors but with high contrast */
+.emergency-theme-high-contrast .emergency-container .phrase-category:nth-child(1) .category-header {
+  background: linear-gradient(135deg, #ff0000 0%, #cc0000 80%, #990000 100%) !important;
+  border: 2px solid #ffffff !important;
+}
+
+.emergency-theme-high-contrast .emergency-container .phrase-category:nth-child(2) .category-header {
+  background: linear-gradient(135deg, #ff8800 0%, #cc6600 80%, #994400 100%) !important;
+  border: 2px solid #ffffff !important;
+}
+
+.emergency-theme-high-contrast .emergency-container .phrase-category:nth-child(3) .category-header {
+  background: linear-gradient(135deg, #0066ff 0%, #0044cc 80%, #003399 100%) !important;
+  border: 2px solid #ffffff !important;
+}
+
+.emergency-theme-high-contrast .emergency-container .phrase-category:nth-child(4) .category-header {
+  background: linear-gradient(135deg, #00bb00 0%, #008800 80%, #006600 100%) !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* Animation for Critical Items */
+.severity-critical {
+  position: relative;
+}
+
+.severity-critical::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #dc2626, #f59e0b, #dc2626);
+  border-radius: 18px;
+  z-index: -1;
+  opacity: 0;
+  animation: critical-glow 3s ease-in-out infinite;
+}
+
+@keyframes critical-glow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.2; }
+}
+
+/* Print Styles */
 @media print {
-  .emergency-phrases {
+  .emergency-container {
     background: white;
     color: black;
+    box-shadow: none;
   }
   
   .emergency-header {
@@ -534,10 +983,11 @@
     border: 2px solid black;
   }
   
-  .emergency-phrase-button {
+  .emergency-card {
     break-inside: avoid;
     border: 1px solid black;
     box-shadow: none;
+    background: white;
   }
   
   .phrase-actions {
@@ -546,57 +996,5 @@
   
   .emergency-contact {
     display: none;
-  }
-}
-
-/* Animation for critical phrases */
-.emergency-phrase-button.severity-critical {
-  position: relative;
-}
-
-.emergency-phrase-button.severity-critical::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #ff4757, #ff6b35, #ff4757);
-  border-radius: 14px;
-  z-index: -1;
-  opacity: 0;
-  animation: critical-glow 3s infinite;
-}
-
-@keyframes critical-glow {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 0.3; }
-}
-
-/* Keyboard navigation enhancements */
-.emergency-phrase-button[tabindex="0"]:focus {
-  z-index: 10;
-}
-
-/* Screen reader only text */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
-  .emergency-icon,
-  .phrase-icon,
-  .category-icon {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
   }
 }
