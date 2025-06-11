@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mic, MicOff, Volume2, Loader, Activity, Volume1 } from 'lucide-react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { speakText } from '../services/awsService';
+import '../App.css';
 
 interface SpeechInterfaceProps {
   language: string;
@@ -84,18 +85,10 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
     <div className={`space-y-3 ${className}`}>
       {/* Enhanced Speech Controls with Medical Context */}
       <div className="flex items-center gap-3 flex-wrap">
-        {/* Speech-to-Text Button with enhanced indicators */}
-        <button
+        {/* Speech-to-Text Button with enhanced indicators */}        <button
           onClick={handleSpeechToText}
           disabled={isProcessing}
-          className={`
-            flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all relative
-            ${isRecording 
-              ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg scale-105' 
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
-            }
-            ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
+          className={`speech-recording-btn ${isRecording ? 'recording' : ''} ${isProcessing ? 'disabled' : ''}`}
         >
           {isProcessing ? (
             <Loader className="w-5 h-5 animate-spin" />
