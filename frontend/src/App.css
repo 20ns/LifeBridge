@@ -736,6 +736,39 @@ body {
   transform: translateY(0);
 }
 
+/* Emergency Workflow Toggle Button */
+.emergency-workflow-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  border: 1px solid var(--neutral-300);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emergency-workflow-toggle:hover {
+  background: var(--neutral-200);
+  border-color: var(--neutral-400);
+  transform: translateY(-1px);
+}
+
+.emergency-workflow-toggle.active {
+  background: var(--accent-red);
+  color: var(--white);
+  border-color: var(--accent-red);
+}
+
+.emergency-workflow-toggle.active:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
 /* Interface Tabs Styles */
 .interface-tabs {
   display: flex;

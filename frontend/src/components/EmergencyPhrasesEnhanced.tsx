@@ -301,19 +301,35 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
       </div>
     );
   };
-
-  // Load emergency phrases from backend
+  // Load emergency phrases from backend with dynamic translation
   useEffect(() => {
     const loadPhrases = async () => {
       setLoading(true);
       try {
         const phrases = await getEmergencyPhrases(targetLanguage);
-        setEmergencyPhrases(phrases);
+        if (phrases && phrases.length > 0) {
+          // Backend phrases have the correct translation structure
+          setEmergencyPhrases(phrases);
+        } else {
+          // Use built-in phrases as fallback, but update their translations
+          const fallbackPhrases = Object.values(emergencyCategories).flatMap(category => 
+            category.phrases.map(phrase => ({
+              ...phrase,
+              translated: phrase.english // Will be the same for fallback
+            }))
+          );
+          setEmergencyPhrases(fallbackPhrases);
+        }
       } catch (error) {
         console.error('Failed to load emergency phrases:', error);
         // Use built-in phrases as fallback
-        const allPhrases = Object.values(emergencyCategories).flatMap(category => category.phrases);
-        setEmergencyPhrases(allPhrases);
+        const fallbackPhrases = Object.values(emergencyCategories).flatMap(category => 
+          category.phrases.map(phrase => ({
+            ...phrase,
+            translated: phrase.english // Will be the same for fallback
+          }))
+        );
+        setEmergencyPhrases(fallbackPhrases);
       } finally {
         setLoading(false);
       }
