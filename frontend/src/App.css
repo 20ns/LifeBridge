@@ -365,6 +365,93 @@ body {
   cursor: not-allowed;
 }
 
+/* Performance Button */
+.performance-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.performance-btn:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4c93 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.performance-btn.active {
+  background: linear-gradient(135deg, #2ed573 0%, #17c0eb 100%);
+  box-shadow: 0 4px 12px rgba(46, 213, 115, 0.4);
+}
+
+.performance-btn.active:hover {
+  background: linear-gradient(135deg, #26de81 0%, #20bf6b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(46, 213, 115, 0.5);
+}
+
+/* Speech Recording Button */
+.speech-recording-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.speech-recording-btn:not(.recording) {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.speech-recording-btn:not(.recording):hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.speech-recording-btn.recording {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  animation: recording-pulse 2s infinite;
+}
+
+.speech-recording-btn.recording:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.speech-recording-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@keyframes recording-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
 /* Emergency Phrases */
 .emergency-section {
   margin-top: 3rem;
