@@ -19,10 +19,6 @@
   color: #ffffff; /* Ensure white text for contrast */
 }
 
-.multi-modal-interface.emergency-mode * {
-  color: inherit;
-}
-
 .multi-modal-interface.emergency-mode .interface-header,
 .multi-modal-interface.emergency-mode .mode-selector,
 .multi-modal-interface.emergency-mode .interface-content {
@@ -31,21 +27,49 @@
 }
 
 .multi-modal-interface.emergency-mode .mode-tab {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  background: rgba(0, 0, 0, 0.6) !important; /* Dark background for visibility */
+  color: #ffffff !important;
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .multi-modal-interface.emergency-mode .mode-tab.active {
-  background: rgba(255, 255, 255, 0.9);
-  color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #1a1a1a !important;
 }
 
 .multi-modal-interface.emergency-mode .connection-indicator,
 .multi-modal-interface.emergency-mode .performance-toggle,
 .multi-modal-interface.emergency-mode .emergency-toggle {
-  background: rgba(0, 0, 0, 0.3);
-  color: #ffffff;
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: #ffffff !important;
+}
+
+/* Emergency mode button overrides */
+.multi-modal-interface.emergency-mode button {
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.multi-modal-interface.emergency-mode button:hover {
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
+}
+
+.multi-modal-interface.emergency-mode button.active,
+.multi-modal-interface.emergency-mode button.recording {
+  background: rgba(220, 38, 38, 0.8) !important;
+  color: #ffffff !important;
+}
+
+.multi-modal-interface.emergency-mode .speech-recording-btn {
+  background: rgba(59, 130, 246, 0.8) !important;
+  color: #ffffff !important;
+}
+
+.multi-modal-interface.emergency-mode .speech-recording-btn.recording {
+  background: rgba(220, 38, 38, 0.8) !important;
+  color: #ffffff !important;
 }
 
 .multi-modal-interface.emergency-mode h2,
