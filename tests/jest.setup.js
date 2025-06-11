@@ -6,6 +6,23 @@ import { TextEncoder, TextDecoder } from 'util';
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
+// Enhanced React setup for proper hooks testing
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+// Ensure React is available globally
+global.React = React;
+global.ReactDOM = ReactDOM;
+
+// Provide React runtime
+global.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
+  isDisabled: true,
+  supportsFiber: true,
+  inject: () => {},
+  onCommitFiberRoot: () => {},
+  onCommitFiberUnmount: () => {},
+};
+
 // Mock fetch globally
 global.fetch = jest.fn();
 

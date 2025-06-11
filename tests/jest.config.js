@@ -5,7 +5,7 @@ module.exports = {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
       presets: [
         ['@babel/preset-env', { targets: { node: 'current' } }],
-        '@babel/preset-react',
+        ['@babel/preset-react', { runtime: 'automatic' }],
         '@babel/preset-typescript'
       ]
     }]
@@ -28,5 +28,10 @@ module.exports = {
   transformIgnorePatterns: [
     '/node_modules/(?!(lucide-react)/)'
   ],
-  testTimeout: 10000
+  testTimeout: 10000,
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  }
 };

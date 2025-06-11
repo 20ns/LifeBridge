@@ -1,12 +1,13 @@
 // Emergency Scenarios Complete Workflow Integration Tests
 // Tests for all 6 emergency scenarios with communication flows and quick actions
 
-const { translateText, speakText } = require('../../frontend/src/services/awsService');
+// Mock AWS services for testing - removed problematic require
+const mockTranslateText = jest.fn();
+const mockSpeakText = jest.fn();
 
-// Mock AWS services for testing
 jest.mock('../../frontend/src/services/awsService', () => ({
-  translateText: jest.fn(),
-  speakText: jest.fn()
+  translateText: mockTranslateText,
+  speakText: mockSpeakText
 }));
 
 // Import emergency scenarios data (will need to be adapted for Node.js)
@@ -157,12 +158,11 @@ const EMERGENCY_SCENARIOS = [
   }
 ];
 
-describe('Emergency Scenarios Complete Workflow Tests', () => {
-  beforeEach(() => {
+describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() => {
     jest.clearAllMocks();
     // Mock successful translation responses
-    translateText.mockResolvedValue('Translated text');
-    speakText.mockResolvedValue('Speech generated');
+    mockTranslateText.mockResolvedValue('Translated text');
+    mockSpeakText.mockResolvedValue('Speech generated');
   });
 
   describe('Heart Attack Scenario Workflow', () => {
@@ -479,8 +479,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {
         const startTime = Date.now();
         
         // Simulate emergency response workflow
-        await translateText(scenario.phrases[0], 'en', 'es');
-        await speakText(scenario.phrases[0], 'en');
+        await mockTranslateText(scenario.phrases[0], 'en', 'es');
+        await mockSpeakText(scenario.phrases[0], 'en');
         
         const responseTime = Date.now() - startTime;
         
