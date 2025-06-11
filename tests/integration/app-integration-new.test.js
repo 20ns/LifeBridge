@@ -10,7 +10,7 @@ describe('LifeBridge Integration Tests', () => {
 
   beforeEach(() => {
     // This will now refer to global.fetch, which is jest.fn() from jest.setup.js
-    fetch.mockClear();
+    global.fetch.mockClear();
   });
 
   describe('Medical Translation Tests', () => {

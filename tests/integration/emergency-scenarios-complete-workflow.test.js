@@ -6,7 +6,7 @@ const mockTranslateText = jest.fn();
 const mockSpeakText = jest.fn();
 
 jest.mock('../../frontend/src/services/awsService', () => ({
-  translateText: mockTranslateText,
+  mockTranslateText: mockTranslateText,
   speakText: mockSpeakText
 }));
 
@@ -177,8 +177,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       
       // Step 2: Translation of critical phrases
       for (const phrase of heartAttackScenario.phrases.slice(0, 3)) {
-        await translateText(phrase, 'en', 'es');
-        expect(translateText).toHaveBeenCalledWith(phrase, 'en', 'es');
+        await mockTranslateText(phrase, 'en', 'es');
+        expect(mockTranslateText).toHaveBeenCalledWith(phrase, 'en', 'es');
       }
       
       // Step 3: Communication flow execution
@@ -222,8 +222,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       expect(fastStep.timeLimit).toBe("Within 1 minute");
       
       // Translate FAST assessment phrase
-      await translateText(fastStep.phrases[0], 'en', 'de');
-      expect(translateText).toHaveBeenCalledWith("Can you smile for me?", 'en', 'de');
+      await mockTranslateText(fastStep.phrases[0], 'en', 'de');
+      expect(mockTranslateText).toHaveBeenCalledWith("Can you smile for me?", 'en', 'de');
       
       // Verify stroke alert phrase
       const strokeAlert = strokeScenario.phrases[0];
@@ -261,8 +261,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       
       // Translate emergency phrases
       for (const phrase of anaphylaxisScenario.phrases.slice(0, 2)) {
-        await translateText(phrase, 'en', 'fr');
-        expect(translateText).toHaveBeenCalledWith(phrase, 'en', 'fr');
+        await mockTranslateText(phrase, 'en', 'fr');
+        expect(mockTranslateText).toHaveBeenCalledWith(phrase, 'en', 'fr');
       }
       
       console.log('✅ Anaphylaxis Protocol: EpiPen administration workflow validated');
@@ -296,8 +296,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       expect(sceneStep.phrases[0]).toBe("Can you hear me?");
       
       // Translate trauma alert
-      await translateText(traumaScenario.phrases[0], 'en', 'it');
-      expect(translateText).toHaveBeenCalledWith("TRAUMA ALERT: Major accident victim", 'en', 'it');
+      await mockTranslateText(traumaScenario.phrases[0], 'en', 'it');
+      expect(mockTranslateText).toHaveBeenCalledWith("TRAUMA ALERT: Major accident victim", 'en', 'it');
       
       console.log('✅ Trauma ABC Protocol: Assessment sequence validated');
     });
@@ -334,8 +334,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       expect(assessmentActions[0]).toBe("Assess immediate safety risk");
       
       // Translate de-escalation phrases
-      await translateText(safetyStep.phrases[0], 'en', 'zh');
-      expect(translateText).toHaveBeenCalledWith("I'm here to help you", 'en', 'zh');
+      await mockTranslateText(safetyStep.phrases[0], 'en', 'zh');
+      expect(mockTranslateText).toHaveBeenCalledWith("I'm here to help you", 'en', 'zh');
       
       console.log('✅ Mental Health Crisis: De-escalation protocol validated');
     });
@@ -373,8 +373,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       
       // Translate respiratory emergency phrases
       for (const phrase of respiratoryScenario.phrases.slice(0, 2)) {
-        await translateText(phrase, 'en', 'pt');
-        expect(translateText).toHaveBeenCalledWith(phrase, 'en', 'pt');
+        await mockTranslateText(phrase, 'en', 'pt');
+        expect(mockTranslateText).toHaveBeenCalledWith(phrase, 'en', 'pt');
       }
       
       console.log('✅ Respiratory Emergency: Oxygen protocol validated');
@@ -406,8 +406,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       
       for (const scenario of scenarios) {
         // Translate first critical phrase for each
-        await translateText(scenario.phrases[0], 'en', 'es');
-        expect(translateText).toHaveBeenCalledWith(scenario.phrases[0], 'en', 'es');
+        await mockTranslateText(scenario.phrases[0], 'en', 'es');
+        expect(mockTranslateText).toHaveBeenCalledWith(scenario.phrases[0], 'en', 'es');
         
         // Execute first communication step
         const firstStep = scenario.communicationFlow[0];
@@ -416,7 +416,7 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       }
       
       // Verify all scenarios were processed
-      expect(translateText).toHaveBeenCalledTimes(3);
+      expect(mockTranslateText).toHaveBeenCalledTimes(3);
       expect(speakText).toHaveBeenCalledTimes(3);
       
       console.log('✅ Multiple Scenarios: Sequential processing validated');
@@ -453,17 +453,17 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       console.log('Testing Error Handling...');
       
       // Mock translation failure
-      translateText.mockRejectedValueOnce(new Error('Translation service unavailable'));
+      mockTranslateText.mockRejectedValueOnce(new Error('Translation service unavailable'));
       
       try {
-        await translateText("Emergency phrase", 'en', 'es');
+        await mockTranslateText("Emergency phrase", 'en', 'es');
       } catch (error) {
         expect(error.message).toBe('Translation service unavailable');
       }
       
       // Should still allow speech synthesis to work
-      await speakText("Emergency phrase", 'en');
-      expect(speakText).toHaveBeenCalledWith("Emergency phrase", 'en');
+      await mockSpeakText("Emergency phrase", 'en');
+      expect(mockSpeakText).toHaveBeenCalledWith("Emergency phrase", 'en');
       
       console.log('✅ Error Handling: Graceful degradation validated');
     });
