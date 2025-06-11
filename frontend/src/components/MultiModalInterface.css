@@ -454,6 +454,23 @@
   color: #666;
 }
 
+.close-button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
 .performance-icon {
   width: 20px;
   height: 20px;
@@ -524,6 +541,26 @@
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.retry-connection-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.retry-connection-button:hover {
+  background: #5a6fd8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .offline-content button:hover {
