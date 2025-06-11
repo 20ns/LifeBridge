@@ -521,6 +521,26 @@
   box-shadow: 0 6px 25px rgba(255, 71, 87, 0.6);
 }
 
+.emergency-quick-access.active {
+  background: #dc2626;
+  animation: emergency-active-pulse 2s infinite;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
+}
+
+.emergency-quick-access.active:hover {
+  background: #b91c1c;
+  transform: scale(1.1);
+}
+
+@keyframes emergency-active-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.8), 0 4px 20px rgba(255, 71, 87, 0.4); 
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(220, 38, 38, 1), 0 6px 25px rgba(255, 71, 87, 0.6); 
+  }
+}
+
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   .multi-modal-interface,
