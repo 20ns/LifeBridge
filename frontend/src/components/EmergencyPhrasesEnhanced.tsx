@@ -1,8 +1,25 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { AlertTriangle, Volume2, Copy, Check, Phone, Heart, Zap, Shield, Clock } from 'lucide-react';
-import { getEmergencyPhrases, speakText } from '../services/awsService';
+import { AlertTriangle, Volume2, Copy, Check, Phone, Heart, Zap, Shield, Clock, LucideProps } from 'lucide-react'; // Added LucideProps
+import { speakText, translateText } from '../services/awsService'; // Import translateText, remove getEmergencyPhrases
 import '../styles/emergency-themes.css';
 import './EmergencyPhrasesEnhanced.css';
+
+// Define clear types for displayed phrases and categories
+interface DisplayedPhrase {
+  id: string;
+  english: string;
+  translated: string;
+  severity: string;
+  icon?: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>; // Optional
+  priority?: number;          // Optional
+  categoryName?: string;      // To know which category it belongs to
+}
+
+interface CategoryWithDisplayedPhrases {
+  color: string;
+  icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>; // Category's own icon
+  phrases: DisplayedPhrase[];
+}
 
 interface EmergencyPhrasesProps {
   sourceLanguage?: string;
@@ -23,7 +40,7 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
   currentTheme = 'light',
   textSize = 'normal'
 }) => {
-  const [emergencyPhrases, setEmergencyPhrases] = useState<any[]>([]);
+  // const [emergencyPhrases, setEmergencyPhrases] = useState<any[]>([]); // Remove unused state
   const [loading, setLoading] = useState(true);
   const [copiedPhrase, setCopiedPhrase] = useState<string | null>(null);
   const [speakingPhrase, setSpeakingPhrase] = useState<string | null>(null);
@@ -301,42 +318,58 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
       </div>
     );
   };
-  // Load emergency phrases from backend with dynamic translation
+
+  const [displayedCategories, setDisplayedCategories] = useState<Record<string, CategoryWithDisplayedPhrases>>({});
+
   useEffect(() => {
-    const loadPhrases = async () => {
+    const loadAndTranslateCategories = async () => {
       setLoading(true);
-      try {
-        const phrases = await getEmergencyPhrases(targetLanguage);
-        if (phrases && phrases.length > 0) {
-          // Backend phrases have the correct translation structure
-          setEmergencyPhrases(phrases);
-        } else {
-          // Use built-in phrases as fallback, but update their translations
-          const fallbackPhrases = Object.values(emergencyCategories).flatMap(category => 
-            category.phrases.map(phrase => ({
-              ...phrase,
-              translated: phrase.english // Will be the same for fallback
-            }))
-          );
-          setEmergencyPhrases(fallbackPhrases);
-        }
-      } catch (error) {
-        console.error('Failed to load emergency phrases:', error);
-        // Use built-in phrases as fallback
-        const fallbackPhrases = Object.values(emergencyCategories).flatMap(category => 
-          category.phrases.map(phrase => ({
-            ...phrase,
-            translated: phrase.english // Will be the same for fallback
-          }))
-        );
-        setEmergencyPhrases(fallbackPhrases);
-      } finally {
-        setLoading(false);
+      const newDisplayedCategories: Record<string, CategoryWithDisplayedPhrases> = {};
+
+      // Transform emergencyCategories to the new structure with DisplayedPhrase
+      for (const categoryKey in emergencyCategories) {
+        const sourceCategory = emergencyCategories[categoryKey as keyof typeof emergencyCategories];
+        // Ensure sourceCategory.phrases is treated as an array of items that might not have all DisplayedPhrase fields
+        const transformedPhrases: DisplayedPhrase[] = sourceCategory.phrases.map((p: any) => ({
+          id: p.id,
+          english: p.english,
+          translated: p.translated || p.english, // Initial translation is self
+          severity: p.severity,
+          icon: p.icon, // Will be undefined if not on original p, handled by DisplayedPhrase being optional
+          priority: p.priority, // Will be undefined if not on original p, handled by DisplayedPhrase being optional
+          categoryName: categoryKey,
+        }));
+
+        newDisplayedCategories[categoryKey] = {
+          color: sourceCategory.color,
+          icon: sourceCategory.icon,
+          phrases: transformedPhrases,
+        };
       }
+
+      // If translation is needed, iterate over newDisplayedCategories and update 'translated' field
+      if (targetLanguage !== sourceLanguage && targetLanguage) {
+        for (const categoryKey in newDisplayedCategories) {
+          const category = newDisplayedCategories[categoryKey];
+          const translatedPhrasesPromises = category.phrases.map(async (phrase) => {
+            try {
+              const translationResult = await translateText(phrase.english, sourceLanguage, targetLanguage, 'emergency');
+              return { ...phrase, translated: translationResult.translatedText };
+            } catch (translationError) {
+              console.error(`Failed to translate phrase "${phrase.english}" for category "${categoryKey}":`, translationError);
+              return { ...phrase, translated: phrase.english }; // Fallback to English on error for this phrase
+            }
+          });
+          // TS needs help here: Promise.all returns DisplayedPhrase[]
+          category.phrases = await Promise.all(translatedPhrasesPromises) as DisplayedPhrase[];
+        }
+      }
+      setDisplayedCategories(newDisplayedCategories);
+      setLoading(false);
     };
 
-    loadPhrases();
-  }, [targetLanguage, emergencyCategories]);
+    loadAndTranslateCategories();
+  }, [targetLanguage, sourceLanguage, emergencyCategories, setLoading]); // Added sourceLanguage
 
   if (loading) {
     return (
@@ -371,10 +404,10 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
           </div>
         )}
       </div>      <div className={`emergency-grid emergency-grid-2 emergency-section ${largeButtons ? 'large-buttons' : ''}`}>
-        {Object.entries(emergencyCategories).map(([categoryName, category]) => (
+        {Object.entries(displayedCategories).map(([categoryName, category]) => (
           <div key={categoryName} className="phrase-category emergency-section">
             <div className="category-header emergency-status emergency-status-info" style={{ borderColor: category.color }}>
-              <category.icon 
+              <category.icon
                 className="category-icon" 
                 style={{ color: category.color }}
                 size={largeButtons ? 32 : 24}
