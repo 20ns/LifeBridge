@@ -16,6 +16,44 @@
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
   animation: emergency-pulse 2s infinite;
   border: 3px solid #ff4757;
+  color: #ffffff; /* Ensure white text for contrast */
+}
+
+.multi-modal-interface.emergency-mode * {
+  color: inherit;
+}
+
+.multi-modal-interface.emergency-mode .interface-header,
+.multi-modal-interface.emergency-mode .mode-selector,
+.multi-modal-interface.emergency-mode .interface-content {
+  background: rgba(0, 0, 0, 0.1); /* Dark overlay for better contrast */
+  color: #ffffff;
+}
+
+.multi-modal-interface.emergency-mode .mode-tab {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.multi-modal-interface.emergency-mode .mode-tab.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1a1a1a;
+}
+
+.multi-modal-interface.emergency-mode .connection-indicator,
+.multi-modal-interface.emergency-mode .performance-toggle,
+.multi-modal-interface.emergency-mode .emergency-toggle {
+  background: rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+}
+
+.multi-modal-interface.emergency-mode h2,
+.multi-modal-interface.emergency-mode h3,
+.multi-modal-interface.emergency-mode p,
+.multi-modal-interface.emergency-mode span {
+  color: #ffffff !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 @keyframes emergency-pulse {
