@@ -146,18 +146,13 @@ body {
   margin: 0;
 }
 
-/* Translation Interface */
+/* Translation Interface - Override global styles */
 .translation-container {
   margin-bottom: 3rem;
 }
 
-.translation-interface {
-  margin-bottom: 2rem;
-}
-
-.translation-card {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+/* Legacy translation card styles - now handled by component CSS */
+.legacy-translation-card {
   gap: 2rem;
   background: var(--white);
   border-radius: 16px;
