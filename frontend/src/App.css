@@ -25,6 +25,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  color: #1e293b !important; /* Force dark text everywhere */
 }
 
 body {
@@ -34,14 +35,38 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
-  color: var(--neutral-800);
+  color: var(--neutral-800) !important;
   line-height: 1.6;
 }
 
+/* Ensure strong text contrast throughout the app */
 .App {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  color: var(--neutral-800) !important;
+}
+
+/* Override any light text colors */
+.App p,
+.App span,
+.App div,
+.App label,
+.App button,
+.App input,
+.App textarea {
+  color: var(--neutral-800) !important;
+}
+
+/* Preserve specific component colors */
+.App .app-header,
+.App .app-header * {
+  color: var(--white) !important;
+}
+
+.App .btn-primary,
+.App .btn-primary * {
+  color: var(--white) !important;
 }
 
 /* Header Styles */
@@ -1138,3 +1163,35 @@ a:focus {
 /* Import component-specific styles */
 @import './components/SignAnimationPlayer.css';
 @import './components/VisualFeedbackSystem.css';
+
+/* Global text color fix - ensure dark text on light backgrounds */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: #1e293b !important; /* Force dark text everywhere */
+}
+
+/* Override emergency theme text colors that might be too light */
+.emergency-mode * {
+  color: #ffffff !important; /* White text in emergency mode only */
+}
+
+/* Preserve header and button colors */
+.app-header,
+.app-header *,
+.btn-primary,
+.btn-primary *,
+.emergency-button,
+.translate-button,
+.control-button {
+  color: #ffffff !important;
+}
+
+/* Ensure input and textarea have dark text */
+input,
+textarea,
+select {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}

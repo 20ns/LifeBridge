@@ -542,3 +542,50 @@
     border-color: #6366f1;
   }
 }
+
+/* Ensure good text contrast throughout translation interface */
+.translation-interface,
+.translation-interface * {
+  color: #1e293b !important; /* Dark text for good contrast */
+}
+
+/* Preserve specific UI element colors */
+.translation-interface .section-header h3 {
+  color: #334155 !important; /* Slightly lighter for headers */
+  font-weight: 600 !important;
+}
+
+.translation-interface .text-input,
+.translation-interface .text-output {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
+.translation-interface .text-output p {
+  color: #1e293b !important;
+}
+
+.translation-interface .control-button,
+.translation-interface .translate-button {
+  color: #ffffff !important;
+  background: #2563eb !important;
+}
+
+.translation-interface .context-select {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
+/* Status indicators */
+.translation-interface .confidence-score,
+.translation-interface .typing-indicator span,
+.translation-interface .translating-indicator span {
+  color: #475569 !important;
+}
+
+/* Emergency elements */
+.translation-interface .emergency-button {
+  color: #1e293b !important;
+  background: #ffffff !important;
+  border-color: #dc2626 !important;
+}
