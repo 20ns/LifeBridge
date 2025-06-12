@@ -1,6 +1,88 @@
 // Backend API Configuration
 // Use deployed AWS API Gateway URL
-const API_BASE_URL = 'https://9t2to2akvf.execute-api.eu-north-1.amazonaws.com/dev';
+const API_BASE_URL = 'http://localhost:3001/dev'; // Using local backend for testing
+
+// Rate limiting and retry configuration
+const RATE_LIMIT_DELAY = 1500; // 1.5 seconds between requests
+const MAX_RETRIES = 3;
+const BASE_RETRY_DELAY = 2000; // 2 seconds base delay
+
+// Translation cache to avoid repeated API calls
+const translationCache = new Map<string, TranslationResult>();
+
+// Request queue to manage rate limiting
+let requestQueue: Array<() => Promise<void>> = [];
+let isProcessingQueue = false;
+
+// Helper function to create a cache key
+const createCacheKey = (text: string, sourceLanguage: string, targetLanguage: string, context?: string): string => {
+  return `${text}_${sourceLanguage}_${targetLanguage}_${context || 'general'}`;
+};
+
+// Helper function to delay execution
+const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+// Process request queue with rate limiting
+const processQueue = async (): Promise<void> => {
+  if (isProcessingQueue || requestQueue.length === 0) return;
+  
+  isProcessingQueue = true;
+  
+  while (requestQueue.length > 0) {
+    const request = requestQueue.shift();
+    if (request) {
+      try {
+        await request();
+        await delay(RATE_LIMIT_DELAY); // Rate limit between requests
+      } catch (error) {
+        console.error('Queue request failed:', error);
+      }
+    }
+  }
+  
+  isProcessingQueue = false;
+};
+
+// Add request to queue
+const queueRequest = <T>(request: () => Promise<T>): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    const queuedRequest = async () => {
+      try {
+        const result = await request();
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    requestQueue.push(queuedRequest);
+    processQueue();
+  });
+};
+
+// Exponential backoff retry logic
+const retryWithBackoff = async <T>(
+  operation: () => Promise<T>,
+  retryCount = 0
+): Promise<T> => {
+  try {
+    return await operation();
+  } catch (error) {
+    if (retryCount >= MAX_RETRIES) {
+      throw error;
+    }
+    
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes('Too many requests') || errorMessage.includes('rate limit')) {
+      const backoffDelay = BASE_RETRY_DELAY * Math.pow(2, retryCount);
+      console.log(`Rate limited, retrying in ${backoffDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+      await delay(backoffDelay);
+      return retryWithBackoff(operation, retryCount + 1);
+    }
+    
+    throw error;
+  }
+};
 
 // Utility function to convert base64 to Blob
 const base64ToBlob = (base64: string, mimeType: string): Blob => {
@@ -113,46 +195,74 @@ export const translateText = async (
   targetLanguage: string,
   context?: 'emergency' | 'consultation' | 'medication' | 'general'
 ): Promise<TranslationResult> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/translate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text,
-        sourceLanguage,
-        targetLanguage,
-        context: context || 'general'
-      })
-    });if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Translation failed: ${errorData.message || 'Unknown error'}`);
-    }
+  // Check cache first
+  const cacheKey = createCacheKey(text, sourceLanguage, targetLanguage, context);
+  if (translationCache.has(cacheKey)) {
+    console.log('Using cached translation');
+    return translationCache.get(cacheKey)!;
+  }
 
-    const data = await response.json();
-    console.log('API Response:', data);
-    
-    // Extract from the nested data structure returned by the backend
-    const translationData = data.data || data;
-    console.log('Translation Data:', translationData);
-    
-    return {
-      translatedText: translationData.translatedText,
-      confidence: translationData.confidence || 0.8,
-      detectedLanguage: translationData.sourceLanguage || sourceLanguage
+  // If same language, return original text
+  if (sourceLanguage === targetLanguage) {
+    const result: TranslationResult = {
+      translatedText: text,
+      confidence: 1.0,
+      detectedLanguage: sourceLanguage
     };
-    
-  } catch (error) {
+    translationCache.set(cacheKey, result);
+    return result;
+  }
+
+  // Queue the translation request with rate limiting
+  return queueRequest(async () => {
+    return retryWithBackoff(async () => {
+      const response = await fetch(`${API_BASE_URL}/translate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          sourceLanguage,
+          targetLanguage,
+          context: context || 'general'
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(`Translation failed: ${errorData.message || errorData.error || 'Unknown error'}`);
+      }      const data = await response.json();
+      console.log('API Response:', data);
+      
+      // Extract from the nested data structure returned by the backend
+      const translationData = data.data || data;
+      console.log('Translation Data:', translationData);
+      
+      const result: TranslationResult = {
+        translatedText: translationData.translatedText,
+        confidence: translationData.confidence || 0.8,
+        detectedLanguage: translationData.sourceLanguage || sourceLanguage
+      };
+
+      // Cache the result
+      translationCache.set(cacheKey, result);
+      
+      return result;
+    });
+  }).catch((error) => {
     console.error('Translation error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     
-    // Fallback to basic translation if backend fails
-    return {
-      translatedText: `[Translation Error: ${text}]`,
+    // Return a more user-friendly error message
+    const result: TranslationResult = {
+      translatedText: text, // Fallback to original text instead of error message
       confidence: 0,
       detectedLanguage: sourceLanguage
     };
-  }
+    
+    return result;
+  });
 };
 
 export const detectLanguage = async (text: string): Promise<string> => {

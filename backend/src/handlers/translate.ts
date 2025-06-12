@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { translateText } from '../services/bedrock';
+import { translateText } from '../services/translate';
 import { createResponse, createErrorResponse, validateRequestBody } from '../utils/response';
 
 export const handler = async (

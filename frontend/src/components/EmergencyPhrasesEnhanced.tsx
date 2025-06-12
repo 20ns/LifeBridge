@@ -41,7 +41,11 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
   textSize = 'normal'
 }) => {
   // const [emergencyPhrases, setEmergencyPhrases] = useState<any[]>([]); // Remove unused state
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Global loading for initial English setup
+  const [categoryLoadingStates, setCategoryLoadingStates] = useState<Record<string, boolean>>({});
+  const [categoryErrorStates, setCategoryErrorStates] = useState<Record<string, boolean>>({});
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [translatedCategoriesForCurrentLang, setTranslatedCategoriesForCurrentLang] = useState<Set<string>>(new Set());
   const [copiedPhrase, setCopiedPhrase] = useState<string | null>(null);
   const [speakingPhrase, setSpeakingPhrase] = useState<string | null>(null);
   const [lastUsedPhrases, setLastUsedPhrases] = useState<string[]>([]);
@@ -320,56 +324,128 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
   };
 
   const [displayedCategories, setDisplayedCategories] = useState<Record<string, CategoryWithDisplayedPhrases>>({});
+  const criticalCategoryKey = 'Critical Emergency'; // Define this once
+  // Helper function to translate phrases for a single category if needed
+  const translateSingleCategoryIfNeeded = useCallback(async (categoryKey: string) => {
+    // Type assertion for categoryKey when indexing emergencyCategories
+    const currentEmergencyCategory = emergencyCategories[categoryKey as keyof typeof emergencyCategories];
+
+    // Don't re-translate if already done for the current language combination or if category data is missing
+    if (translatedCategoriesForCurrentLang.has(categoryKey) || !displayedCategories[categoryKey] || !currentEmergencyCategory) {
+      return;
+    }
+
+    // Ensure we are translating the original English phrases from emergencyCategories
+    const originalPhrases = currentEmergencyCategory.phrases;
+
+    setCategoryLoadingStates(prev => ({ ...prev, [categoryKey]: true }));
+    setCategoryErrorStates(prev => ({ ...prev, [categoryKey]: false }));
+
+    const translatedCategoryPhrases: DisplayedPhrase[] = [];
+    let anErrorOccurred = false;
+
+    for (const phrase of originalPhrases) { // Iterate over original English phrases
+      try {
+        // Increased delay to prevent rate limiting - 2.5 seconds between requests
+        await new Promise(resolve => setTimeout(resolve, 2500));
+        const translationResult = await translateText(phrase.english, sourceLanguage, targetLanguage, 'emergency');
+        // Construct the DisplayedPhrase object correctly
+        translatedCategoryPhrases.push({
+            id: phrase.id,
+            english: phrase.english,
+            translated: translationResult.translatedText,
+            severity: phrase.severity, // Ensure all fields are present
+            icon: (phrase as any).icon, // Cast if icon is not strictly on type but present in data
+            priority: (phrase as any).priority,
+            categoryName: categoryKey
+        });
+      } catch (err) {
+        console.error(`Failed to translate phrase "${phrase.english}" for category "${categoryKey}":`, err);
+        translatedCategoryPhrases.push({
+            id: phrase.id,
+            english: phrase.english,
+            translated: phrase.english, // Fallback to English
+            severity: phrase.severity,
+            icon: (phrase as any).icon,
+            priority: (phrase as any).priority,
+            categoryName: categoryKey
+        });
+        anErrorOccurred = true;
+      }
+    }
+
+    setDisplayedCategories(prev => ({
+      ...prev,
+      [categoryKey]: { ...prev[categoryKey], phrases: translatedCategoryPhrases },
+    }));
+    setCategoryLoadingStates(prev => ({ ...prev, [categoryKey]: false }));
+    if (anErrorOccurred) {
+      setCategoryErrorStates(prev => ({ ...prev, [categoryKey]: true }));
+    } else {
+      setTranslatedCategoriesForCurrentLang(prev => new Set(prev).add(categoryKey));
+    }
+  }, [
+    targetLanguage,
+    sourceLanguage,
+    translateText,
+    emergencyCategories,
+    displayedCategories,
+    translatedCategoriesForCurrentLang,
+    // Assuming setCategoryLoadingStates, setCategoryErrorStates, setDisplayedCategories,
+    // setTranslatedCategoriesForCurrentLang are stable from useState
+  ]);
+
 
   useEffect(() => {
-    const loadAndTranslateCategories = async () => {
-      setLoading(true);
-      const newDisplayedCategories: Record<string, CategoryWithDisplayedPhrases> = {};
-
-      // Transform emergencyCategories to the new structure with DisplayedPhrase
-      for (const categoryKey in emergencyCategories) {
-        const sourceCategory = emergencyCategories[categoryKey as keyof typeof emergencyCategories];
-        // Ensure sourceCategory.phrases is treated as an array of items that might not have all DisplayedPhrase fields
-        const transformedPhrases: DisplayedPhrase[] = sourceCategory.phrases.map((p: any) => ({
+    setLoading(true);
+    const initialDisplaySetup: Record<string, CategoryWithDisplayedPhrases> = {};
+    for (const catKey in emergencyCategories) {
+      const sourceCat = emergencyCategories[catKey as keyof typeof emergencyCategories];
+      initialDisplaySetup[catKey] = {
+        ...sourceCat,
+        phrases: sourceCat.phrases.map((p: any) => ({
           id: p.id,
           english: p.english,
-          translated: p.translated || p.english, // Initial translation is self
+          translated: p.english, // Start with English
           severity: p.severity,
-          icon: p.icon, // Will be undefined if not on original p, handled by DisplayedPhrase being optional
-          priority: p.priority, // Will be undefined if not on original p, handled by DisplayedPhrase being optional
-          categoryName: categoryKey,
-        }));
+          icon: p.icon,
+          priority: p.priority,
+          categoryName: catKey,
+        })),
+      };
+    }
+    setDisplayedCategories(initialDisplaySetup);
+    
+    setTranslatedCategoriesForCurrentLang(new Set());
+    setExpandedCategories({ [criticalCategoryKey]: true });
+    setCategoryLoadingStates({});
+    setCategoryErrorStates({});
+    setLoading(false);
 
-        newDisplayedCategories[categoryKey] = {
-          color: sourceCategory.color,
-          icon: sourceCategory.icon,
-          phrases: transformedPhrases,
-        };
+    if (targetLanguage !== sourceLanguage && targetLanguage && initialDisplaySetup[criticalCategoryKey]) {
+      translateSingleCategoryIfNeeded(criticalCategoryKey);
+    } else if (initialDisplaySetup[criticalCategoryKey]) {
+      setTranslatedCategoriesForCurrentLang(prev => new Set(prev).add(criticalCategoryKey));
+    }
+
+  }, [targetLanguage, sourceLanguage, emergencyCategories, translateSingleCategoryIfNeeded]);
+
+
+  const handleToggleCategory = (categoryKey: string) => {
+    const isCurrentlyExpanded = !!expandedCategories[categoryKey];
+    const isExpanding = !isCurrentlyExpanded;
+
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryKey]: isExpanding,
+    }));
+
+    if (isExpanding && targetLanguage !== sourceLanguage && targetLanguage) {
+      if (!translatedCategoriesForCurrentLang.has(categoryKey) && !categoryLoadingStates[categoryKey]) {
+         translateSingleCategoryIfNeeded(categoryKey);
       }
-
-      // If translation is needed, iterate over newDisplayedCategories and update 'translated' field
-      if (targetLanguage !== sourceLanguage && targetLanguage) {
-        for (const categoryKey in newDisplayedCategories) {
-          const category = newDisplayedCategories[categoryKey];
-          const translatedPhrasesPromises = category.phrases.map(async (phrase) => {
-            try {
-              const translationResult = await translateText(phrase.english, sourceLanguage, targetLanguage, 'emergency');
-              return { ...phrase, translated: translationResult.translatedText };
-            } catch (translationError) {
-              console.error(`Failed to translate phrase "${phrase.english}" for category "${categoryKey}":`, translationError);
-              return { ...phrase, translated: phrase.english }; // Fallback to English on error for this phrase
-            }
-          });
-          // TS needs help here: Promise.all returns DisplayedPhrase[]
-          category.phrases = await Promise.all(translatedPhrasesPromises) as DisplayedPhrase[];
-        }
-      }
-      setDisplayedCategories(newDisplayedCategories);
-      setLoading(false);
-    };
-
-    loadAndTranslateCategories();
-  }, [targetLanguage, sourceLanguage, emergencyCategories, setLoading]); // Added sourceLanguage
+    }
+  };
 
   if (loading) {
     return (
@@ -404,31 +480,65 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
           </div>
         )}
       </div>      <div className={`emergency-grid emergency-grid-2 emergency-section ${largeButtons ? 'large-buttons' : ''}`}>
-        {Object.entries(displayedCategories).map(([categoryName, category]) => (
-          <div key={categoryName} className="phrase-category emergency-section">
-            <div className="category-header emergency-status emergency-status-info" style={{ borderColor: category.color }}>
-              <category.icon
-                className="category-icon" 
-                style={{ color: category.color }}
-                size={largeButtons ? 32 : 24}
-              />
-              <h3 className={`category-title ${largeButtons ? 'large-title' : ''}`}>
-                {categoryName}
-              </h3>
-            </div>
-            
-            <div className={`emergency-grid emergency-grid-1 ${largeButtons ? 'large-grid' : ''}`}>
-              {category.phrases.map((phrase: any) => (
-                <EmergencyButton
-                  key={phrase.id}
-                  phrase={phrase}
-                  categoryColor={category.color}
-                  Icon={phrase.icon || category.icon}
+        {Object.entries(displayedCategories).map(([categoryName, category]) => {
+          const isExpanded = !!expandedCategories[categoryName];
+          const isLoadingCategory = !!categoryLoadingStates[categoryName];
+          const hasErrorInCategory = !!categoryErrorStates[categoryName];
+
+          return (
+            <div key={categoryName} className="phrase-category emergency-section">
+              <div
+                className="category-header emergency-status emergency-status-info"
+                style={{ borderColor: category.color, cursor: 'pointer' }}
+                onClick={() => handleToggleCategory(categoryName)}
+                role="button"
+                tabIndex={0}
+                aria-expanded={isExpanded}
+                aria-controls={`category-content-${categoryName}`}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleToggleCategory(categoryName); }}}
+              >
+                <category.icon
+                  className="category-icon"
+                  style={{ color: category.color }}
+                  size={largeButtons ? 32 : 24}
                 />
-              ))}
+                <h3 className={`category-title ${largeButtons ? 'large-title' : ''}`}>
+                  {categoryName}
+                </h3>
+                {isLoadingCategory && (
+                  <div className="loading-indicator">
+                    <div className="spinner-small" aria-label="Loading category..."></div>
+                    <span>Translating...</span>
+                  </div>
+                )}
+                {hasErrorInCategory && !isLoadingCategory && (
+                  <div className="error-indicator" title="Some translations failed, showing English fallback">
+                    ⚠️
+                  </div>
+                )}
+                <span className="category-toggle-icon" aria-hidden="true">
+                  {isExpanded ? '▼' : '▶'}
+                </span>
+              </div>
+              
+              {isExpanded && (
+                <div
+                  id={`category-content-${categoryName}`}
+                  className={`emergency-grid emergency-grid-1 ${largeButtons ? 'large-grid' : ''} category-phrases-content`}
+                >
+                  {category.phrases.map((phrase: any) => (
+                    <EmergencyButton
+                      key={phrase.id}
+                      phrase={phrase}
+                      categoryColor={category.color}
+                      Icon={phrase.icon || category.icon}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>      {/* Emergency contact button */}
       <div className="emergency-section emergency-contact">
         <button 
