@@ -85,22 +85,9 @@ function App() {
               </>            )}
           </nav>
         </div>
-      </header>
-
-      <main className="main-content" id="main-content" role="main">
+      </header>      <main className="main-content" id="main-content" role="main">
         {activeTab === 'main' ? (
           <>
-            <div className="platform-description">
-              <div className="description-card">
-                <Shield className="desc-icon" />
-                <h2>Multi-Modal Medical Translation</h2>
-                <p>
-                  Seamlessly switch between text, speech, and sign language translation modes. 
-                  Optimized for emergency healthcare situations with real-time performance monitoring.
-                </p>
-              </div>
-            </div>
-
             <MultiModalInterface
               sourceLanguage={sourceLanguage}
               targetLanguage={targetLanguage}

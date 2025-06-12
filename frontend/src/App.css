@@ -48,7 +48,7 @@ body {
 .app-header {
   background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
   color: var(--white);
-  padding: 1.5rem 2rem;
+  padding: 1rem 2rem;
   box-shadow: var(--shadow-lg);
 }
 
@@ -141,10 +141,9 @@ body {
 /* Main Content */
 .main-content {
   flex: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
   width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 /* Translation Interface */
@@ -668,7 +667,7 @@ body {
 .app-footer {
   background: var(--neutral-800);
   color: var(--white);
-  padding: 1.5rem 2rem;
+  padding: 0.75rem 2rem;
   margin-top: auto;
 }
 

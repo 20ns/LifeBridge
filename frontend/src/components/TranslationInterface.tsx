@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
+import { Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
 import { usePerformanceMonitor } from '../utils/performanceMonitor';
 import SpeechInterface from './SpeechInterface';
 import EmergencyScenarioWorkflow from './EmergencyScenarioWorkflow';
 import QRecommendations from './QRecommendations';
+import './TranslationInterface.css';
 
 interface TranslationInterfaceProps {
   sourceLanguage: string;
@@ -25,7 +26,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   const [isTranslating, setIsTranslating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [confidence, setConfidence] = useState<number | null>(null);
-  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>('general');  const [realTimeMode, setRealTimeMode] = useState(true);
+  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>('general');  const [realTimeMode, setRealTimeMode] = useState(false);
   const [showEmergencyWorkflow, setShowEmergencyWorkflow] = useState(false);
   const [showQRecommendations, setShowQRecommendations] = useState(true);  const [detectedSymptoms, setDetectedSymptoms] = useState<string>('');
   const [patientAge] = useState<number | undefined>(undefined);
@@ -62,10 +63,17 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     sourceLanguage,
     targetLanguage,
     context
-  });  // Handle input changes with real-time translation
+  });  // Handle input changes with optional real-time translation
   const handleInputChange = (value: string) => {
     setInputText(value);
     
+    // Clear previous translation if user is editing
+    if (!realTimeMode && translatedText) {
+      setTranslatedText('');
+      setConfidence(null);
+    }
+    
+    // Only send typing indicator if real-time mode is enabled
     if (realTimeMode && value.trim()) {
       sendTypingIndicator(value);
     }
@@ -77,8 +85,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       setTranslatedText(lastTranslation.translatedText);
       setConfidence(lastTranslation.confidence);
     }
-  }, [lastTranslation, realTimeMode]);
-    const handleTranslate = useCallback(async (textToTranslate?: string) => {
+  }, [lastTranslation, realTimeMode]);  const handleTranslate = useCallback(async (textToTranslate?: string) => {
     const text = textToTranslate || inputText;
     if (!text.trim()) return;
 
@@ -94,6 +101,11 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       
       setTranslatedText(result.translatedText);
       setConfidence(result.confidence);
+      
+      // Turn off real-time mode after manual translation to prevent conflicts
+      if (realTimeMode && textToTranslate) {
+        setRealTimeMode(false);
+      }
     } catch (error) {
       console.error('Translation error:', error);
       
@@ -105,7 +117,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     } finally {
       setIsTranslating(false);
     }
-  }, [inputText, sourceLanguage, targetLanguage, context, performanceMonitor]);
+  }, [inputText, sourceLanguage, targetLanguage, context, performanceMonitor, realTimeMode]);
 
   const handleCopy = async () => {
     if (translatedText) {
@@ -183,54 +195,24 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     handleTranslate(scenario);
     setShowEmergencyWorkflow(false);
   };
-
-  // Auto-translate when input changes (with debounce)
+  // Only auto-translate in real-time mode when user explicitly enables it
   useEffect(() => {
+    if (!realTimeMode) return;
+    
     const timer = setTimeout(() => {
       if (inputText.trim() && inputText.length > 2) {
-        handleTranslate();
+        // Only use real-time translation when enabled
+        sendTypingIndicator(inputText);
       }
-    }, 1000);
+    }, 1500); // Increased debounce time
 
     return () => clearTimeout(timer);
-  }, [inputText, sourceLanguage, targetLanguage, handleTranslate]);
-
+  }, [inputText, sourceLanguage, targetLanguage, realTimeMode, sendTypingIndicator]);
   return (
     <div className="translation-interface">
       <div className="translation-card">
-        <div className="input-section">
-          <div className="section-header">
-            <h3>Source Text</h3>
-            {/* Emergency Workflow Toggle */}
-            <button
-              onClick={() => setShowEmergencyWorkflow(!showEmergencyWorkflow)}
-              className={`emergency-workflow-toggle ${showEmergencyWorkflow ? 'active' : ''}`}
-              title="Emergency Scenario Workflow"
-            >
-              <AlertTriangle size={16} />
-              Emergency Workflow
-            </button>
-          </div>          {/* Emergency Scenario Workflow */}
-          {showEmergencyWorkflow && (
-            <EmergencyScenarioWorkflow
-              sourceLanguage={sourceLanguage}
-              targetLanguage={targetLanguage}
-              onPhraseSelect={handleEmergencyScenario}
-            />
-          )}          {/* Enhanced Speech Interface */}
-          <div className="speech-section">
-            <SpeechInterface
-              language={sourceLanguage}
-              onSpeechToText={handleSpeechToText}
-              textToSpeak={translatedText}
-              medicalContext={context}
-              realTimeMode={realTimeMode}
-              voiceActivityDetection={true}
-              className="mb-4"
-            />
-          </div>
-
-          {/* Medical Context Selector */}
+        {/* Controls Section */}
+        <div className="controls-section">
           <div className="context-selector">
             <label htmlFor="context-select">Medical Context:</label>
             <select 
@@ -244,106 +226,143 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               <option value="consultation">👨‍⚕️ Patient Consultation</option>
               <option value="medication">💊 Medication/Dosage</option>
             </select>
-            
-            {/* Real-time Mode Toggle */}
-            <div className="realtime-toggle">
-              <button
-                onClick={() => setRealTimeMode(!realTimeMode)}
-                className={`realtime-button ${realTimeMode ? 'active' : ''}`}
-                title={realTimeMode ? 'Disable real-time translation' : 'Enable real-time translation'}
-              >
-                {isConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
-                {realTimeMode ? 'Real-time ON' : 'Real-time OFF'}
-              </button>
-            </div>
           </div>
-
-          <textarea
-            ref={inputRef}
-            value={inputText}
-            onChange={(e) => handleInputChange(e.target.value)}
-            placeholder="Enter medical text to translate... (e.g., 'The patient has chest pain')"
-            className="text-input"
-            rows={4}
-          />
-
-          <div className="input-actions">
+          
+          <div className="realtime-toggle">
             <button
-              onClick={() => handleTranslate()}
-              className="translate-button"
-              disabled={!inputText.trim() || isTranslating || (realTimeMode && isRealTimeTranslating)}
+              onClick={() => setRealTimeMode(!realTimeMode)}
+              className={`realtime-button ${realTimeMode ? 'active' : ''}`}
+              title={realTimeMode ? 'Disable real-time translation' : 'Enable real-time translation'}
             >
-              {isTranslating || (realTimeMode && isRealTimeTranslating) ? 'Translating...' : 'Translate'}
+              {isConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
+              {realTimeMode ? 'Real-time ON' : 'Real-time OFF'}
             </button>
           </div>
-          
-          {/* Status Indicators */}
-          {realTimeMode && (
-            <div className="status-indicators">
-              {isTyping && (
-                <div className="typing-indicator">
-                  <div className="pulse"></div>
-                  <span>Analyzing text...</span>
-                </div>
-              )}
-              {isRealTimeTranslating && (
-                <div className="translating-indicator">
-                  <div className="pulse"></div>
-                  <span>Translating in real-time...</span>
-                </div>
-              )}
-              {realTimeError && (
-                <div className="error-indicator">
-                  <span>⚠️ {realTimeError}</span>
-                </div>
-              )}
-            </div>
-          )}
+
+          <button
+            onClick={() => setShowEmergencyWorkflow(!showEmergencyWorkflow)}
+            className={`emergency-workflow-toggle ${showEmergencyWorkflow ? 'active' : ''}`}
+            title="Emergency Scenario Workflow"
+          >
+            <AlertTriangle size={16} />
+            Emergency Workflow
+          </button>
         </div>
 
-        <div className="translation-arrow">
-          <Send size={20} />
-        </div>
-
-        <div className="output-section">
-          <div className="section-header">
-            <h3>Translation</h3>
-            <div className="output-controls">
-              {confidence && (
-                <span className="confidence-score">
-                  Confidence: {Math.round(confidence * 100)}%
-                </span>
-              )}
-              <button
-                onClick={handleCopy}
-                className="control-button"
-                title="Copy translation"
-              >
-                {copied ? <Check size={20} /> : <Copy size={20} />}
-              </button>
-              <button
-                onClick={handleSpeak}
-                className="control-button"
-                title="Speak translation"
-                disabled={!translatedText}
-              >
-                <Volume2 size={20} />
-              </button>
-            </div>
+        {/* Emergency Scenario Workflow */}
+        {showEmergencyWorkflow && (
+          <div style={{ padding: '16px 24px', background: '#fef7e0', borderBottom: '1px solid #f9ab00' }}>
+            <EmergencyScenarioWorkflow
+              sourceLanguage={sourceLanguage}
+              targetLanguage={targetLanguage}
+              onPhraseSelect={handleEmergencyScenario}
+            />
           </div>
-          
-          <div className="text-output">
-            {isTranslating ? (
-              <div className="translation-loading">
-                <div className="spinner"></div>
-                <span>Translating...</span>
+        )}        {/* Main Translation Layout */}
+        <div className="translation-layout">
+          {/* Input Section */}
+          <div className="input-section">
+            <div className="section-header">
+              <h3>Source Text</h3>
+            </div>
+
+            {/* Enhanced Speech Interface */}
+            <div className="speech-section" style={{ marginBottom: '16px' }}>
+              <SpeechInterface
+                language={sourceLanguage}
+                onSpeechToText={handleSpeechToText}
+                textToSpeak={translatedText}
+                medicalContext={context}
+                realTimeMode={realTimeMode}
+                voiceActivityDetection={true}
+                className="mb-4"
+              />
+            </div>
+
+            <textarea
+              ref={inputRef}
+              value={inputText}
+              onChange={(e) => handleInputChange(e.target.value)}
+              placeholder="Enter medical text to translate..."
+              className="text-input"
+              rows={4}
+            />
+
+            <div className="input-actions">
+              <button
+                onClick={() => handleTranslate()}
+                className="translate-button"
+                disabled={!inputText.trim() || isTranslating || (realTimeMode && isRealTimeTranslating)}
+              >
+                {isTranslating || (realTimeMode && isRealTimeTranslating) ? 'Translating...' : 'Translate'}
+              </button>
+            </div>
+            
+            {/* Status Indicators */}
+            {realTimeMode && (
+              <div className="status-indicators">
+                {isTyping && (
+                  <div className="typing-indicator">
+                    <div className="pulse"></div>
+                    <span>Analyzing text...</span>
+                  </div>
+                )}
+                {isRealTimeTranslating && (
+                  <div className="translating-indicator">
+                    <div className="pulse"></div>
+                    <span>Translating in real-time...</span>
+                  </div>
+                )}
+                {realTimeError && (
+                  <div className="error-indicator">
+                    <span>⚠️ {realTimeError}</span>
+                  </div>
+                )}
               </div>
-            ) : (
-              <p>{translatedText || 'Translation will appear here...'}</p>
             )}
           </div>
+
+          {/* Output Section */}
+          <div className="output-section">
+            <div className="section-header">
+              <h3>Translation</h3>
+              <div className="output-controls">
+                {confidence && (
+                  <span className="confidence-score">
+                    {Math.round(confidence * 100)}%
+                  </span>
+                )}
+                <button
+                  onClick={handleCopy}
+                  className="control-button"
+                  title="Copy translation"
+                >
+                  {copied ? <Check size={20} /> : <Copy size={20} />}
+                </button>
+                <button
+                  onClick={handleSpeak}
+                  className="control-button"
+                  title="Speak translation"
+                  disabled={!translatedText}
+                >
+                  <Volume2 size={20} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="text-output">
+              {isTranslating ? (
+                <div className="translation-loading">
+                  <div className="spinner"></div>
+                  <span>Translating...</span>
+                </div>
+              ) : (
+                <p>{translatedText || 'Translation will appear here...'}</p>
+              )}
+            </div>
+          </div>
         </div>
-      </div>      {/* Emergency Quick Actions */}
+      </div>{/* Emergency Quick Actions */}
       {context === 'emergency' && !showEmergencyWorkflow && (
         <div className="emergency-quick-actions">
           <h4>🚨 Emergency Quick Phrases</h4>
