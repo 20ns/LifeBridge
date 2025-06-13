@@ -1,31 +1,90 @@
 /* LifeBridge AI - Medical Translation Platform Styles */
 
 :root {
+  /* Primary Color System - Blue Gradient Header */
   --primary-blue: #2563eb;
   --primary-blue-dark: #1d4ed8;
+  --primary-blue-light: #3b82f6;
+  
+  /* Secondary Colors for Medical Context */
   --secondary-green: #059669;
+  --secondary-green-dark: #047857;
+  --secondary-green-light: #10b981;
+  
+  /* Accent Colors for Emergency/Alert States */
   --accent-red: #dc2626;
+  --accent-red-dark: #b91c1c;
   --accent-orange: #ea580c;
+  --accent-yellow: #eab308;
+  
+  /* Neutral Color Palette */
   --neutral-50: #f8fafc;
   --neutral-100: #f1f5f9;
   --neutral-200: #e2e8f0;
   --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
   --neutral-600: #475569;
   --neutral-700: #334155;
   --neutral-800: #1e293b;
   --neutral-900: #0f172a;
+  
+  /* Base Colors */
   --white: #ffffff;
+  --black: #000000;
+  
+  /* Text Colors - High Contrast for Medical Context */
+  --text-primary: var(--neutral-800);
+  --text-secondary: var(--neutral-600);
+  --text-inverse: var(--white);
+  
+  /* Background Colors */
+  --bg-primary: var(--white);
+  --bg-secondary: var(--neutral-50);
+  --bg-tertiary: var(--neutral-100);
+  
+  /* Border Colors */
+  --border-light: var(--neutral-200);
+  --border-medium: var(--neutral-300);
+  --border-dark: var(--neutral-400);
+  
+  /* Shadow System */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  
+  /* Typography Scale */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
-* {
+/* Global Reset and Base Styles */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  color: #1e293b !important; /* Force dark text everywhere */
 }
 
 body {
@@ -34,46 +93,25 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
-  color: var(--neutral-800) !important;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  color: var(--text-primary);
   line-height: 1.6;
+  font-size: var(--font-size-base);
 }
 
-/* Ensure strong text contrast throughout the app */
+/* Application Container */
 .App {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  color: var(--neutral-800) !important;
+  color: var(--text-primary);
 }
 
-/* Override any light text colors */
-.App p,
-.App span,
-.App div,
-.App label,
-.App button,
-.App input,
-.App textarea {
-  color: var(--neutral-800) !important;
-}
-
-/* Preserve specific component colors */
-.App .app-header,
-.App .app-header * {
-  color: var(--white) !important;
-}
-
-.App .btn-primary,
-.App .btn-primary * {
-  color: var(--white) !important;
-}
-
-/* Header Styles */
+/* Header Styles - Blue Gradient Design */
 .app-header {
   background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
-  color: var(--white);
-  padding: 1rem 2rem;
+  color: var(--text-inverse);
+  padding: var(--spacing-md) var(--spacing-xl);
   box-shadow: var(--shadow-lg);
 }
 
@@ -84,125 +122,106 @@ body {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .logo-section {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .logo-icon {
   width: 40px;
   height: 40px;
-  color: var(--white);
+  color: var(--text-inverse);
 }
 
 .logo-section h1 {
-  font-size: 2rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   margin: 0;
+  color: var(--text-inverse);
 }
 
 .subtitle {
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   opacity: 0.9;
   margin: 0;
+  color: var(--text-inverse);
 }
 
-/* Language Selector Styles - Improved visibility */
+/* Language Selector Styles - Clean and Accessible */
 .language-selector {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-radius: 12px !important;
-  padding: 1rem !important;
-  backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-lg);
 }
 
 .language-pair {
-  display: flex !important;
-  align-items: center !important;
-  gap: 1rem !important;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
 .language-dropdown {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
-  background: var(--white) !important;
-  border-radius: 8px !important;
-  padding: 0.5rem !important;
-  color: var(--neutral-800) !important;
-  border: 2px solid #e2e8f0 !important;
-  transition: all 0.2s ease !important;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  border: 2px solid var(--border-light);
+  transition: all 0.2s ease;
 }
 
 .language-dropdown:hover {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  border-color: var(--primary-blue-light);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .language-select {
-  border: none !important;
-  background: #ffffff !important;
-  font-size: 0.9rem !important;
-  cursor: pointer !important;
-  outline: none !important;
-  min-width: 140px !important;
-  color: #1f2937 !important;
-  font-weight: 500 !important;
-  -webkit-text-fill-color: #1f2937 !important;
-  -webkit-appearance: menulist !important;
-  appearance: menulist !important;
+  border: none;
+  background: var(--bg-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+  color: var(--text-primary);
+  font-weight: 500;
+  -webkit-appearance: menulist;
+  appearance: menulist;
 }
 
 .language-select option {
-  color: #1f2937 !important;
-  background: #ffffff !important;
-  font-weight: 500 !important;
-  padding: 8px !important;
-  -webkit-text-fill-color: #1f2937 !important;
-}
-
-/* Enhanced language selector visibility - override all conflicts */
-.language-selector select,
-.language-dropdown select,
-select.language-select {
-  color: #1f2937 !important;
-  background: #ffffff !important;
-  font-weight: 500 !important;
-}
-
-.language-selector select option,
-.language-dropdown select option,
-select.language-select option {
-  color: #1f2937 !important;
-  background: #ffffff !important;
-  font-weight: 500 !important;
-  padding: 8px !important;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  font-weight: 500;
+  padding: 8px;
 }
 
 .swap-button {
-  background: rgba(59, 130, 246, 0.9) !important;
-  border: none !important;
-  border-radius: 50% !important;
-  width: 40px !important;
-  height: 40px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  color: var(--white) !important;
-  transition: all 0.2s ease !important;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3) !important;
+  background: var(--primary-blue);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-inverse);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
 }
 
 .swap-button:hover {
-  background: rgba(37, 99, 235, 1) !important;
-  transform: rotate(180deg) !important;
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4) !important;
+  background: var(--primary-blue-dark);
+  transform: rotate(180deg);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Main Content */
@@ -213,40 +232,32 @@ select.language-select option {
   margin: 0;
 }
 
-/* Translation Interface - Override global styles */
+/* Translation Interface Base Styles */
 .translation-container {
-  margin-bottom: 3rem;
-}
-
-/* Legacy translation card styles - now handled by component CSS */
-.legacy-translation-card {
-  gap: 2rem;
-  background: var(--white);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--neutral-200);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
 .section-header h3 {
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--neutral-700);
+  color: var(--text-secondary);
 }
 
-.input-controls, .output-controls {
+.input-controls, 
+.output-controls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
+/* Microphone Button */
 .mic-button {
   background: var(--secondary-green);
   border: none;
@@ -257,12 +268,12 @@ select.language-select option {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--white);
+  color: var(--text-inverse);
   transition: all 0.2s ease;
 }
 
 .mic-button:hover {
-  background: #047857;
+  background: var(--secondary-green-dark);
   transform: scale(1.05);
 }
 
@@ -277,15 +288,18 @@ select.language-select option {
   100% { transform: scale(1); }
 }
 
+/* Text Input Styles */
 .text-input {
   width: 100%;
-  border: 2px solid var(--neutral-200);
-  border-radius: 12px;
-  padding: 1rem;
-  font-size: 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-base);
   resize: vertical;
   min-height: 120px;
   transition: border-color 0.2s ease;
+  color: var(--text-primary);
+  background: var(--bg-primary);
 }
 
 .text-input:focus {
@@ -295,24 +309,25 @@ select.language-select option {
 }
 
 .input-actions {
-  margin-top: 1rem;
+  margin-top: var(--spacing-md);
   display: flex;
   justify-content: flex-end;
 }
 
+/* Button System */
 .translate-button {
   background: var(--primary-blue);
-  color: var(--white);
+  color: var(--text-inverse);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 0.75rem 1.5rem;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .translate-button:hover:not(:disabled) {
@@ -328,13 +343,38 @@ select.language-select option {
   box-shadow: none;
 }
 
+.control-button {
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-md);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.control-button:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+}
+
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Status Indicators and Loading States */
 .listening-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
   color: var(--accent-red);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 .pulse {
@@ -350,7 +390,7 @@ select.language-select option {
   align-items: center;
   justify-content: center;
   color: var(--primary-blue);
-  background: var(--neutral-100);
+  background: var(--bg-tertiary);
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -359,25 +399,27 @@ select.language-select option {
 
 .text-output {
   min-height: 120px;
-  border: 2px solid var(--neutral-200);
-  border-radius: 12px;
-  padding: 1rem;
-  background: var(--neutral-50);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
+  color: var(--text-primary);
 }
 
 .text-output p {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   line-height: 1.6;
+  color: var(--text-primary);
 }
 
 .translation-loading {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--neutral-600);
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
 }
 
 .spinner {
@@ -395,50 +437,26 @@ select.language-select option {
 }
 
 .confidence-score {
-  font-size: 0.8rem;
-  color: var(--neutral-600);
-  background: var(--neutral-100);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
   padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-}
-
-.control-button {
-  background: var(--neutral-100);
-  border: none;
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--neutral-600);
-  transition: all 0.2s ease;
-}
-
-.control-button:hover {
-  background: var(--neutral-200);
-  color: var(--neutral-800);
-}
-
-.control-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  border-radius: var(--radius-sm);
 }
 
 /* Performance Button */
 .performance-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: var(--text-inverse);
   border: none;
   border-radius: 20px;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
@@ -464,39 +482,39 @@ select.language-select option {
 .speech-recording-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 }
 
 .speech-recording-btn:not(.recording) {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--primary-blue-light) 0%, var(--primary-blue-dark) 100%);
+  color: var(--text-inverse);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .speech-recording-btn:not(.recording):hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  background: linear-gradient(135deg, var(--primary-blue) 0%, #1e40af 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .speech-recording-btn.recording {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-red-dark) 100%);
+  color: var(--text-inverse);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   animation: recording-pulse 2s infinite;
 }
 
 .speech-recording-btn.recording:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, var(--accent-red-dark) 0%, #b91c1c 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
@@ -513,80 +531,80 @@ select.language-select option {
   50% { opacity: 0.8; }
 }
 
-/* Emergency Phrases */
+/* Emergency Phrases Section */
 .emergency-section {
-  margin-top: 3rem;
+  margin-top: var(--spacing-2xl);
 }
 
 .emergency-phrases {
-  background: var(--white);
-  border-radius: 16px;
-  padding: 2rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
   box-shadow: var(--shadow-lg);
-  border: 1px solid var(--neutral-200);
+  border: 1px solid var(--border-light);
 }
 
 .emergency-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 .emergency-icon {
   width: 48px;
   height: 48px;
   color: var(--accent-orange);
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
 .emergency-header h2 {
-  font-size: 1.8rem;
+  font-size: var(--font-size-3xl);
   font-weight: 700;
-  color: var(--neutral-800);
-  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
 }
 
 .emergency-header p {
-  color: var(--neutral-600);
-  font-size: 1rem;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
 }
 
 .phrases-grid {
   display: grid;
-  gap: 2rem;
+  gap: var(--spacing-xl);
 }
 
 .phrase-category {
-  border: 1px solid var(--neutral-200);
-  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
   overflow: hidden;
 }
 
 .category-title {
-  background: var(--neutral-100);
-  padding: 1rem;
-  font-size: 1.1rem;
+  background: var(--bg-tertiary);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--neutral-700);
+  color: var(--text-secondary);
   margin: 0;
-  border-bottom: 1px solid var(--neutral-200);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .phrases-list {
-  padding: 1rem;
+  padding: var(--spacing-md);
   display: grid;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .phrase-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  border: 1px solid var(--neutral-200);
-  border-radius: 8px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
-  background: var(--white);
+  background: var(--bg-primary);
 }
 
 .phrase-card:hover {
@@ -596,6 +614,80 @@ select.language-select option {
 
 .severity-critical {
   border-left: 4px solid var(--accent-red);
+}
+
+.severity-high {
+  border-left: 4px solid var(--accent-orange);
+}
+
+.severity-medium {
+  border-left: 4px solid var(--accent-yellow);
+}
+
+.severity-low {
+  border-left: 4px solid var(--secondary-green);
+}
+
+.phrase-content {
+  flex: 1;
+}
+
+.phrase-english {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.phrase-translated {
+  color: var(--primary-blue);
+  font-weight: 500;
+}
+
+.phrase-prompt {
+  color: var(--neutral-500);
+  font-style: italic;
+  font-size: var(--font-size-sm);
+}
+
+.phrase-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--neutral-300);
+  border-top: 2px solid var(--primary-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.phrase-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-left: var(--spacing-md);
+}
+
+.action-button {
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-sm);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
 }
 
 .severity-high {
@@ -674,7 +766,7 @@ select.language-select option {
 
 /* Medical Context Selector */
 .context-selector {
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -682,17 +774,17 @@ select.language-select option {
 
 .context-selector label {
   font-weight: 600;
-  color: var(--neutral-700);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .context-select {
-  padding: 0.5rem 0.75rem;
-  border: 2px solid var(--neutral-200);
-  border-radius: 0.5rem;
-  background: var(--white);
-  color: var(--neutral-800);
-  font-size: 0.9rem;
+  padding: var(--spacing-sm) 0.75rem;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -710,7 +802,7 @@ select.language-select option {
 }
 
 .context-select option {
-  padding: 0.5rem;
+  padding: var(--spacing-sm);
   font-weight: 500;
 }
 
@@ -728,8 +820,8 @@ select.language-select option {
 /* Footer */
 .app-footer {
   background: var(--neutral-800);
-  color: var(--white);
-  padding: 0.75rem 2rem;
+  color: var(--text-inverse);
+  padding: 0.75rem var(--spacing-xl);
   margin-top: auto;
 }
 
@@ -740,12 +832,12 @@ select.language-select option {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .footer-icons {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-md);
   opacity: 0.7;
 }
 
@@ -759,13 +851,13 @@ select.language-select option {
 .realtime-button {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 2px solid var(--neutral-300);
-  border-radius: 0.5rem;
-  background: var(--white);
-  color: var(--neutral-700);
-  font-size: 0.85rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0.75rem;
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -796,68 +888,39 @@ select.language-select option {
 .translating-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
   background: rgba(37, 99, 235, 0.05);
   border: 1px solid rgba(37, 99, 235, 0.2);
-  font-size: 0.85rem;
+  font-size: var(--font-size-xs);
   color: var(--primary-blue);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-sm);
 }
 
 .error-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
   background: rgba(220, 38, 38, 0.05);
   border: 1px solid rgba(220, 38, 38, 0.2);
-  font-size: 0.85rem;
+  font-size: var(--font-size-xs);
   color: var(--accent-red);
-  margin-bottom: 0.5rem;
-}
-
-.pulse {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.2);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Real-time connection status */
-.context-selector {
-  justify-content: space-between;
-  align-items: center;
+  margin-bottom: var(--spacing-sm);
 }
 
 /* Emergency Quick Actions */
 .emergency-quick-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
   flex-wrap: wrap;
-  margin-top: 1rem;
-  padding: 1rem;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
   background: rgba(220, 38, 38, 0.05);
   border: 1px solid rgba(220, 38, 38, 0.2);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
 }
 
 .emergency-button {
@@ -866,17 +929,17 @@ select.language-select option {
   gap: 0.25rem;
   padding: 0.4rem 0.6rem;
   background: var(--accent-red);
-  color: var(--white);
+  color: var(--text-inverse);
   border: none;
-  border-radius: 0.375rem;
-  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .emergency-button:hover {
-  background: #b91c1c;
+  background: var(--accent-red-dark);
   transform: translateY(-1px);
 }
 
@@ -888,21 +951,21 @@ select.language-select option {
 .emergency-workflow-toggle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: var(--neutral-100);
-  color: var(--neutral-700);
-  border: 1px solid var(--neutral-300);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .emergency-workflow-toggle:hover {
-  background: var(--neutral-200);
-  border-color: var(--neutral-400);
+  background: var(--border-light);
+  border-color: var(--border-dark);
   transform: translateY(-1px);
 }
 
@@ -1206,142 +1269,30 @@ a:focus {
 @import './components/SignAnimationPlayer.css';
 @import './components/VisualFeedbackSystem.css';
 
-/* Global text color fix - ensure dark text on light backgrounds */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  color: #1e293b !important; /* Force dark text everywhere */
+/* Emergency Mode Text Color Overrides - Simplified */
+.emergency-mode {
+  color: var(--text-inverse);
 }
 
-/* Override emergency theme text colors that might be too light */
 .emergency-mode * {
-  color: #ffffff !important; /* White text in emergency mode only */
+  color: var(--text-inverse);
 }
 
-/* Preserve header and button colors */
-.app-header,
-.app-header *,
-.btn-primary,
-.btn-primary *,
-.emergency-button,
-.translate-button,
-.control-button {
-  color: #ffffff !important;
-}
-
-/* EXCEPTION: Keep language selector readable even in emergency mode */
+/* Preserve readability in form elements and translation areas */
 .emergency-mode .language-selector select,
 .emergency-mode .language-dropdown select,
 .emergency-mode select.language-select,
+.emergency-mode .text-input,
+.emergency-mode .text-output,
+.emergency-mode input,
+.emergency-mode textarea {
+  color: var(--text-primary) !important;
+  background: var(--bg-primary) !important;
+}
+
 .emergency-mode .language-selector select option,
 .emergency-mode .language-dropdown select option,
 .emergency-mode select.language-select option {
-  color: #1f2937 !important;
-  background: #ffffff !important;
-}
-
-/* EXCEPTION: Keep translation interface text readable in emergency mode */
-.emergency-mode .translation-interface .text-input,
-.emergency-mode .translation-interface .text-output,
-.emergency-mode .translation-interface .text-output p {
-  color: #1e293b !important;
-  background: #ffffff !important;
-}
-
-/* Ensure input and textarea have dark text */
-input,
-textarea,
-select {
-  color: #1e293b !important;
-  background: #ffffff !important;
-}
-
-/* Final override for all select elements and options to ensure visibility */
-select,
-select option {
-  color: #1e293b !important;
-  background: #ffffff !important;
-}
-
-/* ULTRA HIGH SPECIFICITY - Language Selector Fix */
-.language-selector .language-dropdown .language-select,
-.language-selector .language-pair .language-dropdown .language-select,
-div.language-selector div.language-dropdown select.language-select {
-  color: #1e293b !important;
-  background: #ffffff !important;
-  border: 2px solid #e2e8f0 !important;
-}
-
-.language-selector .language-dropdown .language-select option,
-.language-selector .language-pair .language-dropdown .language-select option,
-div.language-selector div.language-dropdown select.language-select option {
-  color: #1e293b !important;
-  background: #ffffff !important;
-  font-weight: 500 !important;
-}
-
-/* Force select element visibility across all contexts */
-select[class*="language"],
-select.language-select,
-.language-dropdown select,
-.language-selector select {
-  color: #1e293b !important;
-  background: #ffffff !important;
-  -webkit-appearance: menulist !important;
-  -moz-appearance: menulist !important;
-  appearance: menulist !important;
-}
-
-/* Force option visibility */
-select[class*="language"] option,
-select.language-select option,
-.language-dropdown select option,
-.language-selector select option {
-  color: #1e293b !important;
-  background: #ffffff !important;
-}
-
-/* Ensure translation text is always visible */
-.text-output,
-.text-output p,
-.translated-text,
-.translation-result {
-  color: #1e293b !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-}
-
-/* ULTIMATE OVERRIDE - FIX WHITE TEXT ON WHITE BACKGROUND */
-/* This should be the last CSS in the file to override everything */
-
-/* Language Selector - Nuclear Option */
-* [class*="language"] select,
-* select[class*="language"],
-* .language-selector select,
-* .language-dropdown select {
-  color: #000000 !important;
-  background-color: #ffffff !important;
-  -webkit-text-fill-color: #000000 !important;
-  text-shadow: none !important;
-}
-
-* [class*="language"] select option,
-* select[class*="language"] option,
-* .language-selector select option,
-* .language-dropdown select option {
-  color: #000000 !important;
-  background-color: #ffffff !important;
-  -webkit-text-fill-color: #000000 !important;
-  text-shadow: none !important;
-}
-
-/* Translation Text - Nuclear Option */
-* .text-output,
-* .text-output *,
-* [class*="translation"] .text-output,
-* [class*="translation"] .text-output * {
-  color: #000000 !important;
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  -webkit-text-fill-color: #000000 !important;
-  text-shadow: none !important;
+  color: var(--text-primary) !important;
+  background: var(--bg-primary) !important;
 }
