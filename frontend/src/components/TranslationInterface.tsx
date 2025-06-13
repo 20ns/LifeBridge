@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
+import { Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle, Mic } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
 import { usePerformanceMonitor } from '../utils/performanceMonitor';
@@ -272,23 +272,17 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
           </div>
         )}        {/* Main Translation Layout */}
         <div className="translation-layout">
-          {/* Input Section */}
-          <div className="input-section">
+          {/* Input Section */}          <div className="input-section">
             <div className="section-header">
               <h3>Source Text</h3>
-            </div>
-
-            {/* Enhanced Speech Interface - Simplified */}
-            <div className="speech-section">
-              <SpeechInterface
-                language={sourceLanguage}
-                onSpeechToText={handleSpeechToText}
-                textToSpeak={translatedText}
-                medicalContext={context}
-                realTimeMode={realTimeMode}
-                voiceActivityDetection={true}
-                className="speech-interface-compact"
-              />
+              <button
+                onClick={() => setIsListening(!isListening)}
+                className={`start-recording-button ${isListening ? 'recording' : ''}`}
+                title={isListening ? 'Stop Recording' : 'Start Recording'}
+              >
+                <Mic size={16} />
+                {isListening ? 'Stop Recording' : 'Start Recording'}
+              </button>
             </div>
 
             <textarea
