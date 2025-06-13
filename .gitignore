@@ -10,6 +10,14 @@ pnpm-debug.log*
 lerna-debug.log*
 .pnpm-store/
 
+# ===== APM FRAMEWORK & PROJECT MANAGEMENT =====
+# Agentic Project Management artifacts
+Implementation_Plan.md
+Memory/
+prompts/
+Handover_File.md
+Handover_Prompt.md
+
 # ===== ENVIRONMENT VARIABLES & SECRETS =====
 .env
 .env.local
