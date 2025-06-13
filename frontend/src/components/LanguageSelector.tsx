@@ -1,5 +1,6 @@
 import React from 'react';
 import { Globe, ArrowRightLeft } from 'lucide-react';
+import './LanguageSelector.css';
 
 interface LanguageSelectorProps {
   sourceLanguage: string;
@@ -28,19 +29,45 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onTargetChange
 }) => {
   const swapLanguages = () => {
+    // Add visual feedback for swap action
+    const swapButton = document.querySelector('.swap-button');
+    if (swapButton) {
+      swapButton.classList.add('swapping');
+      setTimeout(() => {
+        swapButton.classList.remove('swapping');
+      }, 600);
+    }
+    
     onSourceChange(targetLanguage);
     onTargetChange(sourceLanguage);
+  };
+
+  const handleLanguageChange = (type: 'source' | 'target', value: string) => {
+    const selector = document.querySelector(`.language-select.${type}`);
+    if (selector) {
+      selector.classList.add('changing');
+      setTimeout(() => {
+        selector.classList.remove('changing');
+      }, 300);
+    }
+    
+    if (type === 'source') {
+      onSourceChange(value);
+    } else {
+      onTargetChange(value);
+    }
   };
 
   return (
     <div className="language-selector">
       <div className="language-pair">
-        <div className="language-dropdown">
-          <Globe size={16} />
+        <div className="language-dropdown source">
+          <Globe size={20} />
           <select 
             value={sourceLanguage} 
-            onChange={(e) => onSourceChange(e.target.value)}
-            className="language-select"
+            onChange={(e) => handleLanguageChange('source', e.target.value)}
+            className="language-select source"
+            aria-label="Source language"
           >
             {languages.map(lang => (
               <option key={lang.code} value={lang.code}>
@@ -54,16 +81,18 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           onClick={swapLanguages}
           className="swap-button"
           title="Swap languages"
+          aria-label="Swap source and target languages"
         >
-          <ArrowRightLeft size={16} />
+          <ArrowRightLeft size={18} />
         </button>
 
-        <div className="language-dropdown">
-          <Globe size={16} />
+        <div className="language-dropdown target">
+          <Globe size={20} />
           <select 
             value={targetLanguage} 
-            onChange={(e) => onTargetChange(e.target.value)}
-            className="language-select"
+            onChange={(e) => handleLanguageChange('target', e.target.value)}
+            className="language-select target"
+            aria-label="Target language"
           >
             {languages.map(lang => (
               <option key={lang.code} value={lang.code}>

@@ -197,9 +197,19 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     }, 5000);
   }, []);
 
-  // Mode switching with performance tracking
+  // Enhanced mode switching with visual feedback
   const handleModeSwitch = useCallback((mode: CommunicationMode) => {
     const startTime = Date.now();
+    
+    // Add visual feedback class temporarily
+    const modeSelector = document.querySelector('.mode-selector');
+    if (modeSelector) {
+      modeSelector.classList.add('switching');
+      setTimeout(() => {
+        modeSelector.classList.remove('switching');
+      }, 300);
+    }
+    
     setActiveMode(mode);
     
     // Stop any active listening when switching modes
@@ -211,7 +221,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     addNotification(`Switched to ${mode} mode`);
   }, [trackPerformance, addNotification]);
 
-  // Connection quality indicator
+  // Enhanced connection quality indicator with better visual states
   const ConnectionIndicator = () => (
     <div className={`connection-indicator ${connectionQuality.status}`}>
       {connectionQuality.status === 'offline' ? (
@@ -222,6 +232,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       <div className="connection-details">
         <span className="connection-status">{connectionQuality.status}</span>
         <span className="connection-latency">{connectionQuality.latency}ms</span>
+      </div>
+      <div className={`connection-strength-bar ${connectionQuality.status}`}>
+        <div 
+          className="strength-fill" 
+          style={{ width: `${connectionQuality.strength}%` }}
+        />
       </div>
     </div>
   );
