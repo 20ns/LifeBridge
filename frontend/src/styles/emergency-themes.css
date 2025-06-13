@@ -126,7 +126,7 @@
   background: var(--emergency-critical);
   color: white;
   border-color: var(--emergency-critical-dark);
-  animation: emergency-pulse var(--emergency-pulse-duration) infinite;
+  /* animation: emergency-pulse var(--emergency-pulse-duration) infinite; */
 }
 
 .emergency-btn-critical:hover {
@@ -175,7 +175,7 @@
   border-radius: 12px;
   padding: var(--emergency-spacing-md);
   box-shadow: var(--shadow);
-  transition: all var(--emergency-fade-duration) ease;
+  /* transition: all var(--emergency-fade-duration) ease; */
 }
 
 .emergency-card-critical {
@@ -190,7 +190,7 @@
 }
 
 .emergency-card:hover {
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
   box-shadow: var(--shadow-lg);
 }
 
@@ -253,7 +253,7 @@
   background: var(--emergency-critical-light);
   color: var(--emergency-critical-dark);
   border: 1px solid var(--emergency-critical);
-  animation: emergency-blink 1s infinite;
+  /* animation: emergency-blink 1s infinite; */
 }
 
 .emergency-status-urgent {
