@@ -209,6 +209,13 @@
 }
 
 /* Enhanced Translation Areas */
+.translation-layout {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: var(--spacing-xl);
+ margin-bottom: var(--spacing-xl);
+}
+
 .translation-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -430,6 +437,10 @@
   .translation-container {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
+  }
+  .translation-layout { /* Add responsive stacking for the new layout */
+   grid-template-columns: 1fr;
+   gap: var(--spacing-lg);
   }
   
   .top-controls-bar {

@@ -290,7 +290,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               value={inputText}
               onChange={(e) => handleInputChange(e.target.value)}
               placeholder="Enter medical text to translate..."
-              className="text-input"
+              className="translation-input"
               rows={4}
             />
 
@@ -356,7 +356,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               </div>
             </div>
             
-            <div className="text-output">
+            <div className={`translation-output ${!translatedText ? 'empty' : ''}`}>
               {isTranslating ? (
                 <div className="translation-loading">
                   <div className="spinner"></div>
