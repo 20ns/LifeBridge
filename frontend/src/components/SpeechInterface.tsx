@@ -72,7 +72,7 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
 
   if (!isSupported) {
     return (
-      <div className={`flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg ${className}`}>
+      <div className={`interface-container flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg ${className}`}>
         <MicOff className="w-5 h-5 text-yellow-600" />
         <span className="text-sm text-yellow-800">
           Speech recognition not supported in this browser
@@ -82,7 +82,21 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
   }
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`interface-container space-y-3 ${className}`}>
+      {/* Enhanced Instructions for Medical Context */}
+      <div className="speech-instructions p-3 bg-gray-50 rounded-lg mb-12">
+        <p className="font-bold mb-2">Medical Speech Recognition Instructions:</p>
+        <ul className="space-y-1">
+          <li>• Speak medical terms slowly and clearly</li>
+          <li>• Spell out medication names if not recognized</li>
+          <li>• Use full phrases: "blood pressure is 120 over 80"</li>
+          {realTimeMode && <li>• Real-time mode: Natural pauses trigger processing</li>}
+          {medicalContext === 'emergency' && (
+            <li className="text-red-600">• Emergency mode: Priority processing for urgent terms</li>
+          )}
+        </ul>
+      </div>
+
       {/* Enhanced Speech Controls with Medical Context */}
       <div className="flex items-center gap-3 flex-wrap">
         {/* Speech-to-Text Button with enhanced indicators */}        <button
@@ -149,19 +163,8 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
             {isSpeaking ? 'Speaking...' : 'Speak Text'}
           </button>
         )}
-      </div>
-
-      {/* Enhanced Status Indicators */}
+      </div>      {/* Enhanced Status Indicators */}
       <div className="space-y-2">
-        {realTimeMode && voiceActivityDetection && (
-          <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-blue-700">
-              Real-time mode active - Speak naturally, pauses will trigger processing
-            </span>
-          </div>
-        )}
-
         {isRecording && (
           <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
             <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
@@ -177,7 +180,7 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
         )}
 
         {isProcessing && (
-          <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="speech-instructions flex items-center gap-2">
             <Loader className="w-4 h-4 text-blue-600 animate-spin" />
             <span className="text-sm text-blue-700">
               Processing speech with medical terminology optimization...
@@ -208,22 +211,7 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
             <span className="text-sm text-red-700">
               {currentError}
             </span>
-          </div>
-        )}
-      </div>
-
-      {/* Enhanced Instructions for Medical Context */}
-      <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
-        <p className="font-medium mb-2">Medical Speech Recognition Instructions:</p>
-        <ul className="space-y-1">
-          <li>• Speak medical terms slowly and clearly</li>
-          <li>• Spell out medication names if not recognized</li>
-          <li>• Use full phrases: "blood pressure is 120 over 80"</li>
-          {realTimeMode && <li>• Real-time mode: Natural pauses trigger processing</li>}
-          {medicalContext === 'emergency' && (
-            <li className="text-red-600">• Emergency mode: Priority processing for urgent terms</li>
-          )}
-        </ul>
+          </div>        )}
       </div>
     </div>
   );

@@ -466,7 +466,7 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
     );
   }
   return (
-    <div className={`emergency-container ${isEmergencyMode ? 'emergency-mode' : ''} ${
+    <div className={`interface-container emergency-container ${isEmergencyMode ? 'emergency-mode' : ''} ${
       currentTheme === 'dark' ? 'emergency-theme-dark' : 
       currentTheme === 'high-contrast' ? 'emergency-theme-high-contrast' :
       'emergency-theme-light'

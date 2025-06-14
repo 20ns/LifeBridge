@@ -87,7 +87,7 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
   const detectionStats = getDetectionStats();
 
   return (
-    <div className="sign-language-interface">
+    <div className="interface-container sign-language-interface">
       <div className="interface-header">
         <h3>Medical Sign Language Translator</h3>
         <div className="status-indicators">
@@ -223,7 +223,7 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
         )}
       </div>
 
-      <div className="usage-tips">
+      <div className="speech-instructions usage-tips">
         <h4>Medical Sign Language Tips:</h4>
         <ul>
           <li>🚨 <strong>Emergency:</strong> Make a fist and hold for 2 seconds</li>
