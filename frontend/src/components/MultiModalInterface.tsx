@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  MessageSquare, 
-  Mic, 
-  Hand, 
-  Wifi, 
-  WifiOff, 
-  AlertTriangle, 
+import {
+  MessageSquare,
+  Mic,
+  Hand,
+  Wifi,
+  WifiOff,
+  AlertTriangle,
   Monitor,
   Smartphone,
   Signal,
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import TranslationInterface from './TranslationInterface';
 import SpeechInterface from './SpeechInterface';
-import SignLanguageInterface from './SignLanguageInterface';
+import SignLanguageInterface, { SignLanguageInterfaceHandle } from './SignLanguageInterface'; // Import handle
 import EmergencyPhrasesEnhanced from './EmergencyPhrasesEnhanced';
 import './MultiModalInterface.css';
 
@@ -70,6 +70,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   // Caching mechanism
   const translationCache = useRef<Map<string, any>>(new Map());
   const performanceTimers = useRef<Map<string, number>>(new Map());
+  const signLanguageInterfaceRef = useRef<SignLanguageInterfaceHandle>(null); // Ref for SignLanguageInterface
 
   // Check if device is mobile
   useEffect(() => {
@@ -220,6 +221,38 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     trackPerformance('modeSwitch', startTime);
     addNotification(`Switched to ${mode} mode`);
   }, [trackPerformance, addNotification]);
+
+  // Effect to manage sign language detection based on activeMode
+  useEffect(() => {
+    if (activeMode === 'sign') {
+      console.log('[MultiModalInterface] Mode switched to sign. Attempting to triggerStartDetection.');
+      signLanguageInterfaceRef.current?.triggerStartDetection();
+    } else {
+      // If mode is not 'sign', ensure detection is stopped if it was active
+      if (signLanguageInterfaceRef.current?.isDetectionActive()) {
+        console.log('[MultiModalInterface] Mode switched away from sign. Attempting to triggerStopDetection.');
+        signLanguageInterfaceRef.current?.triggerStopDetection();
+      }
+    }
+  }, [activeMode]);
+
+
+  // Memoized callbacks for SignLanguageInterface
+  const handleSignEmergencyDetected = useCallback(() => {
+    handleEmergencyMode(true);
+  }, [handleEmergencyMode]);
+
+  const handleSignTranslationRequest = useCallback((text: string, context: string) => {
+    const startTime = Date.now();
+    // Simulate API call for sign language translation
+    // In a real app, this would involve an API call and updating state based on the response.
+    console.log(`[MultiModalInterface] Sign translation requested. Text: "${text}", Context: "${context}"`);
+    setTimeout(() => {
+      setTranslatedText(`Translated (Sign): ${text} [Context: ${context}]`);
+      trackPerformance('signDetection', startTime);
+      addNotification(`Sign language text ready for translation: "${text}"`);
+    }, 500); // Reduced timeout for quicker feedback
+  }, [trackPerformance, addNotification]); // setTranslatedText is stable
 
   // Enhanced connection quality indicator with better visual states
   const ConnectionIndicator = () => (
@@ -432,23 +465,19 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
                 realTimeMode={true}
                 voiceActivityDetection={true}
               />
-            )}              {activeMode === 'sign' && (
-              <SignLanguageInterface
-                onEmergencyDetected={() => handleEmergencyMode(true)}
-                onTranslationRequest={(text, context) => {
-                  const startTime = Date.now();
-                  // Handle sign language translation - simulate API call
-                  setTimeout(() => {
-                    setTranslatedText(`Translated: ${text}`);
-                    trackPerformance('signDetection', startTime);
-                  }, 1000);
-                }}
-                isTranslating={false}
-                currentLanguage={targetLanguage}
-                translatedText={translatedText}
-              />
             )}
-              {activeMode === 'emergency' && (
+            {/* Always render SignLanguageInterface but control visibility */}
+            <div style={{ display: activeMode === 'sign' ? 'block' : 'none' }}>
+              <SignLanguageInterface
+                ref={signLanguageInterfaceRef} // Assign ref
+                onEmergencyDetected={handleSignEmergencyDetected}
+                onTranslationRequest={handleSignTranslationRequest}
+                isTranslating={false} // Consider if this should be dynamic
+                currentLanguage={targetLanguage}
+                translatedText={translatedText} // This is passed down
+              />
+            </div>
+            {activeMode === 'emergency' && (
               <EmergencyPhrasesEnhanced
                 sourceLanguage={sourceLanguage}
                 targetLanguage={targetLanguage}
