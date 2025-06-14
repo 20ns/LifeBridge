@@ -325,11 +325,21 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
   
   return (
     <div className="sign-language-detector">
+      <div className="detection-header" style={{
+        textAlign: 'center',
+        fontSize: '1.2rem',
+        marginBottom: '16px',
+        fontWeight: 500,
+        color: '#1a73e8'
+      }}>
+        <div className="status">{detectionStatus}</div>
+      </div>
+      
       <div className="video-container">
         <video
           ref={videoRef}
           className="input-video"
-          style={{ display: 'none' }} // Hide the raw video feed
+          style={{ display: 'none' }}
           playsInline
           autoPlay
           muted
@@ -340,31 +350,15 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
           width={640}
           height={480}
           style={{
-            border: '2px solid #4CAF50',
-            borderRadius: '8px',
             maxWidth: '100%',
             height: 'auto',
-            display: isActive ? 'block' : 'none'
+            display: isActive ? 'block' : 'none',
+            borderRadius: '16px',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+            border: '2px solid #3a86ff',
+            backgroundColor: '#f0f9ff'
           }}
         />
-      </div>
-      
-      <div className="detection-info">
-        <div className="status">{detectionStatus}</div>
-        
-        {isInitialized && isActive && ( // Show guide only when initialized and active
-          <div className="gesture-guide">
-            <h4>Medical Gestures:</h4>
-            <div className="gesture-list">
-              {Object.entries(medicalGestures).map(([key, gesture]) => (
-                <div key={key} className={`gesture-item priority-${gesture.priority}`}>
-                  <strong>{gesture.name}</strong>
-                  <span className="priority">({gesture.priority})</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
