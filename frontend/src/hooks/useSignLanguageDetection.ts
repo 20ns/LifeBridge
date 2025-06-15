@@ -154,16 +154,30 @@ export const useSignLanguageDetection = () => {
     // Update detection history
     setDetectionHistory(prev => [...prev.slice(-19), finalSignData]);
     
-    // Check gesture stability (avoid rapid changes)
-    const now = Date.now();
-    if (gestureStabilityRef.current[finalGesture]) {
-      const timeSinceLastDetection = now - gestureStabilityRef.current[finalGesture];
-      if (timeSinceLastDetection < 2000) { // Wait 2 seconds between same gestures
-        return;
-      }
-    }
+    // Update detection history
+    setDetectionHistory(prev => [...prev.slice(-19), finalSignData]);
     
-    gestureStabilityRef.current[finalGesture] = now;
+    // Get medical text mapping
+    const signMapping = medicalSignMappings[finalGesture];
+    if (!signMapping) {
+      console.warn(`Unknown gesture: ${finalGesture}`);
+      return;
+    }
+
+    // For emergency gestures, bypass stability check
+    const isEmergency = signMapping.medicalPriority === 'critical';
+    
+    // Check gesture stability only for non-emergency gestures
+    const now = Date.now();
+    if (!isEmergency) {
+      if (gestureStabilityRef.current[finalGesture]) {
+        const timeSinceLastDetection = now - gestureStabilityRef.current[finalGesture];
+        if (timeSinceLastDetection < 2000) { // Wait 2 seconds between same gestures
+          return;
+        }
+      }
+      gestureStabilityRef.current[finalGesture] = now;
+    }
     
     // Get medical text mapping
     const mapping = medicalSignMappings[finalGesture];
@@ -173,17 +187,22 @@ export const useSignLanguageDetection = () => {
     }
 
     // Update current text and confidence
-    setCurrentText(mapping.text);
+    setCurrentText(signMapping.text);
     setConfidenceScore(finalConfidence);
     
     // Add to detected signs
     setDetectedSigns(prev => [...prev, {
       ...finalSignData,
-      gesture: mapping.text // Store the translated text
+      gesture: signMapping.text // Store the translated text
     }]);
 
-    // Log for medical context
-    console.log(`Sign detected: ${finalGesture} -> "${mapping.text}" (confidence: ${Math.round(finalConfidence * 100)}%)`);
+    // Log for medical context with ML mode
+    console.log(`Sign detected: ${finalGesture} -> "${mapping.text}" (confidence: ${Math.round(finalConfidence * 100)}%, mode: ${mlMode})`);
+    
+    // DEBUG: Log when emergency gesture is detected
+    if (isEmergency) {
+      console.debug(`EMERGENCY GESTURE DETECTED: ${finalGesture}`);
+    }
   }, [recognizeGestureML]);
 
   // Get text from detected signs for translation
