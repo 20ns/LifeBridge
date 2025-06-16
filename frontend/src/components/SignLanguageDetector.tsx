@@ -202,6 +202,7 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
   };  // Proper gesture analysis based on medical sign language specifications
   const analyzeGesture = (landmarks: HandLandmark[]): string | null => {
     if (!landmarks || landmarks.length !== 21) return null;
+    console.log('[AnalyzeGesture] Landmarks:', JSON.parse(JSON.stringify(landmarks))); // Deep copy for logging
     
     // Hand landmark indices
     const thumbTip = 4, thumbMcp = 2;
@@ -214,14 +215,20 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
     // Helper function to check if finger is extended (tip higher than pip)
     const isFingerExtended = (tipIdx: number, pipIdx: number): boolean => {
       if (!landmarks[tipIdx] || !landmarks[pipIdx]) return false;
-      return landmarks[tipIdx].y < landmarks[pipIdx].y; // Lower y = higher position
+      const tipY = landmarks[tipIdx].y;
+      const pipY = landmarks[pipIdx].y;
+      const isExtended = tipY < pipY;
+      console.log(`[isFingerExtended] For finger (tipIdx ${tipIdx}, pipIdx ${pipIdx}): tipY=${tipY.toFixed(3)}, pipY=${pipY.toFixed(3)}, isExtended=${isExtended}`);
+      return isExtended; // Lower y = higher position
     };
 
     // Special thumb check (different anatomy - check horizontal distance)
     const isThumbExtended = (): boolean => {
       if (!landmarks[thumbTip] || !landmarks[thumbMcp] || !landmarks[indexMcp]) return false;
       const thumbToIndexDistance = Math.abs(landmarks[thumbTip].x - landmarks[indexMcp].x);
-      return thumbToIndexDistance > 0.05; // Threshold for thumb being away from hand
+      const isExtended = thumbToIndexDistance > 0.05;
+      console.log(`[isThumbExtended] thumbTip.x: ${landmarks[thumbTip].x.toFixed(3)}, indexMcp.x: ${landmarks[indexMcp].x.toFixed(3)}, distance: ${thumbToIndexDistance.toFixed(3)}, isExtended=${isExtended}`);
+      return isExtended; // Threshold for thumb being away from hand
     };
 
     // Check finger states
@@ -230,15 +237,18 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
     const middleUp = isFingerExtended(middleTip, middlePip);
     const ringUp = isFingerExtended(ringTip, ringPip);
     const pinkyUp = isFingerExtended(pinkyTip, pinkyPip);
+    console.log(`[AnalyzeGesture] Finger states: ThumbUp=${thumbUp}, IndexUp=${indexUp}, MiddleUp=${middleUp}, RingUp=${ringUp}, PinkyUp=${pinkyUp}`);
 
     // Count extended fingers
     const extendedFingers = [thumbUp, indexUp, middleUp, ringUp, pinkyUp];
     const upCount = extendedFingers.filter(Boolean).length;
+    console.log(`[AnalyzeGesture] Extended fingers count (upCount): ${upCount}`);
 
     // Gesture recognition based on specifications
     
     // 🚨 Emergency: Closed fist (no fingers extended)
     if (upCount === 0) {
+      console.log('[AnalyzeGesture] Condition for EMERGENCY met: upCount === 0. Returning "emergency".');
       return 'emergency';
     }
     
@@ -249,6 +259,7 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
     
     // ✅ Yes: Thumbs up only
     if (thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp) {
+      console.log('[AnalyzeGesture] Condition for YES met: thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp. Returning "yes".');
       return 'yes';
     }
     
