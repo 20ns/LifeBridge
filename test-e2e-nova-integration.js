@@ -6,7 +6,7 @@
 const https = require('https');
 
 // Test configuration
-const API_BASE = 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/dev';
+const API_BASE = 'https://bdig43cvo8.execute-api.eu-north-1.amazonaws.com/dev';
 const NOVA_ENDPOINT = `${API_BASE}/gesture-recognition`;
 
 // Test payloads matching what the frontend would send
@@ -129,27 +129,27 @@ async function runEndToEndTests() {
             console.log(`Status Code: ${response.statusCode}`);
             
             if (response.statusCode === 200 && response.body.success) {
-                const result = response.body.result;
+                const result = response.body.data;
                 
                 console.log('\n✅ SUCCESS - Response Analysis:');
-                console.log(`   Gesture: ${result.gesture}`);
+                console.log(`   Gesture: ${result.recognizedGesture}`);
                 console.log(`   Medical Priority: ${result.medicalPriority}`);
-                console.log(`   Urgency Score: ${result.urgencyScore}/10`);
+                console.log(`   Urgency Score: ${result.urgencyLevel}/10`);
                 console.log(`   Confidence: ${result.confidence}`);
                 console.log(`   Description: ${result.description}`);
                 console.log(`   Actions: ${result.recommendedActions?.length || 0} recommended`);
-                console.log(`   Translation: ${result.translationText?.substring(0, 50)}...`);
+                console.log(`   Translation: ${result.translation?.substring(0, 50)}...`);
                 
                 // Validate expectations
                 const priorityMatch = result.medicalPriority === testCase.expectedPriority;
-                const urgencyAppropriate = result.urgencyScore >= testCase.expectedUrgency;
+                const urgencyAppropriate = result.urgencyLevel >= testCase.expectedUrgency;
                 const hasActions = result.recommendedActions && result.recommendedActions.length > 0;
-                const hasTranslation = result.translationText && result.translationText.length > 10;
+                const hasTranslation = result.translation && result.translation.length > 10;
                 const responseTimeGood = responseTime < 10000; // Less than 10 seconds
                 
                 console.log('\n📊 Quality Validation:');
                 console.log(`   Priority Match: ${priorityMatch ? '✅' : '❌'} (expected: ${testCase.expectedPriority}, got: ${result.medicalPriority})`);
-                console.log(`   Urgency Level: ${urgencyAppropriate ? '✅' : '❌'} (expected: ${testCase.expectedUrgency}+, got: ${result.urgencyScore})`);
+                console.log(`   Urgency Level: ${urgencyAppropriate ? '✅' : '❌'} (expected: ${testCase.expectedUrgency}+, got: ${result.urgencyLevel})`);
                 console.log(`   Has Actions: ${hasActions ? '✅' : '❌'}`);
                 console.log(`   Has Translation: ${hasTranslation ? '✅' : '❌'}`);
                 console.log(`   Response Time: ${responseTimeGood ? '✅' : '❌'} (${responseTime}ms)`);
