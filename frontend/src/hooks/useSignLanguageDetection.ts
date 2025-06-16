@@ -13,7 +13,9 @@ interface MLGestureResponse {
   confidence: number;
   medical_priority: 'critical' | 'high' | 'medium' | 'low';
   urgency_score: number;
-  mode: 'ml' | 'fallback';
+  description?: string;
+  timestamp?: number;
+  mode?: 'nova' | 'fallback';
 }
 
 interface SignToTextMapping {
@@ -24,8 +26,8 @@ interface SignToTextMapping {
   };
 }
 
-// ML Gesture Recognition API endpoint
-const ML_GESTURE_API_ENDPOINT = 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod/gesture-recognition-ml';
+// Nova Micro Sign Language API endpoint
+const NOVA_SIGN_API_ENDPOINT = 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod/nova-sign-language';
 
 // Medical sign language to text mappings for emergency scenarios
 const medicalSignMappings: SignToTextMapping = {
@@ -76,34 +78,60 @@ export const useSignLanguageDetection = () => {
   const [isActive, setIsActive] = useState(false);
   const [detectedSigns, setDetectedSigns] = useState<SignData[]>([]);
   const [currentText, setCurrentText] = useState<string>('');
-  const [confidenceScore, setConfidenceScore] = useState<number>(0);
-  const [detectionHistory, setDetectionHistory] = useState<SignData[]>([]);
-  const [mlMode, setMlMode] = useState<'ml' | 'fallback'>('fallback'); // Start in fallback mode
-  const gestureStabilityRef = useRef<{[key: string]: number}>({});  // Enhanced ML gesture recognition function with fallback
-  const recognizeGestureML = useCallback(async (landmarks: any[]): Promise<MLGestureResponse | null> => {
-    console.log('[ML] Attempting to recognize gesture via API');
+  const [confidenceScore, setConfidenceScore] = useState<number>(0);  const [detectionHistory, setDetectionHistory] = useState<SignData[]>([]);
+  const [mlMode, setMlMode] = useState<'nova' | 'fallback'>('fallback'); // Start in fallback mode
+  const gestureStabilityRef = useRef<{[key: string]: number}>({});
+
+  // Enhanced Nova Micro gesture recognition function with fallback
+  const recognizeGestureNova = useCallback(async (gesture: string, landmarks: any[], confidence: number): Promise<MLGestureResponse | null> => {
+    console.log('[Nova] Attempting to recognize gesture via Nova Micro API');
     try {
-      const response = await fetch(ML_GESTURE_API_ENDPOINT, {
+      const response = await fetch(NOVA_SIGN_API_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ landmarks }),
+        body: JSON.stringify({ 
+          gesture,
+          landmarks,
+          confidence,
+          timestamp: Date.now(),
+          medicalContext: 'emergency room'
+        }),
       });
 
       if (!response.ok) {
-        console.log(`[ML] API request failed with status ${response.status}`);
+        console.log(`[Nova] API request failed with status ${response.status}`);
         setMlMode('fallback');
         return null;
       }
 
-      const data: MLGestureResponse = await response.json();
-      console.log('[ML] API response successful:', data);
-      setMlMode('ml');
-      return data;
+      const responseData = await response.json();
+      
+      if (responseData.success && responseData.result) {
+        const result = responseData.result;
+        
+        // Convert Nova Micro response to ML format for compatibility
+        const mlResponse: MLGestureResponse = {
+          gesture: result.gesture,
+          confidence: result.confidence,
+          medical_priority: result.medicalPriority,
+          urgency_score: result.urgencyScore,
+          description: result.description,
+          timestamp: result.timestamp
+        };
+        
+        console.log('[Nova] API response successful:', mlResponse);
+        setMlMode('nova');
+        return mlResponse;
+      } else {
+        console.log('[Nova] Invalid response structure');
+        setMlMode('fallback');
+        return null;
+      }
 
     } catch (error) {
-      console.log('[ML] Error calling gesture recognition API');
+      console.log('[Nova] Error calling Nova Micro API:', error);
       setMlMode('fallback');
       return null;
     }
@@ -119,24 +147,24 @@ export const useSignLanguageDetection = () => {
   // Stop sign language detection
   const stopDetection = useCallback(() => {
     setIsActive(false);
-  }, []);// Enhanced sign detection handler with clean logic, now incorporating ML call
+  }, []);  // Enhanced sign detection handler with clean logic, now incorporating Nova Micro
   const handleSignDetected = useCallback(async (signDataFromDetector: SignData) => {
     const { landmarks, confidence: localConfidence, gesture: localGesture, timestamp } = signDataFromDetector;
 
     let finalGestureToProcess = localGesture;
     let finalConfidenceToUse = localConfidence;
-    let detectionSource: 'local' | 'ml' = 'local';
+    let detectionSource: 'local' | 'nova' = 'local';
 
-    // Attempt to use ML model for gesture recognition
-    const mlResponse = await recognizeGestureML(landmarks);
+    // Attempt to use Nova Micro for gesture interpretation
+    const novaResponse = await recognizeGestureNova(localGesture, landmarks, localConfidence);
 
-    // Use ML response if it's confident enough, otherwise fallback to local
-    const mlConfidenceThreshold = 0.6;
-    if (mlResponse && mlResponse.gesture && mlResponse.confidence >= mlConfidenceThreshold) {
-      finalGestureToProcess = mlResponse.gesture;
-      finalConfidenceToUse = mlResponse.confidence;
-      detectionSource = 'ml';
-      setMlMode('ml');
+    // Use Nova Micro response if it's confident enough, otherwise fallback to local
+    const novaConfidenceThreshold = 0.6;
+    if (novaResponse && novaResponse.gesture && novaResponse.confidence >= novaConfidenceThreshold) {
+      finalGestureToProcess = novaResponse.gesture;
+      finalConfidenceToUse = novaResponse.confidence;
+      detectionSource = 'nova';
+      setMlMode('nova');
     } else {
       // Keep localGesture and localConfidence
       setMlMode('fallback');
@@ -185,7 +213,7 @@ export const useSignLanguageDetection = () => {
     setDetectedSigns(prev => [...prev, signDataForStateUpdate]);
     
     console.log(`✅ Gesture processed (via ${detectionSource}): ${finalGestureToProcess} -> "${signMapping.text}" (${Math.round(finalConfidenceToUse * 100)}%)`);
-  }, [recognizeGestureML]); // Added recognizeGestureML to the dependency array
+  }, [recognizeGestureNova]); // Added recognizeGestureNova to the dependency array
 
   // Get text from detected signs for translation
   const getTextForTranslation = useCallback(() => {
@@ -330,7 +358,7 @@ export const useSignLanguageDetection = () => {
     stopDetection,
     handleSignDetected,
     clearHistory,
-    recognizeGestureML,
+    recognizeGestureNova,
     
     // Translation methods
     translateSign,
