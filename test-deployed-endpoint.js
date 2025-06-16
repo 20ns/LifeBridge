@@ -16,9 +16,9 @@ const testGestureData = {
 const postData = JSON.stringify(testGestureData);
 
 const options = {
-    hostname: 'sevmuborah.execute-api.eu-north-1.amazonaws.com',
+    hostname: 'bdig43cvo8.execute-api.eu-north-1.amazonaws.com',
     port: 443,
-    path: '/prod/nova-sign-language',
+    path: '/dev/gesture-recognition',
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
