@@ -188,20 +188,29 @@ export const useSignLanguageDetection = () => {
     
     // Update detection history
     setDetectionHistory(prev => [...prev.slice(-19), signDataForStateUpdate]);
-    
-    // For emergency gestures, process immediately
+      // For emergency gestures, process immediately but still apply some basic validation
     const isEmergency = signMapping.medicalPriority === 'critical';
     if (isEmergency) {
-      setCurrentText(signMapping.text);
-      setConfidenceScore(finalConfidenceToUse);
-      setDetectedSigns(prev => [...prev, signDataForStateUpdate]);
+      // Even for emergencies, ensure we don't spam the system with rapid detections
+      const now = Date.now();
+      const lastEmergencyTime = gestureStabilityRef.current[finalGestureToProcess] || 0;
+      
+      if (now - lastEmergencyTime > 1000) { // Minimum 1 second between emergency detections
+        setCurrentText(signMapping.text);
+        setConfidenceScore(finalConfidenceToUse);
+        setDetectedSigns(prev => [...prev, signDataForStateUpdate]);
+        gestureStabilityRef.current[finalGestureToProcess] = now;
+        console.log(`⚠️ EMERGENCY processed: ${finalGestureToProcess} -> "${signMapping.text}" (${Math.round(finalConfidenceToUse * 100)}%)`);
+      } else {
+        console.log(`⚠️ Emergency detection suppressed (too frequent): ${finalGestureToProcess}`);
+      }
       return;
     }
-    
-    // For non-emergency gestures, check stability using the raw gesture string
+      // For non-emergency gestures, check stability using the raw gesture string
     const now = Date.now();
     const lastDetectionTime = gestureStabilityRef.current[finalGestureToProcess];
-    if (lastDetectionTime && (now - lastDetectionTime) < 1500) { // Debounce for 1.5 seconds
+    if (lastDetectionTime && (now - lastDetectionTime) < 2500) { // Debounce for 2.5 seconds
+      console.log(`🔄 Gesture debounced: ${finalGestureToProcess} (last detection ${Math.round((now - lastDetectionTime) / 1000)}s ago)`);
       return;
     }
     
