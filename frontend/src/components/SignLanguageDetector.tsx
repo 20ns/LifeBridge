@@ -251,30 +251,39 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
       const tipY = landmarks[tipIdx].y;
       const pipY = landmarks[pipIdx].y;
       return tipY < pipY - 0.03; // Lower y = higher position, strict threshold
-    };
-
-    // Improved thumb detection - MUCH more strict for fist detection
+    };    // EXTREMELY strict thumb detection - must be clearly extended for thumbs up
     const isThumbExtended = (): boolean => {
       if (!landmarks[thumbTip] || !landmarks[thumbMcp] || !landmarks[indexMcp] || !landmarks[wrist]) return false;
       
-      // For a proper thumbs up, thumb should be:
-      // 1. Significantly higher (lower y) than wrist
-      // 2. Away from index finger horizontally
-      // 3. Away from palm center
+      // For a true thumbs up, the thumb must be:
+      // 1. Significantly above (lower Y) the wrist
+      // 2. Significantly above (lower Y) the thumb MCP joint  
+      // 3. Far away horizontally from all other fingers
+      // 4. Pointing clearly upward in the frame
       
       const thumbToWristVertical = landmarks[wrist].y - landmarks[thumbTip].y;
+      const thumbToMcpVertical = landmarks[thumbMcp].y - landmarks[thumbTip].y;
       const thumbToIndexDistance = Math.abs(landmarks[thumbTip].x - landmarks[indexMcp].x);
-      const palmCenterX = (landmarks[indexMcp].x + landmarks[pinkyMcp].x) / 2;
-      const thumbToPalmDistance = Math.abs(landmarks[thumbTip].x - palmCenterX);
-        // Very strict criteria for thumbs up
-      const isThumbUp = thumbToWristVertical > 0.08 && // Thumb significantly above wrist
-                        thumbToIndexDistance > 0.08 && // Far from index finger
-                        thumbToPalmDistance > 0.06;    // Away from palm center
       
-      // Only log when thumb detection changes or is unusual
-      if (isThumbUp || thumbToWristVertical > 0.05) {
-        console.log(`[ThumbDetection] thumbToWrist: ${thumbToWristVertical.toFixed(3)}, isUp: ${isThumbUp}`);
-      }
+      // Calculate distances to ALL finger tips to ensure thumb is isolated
+      const thumbToIndexTip = Math.sqrt((landmarks[thumbTip].x - landmarks[indexTip].x)**2 + (landmarks[thumbTip].y - landmarks[indexTip].y)**2);
+      const thumbToMiddleTip = Math.sqrt((landmarks[thumbTip].x - landmarks[middleTip].x)**2 + (landmarks[thumbTip].y - landmarks[middleTip].y)**2);
+      const thumbToRingTip = Math.sqrt((landmarks[thumbTip].x - landmarks[ringTip].x)**2 + (landmarks[thumbTip].y - landmarks[ringTip].y)**2);
+      const thumbToPinkyTip = Math.sqrt((landmarks[thumbTip].x - landmarks[pinkyTip].x)**2 + (landmarks[thumbTip].y - landmarks[pinkyTip].y)**2);
+      
+      // For thumbs up, thumb must be far from ALL other fingertips
+      const minDistanceToFingers = Math.min(thumbToIndexTip, thumbToMiddleTip, thumbToRingTip, thumbToPinkyTip);
+      
+      // VERY STRICT criteria - thumb must be clearly isolated and pointing up
+      const isThumbUp = thumbToWristVertical > 0.12 &&      // Much higher above wrist
+                        thumbToMcpVertical > 0.05 &&         // Above thumb joint  
+                        thumbToIndexDistance > 0.10 &&       // Far from index horizontally
+                        minDistanceToFingers > 0.08 &&       // Far from all fingertips
+                        landmarks[thumbTip].y < landmarks[wrist].y - 0.1; // Clearly above wrist level
+      
+      // Enhanced debug logging to understand what's happening
+      console.log(`[ThumbDetection] wristVert: ${thumbToWristVertical.toFixed(3)}, mcpVert: ${thumbToMcpVertical.toFixed(3)}, indexDist: ${thumbToIndexDistance.toFixed(3)}, minFingerDist: ${minDistanceToFingers.toFixed(3)}, isUp: ${isThumbUp}`);
+      
       return isThumbUp;
     };
 
@@ -288,31 +297,31 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
     // Count extended fingers
     const upCount = [thumbUp, indexUp, middleUp, ringUp, pinkyUp].filter(Boolean).length;
 
-    // 🚨 Emergency: Closed fist (NO fingers extended) - HIGHEST PRIORITY
+    // Debug info for troubleshooting gesture detection
+    console.log(`[FingerStates] T:${thumbUp?'UP':'down'} | I:${indexUp?'UP':'down'} | M:${middleUp?'UP':'down'} | R:${ringUp?'UP':'down'} | P:${pinkyUp?'UP':'down'} | Total: ${upCount}`);// 🚨 Emergency: Closed fist (NO fingers extended) - HIGHEST PRIORITY
     if (upCount === 0) {
-      // Additional strict validation for proper closed fist
+      // Enhanced fist validation - check that ALL fingers including thumb are properly tucked
       const wristPos = landmarks[wrist];
-      const fingertips = [landmarks[thumbTip], landmarks[indexTip], landmarks[middleTip], landmarks[ringTip], landmarks[pinkyTip]];
-        let properFistScore = 0;
-      fingertips.forEach((tip, idx) => {
-        if (tip) {
-          const distanceToWrist = Math.sqrt(
-            Math.pow(tip.x - wristPos.x, 2) + 
-            Math.pow(tip.y - wristPos.y, 2)
-          );
-          // For a proper fist, fingertips should be close to wrist/palm
-          if (distanceToWrist < 0.12) {
-            properFistScore++;
-          }
-        }
-      });
+      const palmCenter = {
+        x: (landmarks[indexMcp].x + landmarks[pinkyMcp].x) / 2,
+        y: (landmarks[indexMcp].y + landmarks[pinkyMcp].y) / 2
+      };
       
-      // Need at least 4/5 fingertips close to wrist for a proper fist
-      if (properFistScore >= 4) {
-        console.log(`[GestureAnalysis] ✅ EMERGENCY FIST DETECTED - Score: ${properFistScore}/5`);
+      // Check each fingertip is close to palm/wrist (tucked)
+      const thumbTucked = Math.sqrt((landmarks[thumbTip].x - palmCenter.x)**2 + (landmarks[thumbTip].y - palmCenter.y)**2) < 0.08;
+      const indexTucked = Math.sqrt((landmarks[indexTip].x - wristPos.x)**2 + (landmarks[indexTip].y - wristPos.y)**2) < 0.10;
+      const middleTucked = Math.sqrt((landmarks[middleTip].x - wristPos.x)**2 + (landmarks[middleTip].y - wristPos.y)**2) < 0.10;
+      const ringTucked = Math.sqrt((landmarks[ringTip].x - wristPos.x)**2 + (landmarks[ringTip].y - wristPos.y)**2) < 0.10;
+      const pinkyTucked = Math.sqrt((landmarks[pinkyTip].x - wristPos.x)**2 + (landmarks[pinkyTip].y - wristPos.y)**2) < 0.10;
+      
+      const fistScore = [thumbTucked, indexTucked, middleTucked, ringTucked, pinkyTucked].filter(Boolean).length;
+      
+      // CRITICAL: Thumb must be specifically tucked (not extended) for emergency
+      if (fistScore >= 4 && thumbTucked) {
+        console.log(`[GestureAnalysis] ✅ EMERGENCY FIST DETECTED - Score: ${fistScore}/5, ThumbTucked: ${thumbTucked}`);
         return 'emergency';
       } else {
-        console.log(`[GestureAnalysis] ❌ Not a proper fist - Score: ${properFistScore}/5`);
+        console.log(`[GestureAnalysis] ❌ Not a proper fist - Score: ${fistScore}/5, ThumbTucked: ${thumbTucked}`);
         return null;
       }
     }
