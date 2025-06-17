@@ -46,9 +46,9 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
   onSignDetected,
   isActive,
   medicalContext = 'general' // medicalContext is available but not used in current gesture logic
-}) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+}) => {  const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const emergencyStartTimeRef = useRef<number | null>(null);
   const [hands, setHands] = useState<any>(null);
   const [camera, setCamera] = useState<any>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -56,7 +56,6 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [gestureBuffer, setGestureBuffer] = useState<SignData[]>([]);
   const [emergencyTimer, setEmergencyTimer] = useState<NodeJS.Timeout | null>(null);
-  const [emergencyStartTime, setEmergencyStartTime] = useState<number | null>(null);
   const [lastGestureTime, setLastGestureTime] = useState<{[key: string]: number}>({});
   const [gestureStabilityBuffer, setGestureStabilityBuffer] = useState<{[key: string]: SignData[]}>({});
 
@@ -99,25 +98,24 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
             confidence: confidence,
             gesture: gesture,
             timestamp: Date.now()
-          };
-            // Special handling for emergency gesture (requires 2-second hold)
+          };          // Special handling for emergency gesture (requires 2-second hold)
           if (gesture === 'emergency') {
             const now = Date.now();
-              if (!emergencyStartTime) {
+              if (!emergencyStartTimeRef.current) {
               // First time detecting emergency gesture
-              setEmergencyStartTime(now);
+              emergencyStartTimeRef.current = now;
               console.log('[SignLangDetector] 🚨 EMERGENCY FIST detected - starting 2-second hold validation');
               setDetectionStatus(`🚨 EMERGENCY FIST detected - hold for 2 seconds... (${Math.round(confidence * 100)}%)`);
             } else {
               // Check if we've held the fist long enough
-              const holdTime = now - emergencyStartTime;
+              const holdTime = now - emergencyStartTimeRef.current;
               
               if (holdTime >= 2000) {
                 // 2 seconds completed - trigger emergency
                 console.log('[SignLangDetector] ✅ EMERGENCY CONFIRMED - 2 seconds completed');
                 onSignDetected(signData);
                 setDetectionStatus(`🚨 EMERGENCY CONFIRMED! (${Math.round(confidence * 100)}%)`);
-                setEmergencyStartTime(null);
+                emergencyStartTimeRef.current = null;
               } else {
                 // Still holding, show countdown
                 const secondsLeft = Math.ceil((2000 - holdTime) / 1000);
@@ -127,8 +125,8 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
             continue; // Don't process other logic for emergency
           } else {
             // Cancel emergency timer if different gesture is detected
-            if (emergencyStartTime) {
-              setEmergencyStartTime(null);
+            if (emergencyStartTimeRef.current) {
+              emergencyStartTimeRef.current = null;
               console.log('[SignLangDetector] Emergency hold cancelled - different gesture detected:', gesture);
             }
           }
@@ -180,22 +178,22 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
             return { ...prev, [gesture]: newBuffer };
           });        } else if (gesture) {
           // Cancel emergency timer if gesture not confident enough
-          if (emergencyStartTime) {
-            setEmergencyStartTime(null);
+          if (emergencyStartTimeRef.current) {
+            emergencyStartTimeRef.current = null;
             console.log('[SignLangDetector] Emergency hold cancelled - low confidence');
           }          setDetectionStatus(`🤔 Unclear gesture (${Math.round(confidence * 100)}%) - check hand position`);
         } else {
           // Cancel emergency timer if no gesture detected
-          if (emergencyStartTime) {
-            setEmergencyStartTime(null);
+          if (emergencyStartTimeRef.current) {
+            emergencyStartTimeRef.current = null;
             console.log('[SignLangDetector] Emergency hold cancelled - no clear gesture detected');
           }
           setDetectionStatus(`👋 Position hand clearly - make distinct gesture`);
         }
       }    } else {
       // Cancel emergency timer if no hands detected
-      if (emergencyStartTime) {
-        setEmergencyStartTime(null);
+      if (emergencyStartTimeRef.current) {
+        emergencyStartTimeRef.current = null;
         console.log('[SignLangDetector] Emergency hold cancelled - no hands detected');
       }
       setDetectionStatus('👋 No hands detected - show your hands to the camera');
@@ -508,11 +506,10 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
       }
       if (emergencyTimer) {
         clearTimeout(emergencyTimer);
-        setEmergencyTimer(null);
-        console.log('[SignLangDetector] Emergency timer cleared during cleanup.');
+        setEmergencyTimer(null);        console.log('[SignLangDetector] Emergency timer cleared during cleanup.');
       }
       // Clear emergency state on cleanup
-      setEmergencyStartTime(null);
+      emergencyStartTimeRef.current = null;
       setLastGestureTime({});
       setGestureStabilityBuffer({});
     };
