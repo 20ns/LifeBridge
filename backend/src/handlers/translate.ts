@@ -27,7 +27,7 @@ export const handler = async (
       return createErrorResponse(400, validation.error!);
     }
 
-    const { text, sourceLanguage, targetLanguage, context } = validation.data;
+    const { text, sourceLanguage, targetLanguage, context, performanceMode = 'standard' } = validation.data;
 
     // Validate input
     if (!text.trim()) {
@@ -37,8 +37,8 @@ export const handler = async (
     if (text.length > 5000) {
       return createErrorResponse(400, 'Text too long (maximum 5000 characters)');
     }    // Perform translation
-    console.log(`Translating: "${text}" from ${sourceLanguage} to ${targetLanguage} (context: ${context || 'general'})`);
-    const result = await translateText(text, sourceLanguage, targetLanguage, context);
+    console.log(`Translating: "${text}" from ${sourceLanguage} to ${targetLanguage} (context: ${context || 'general'}, mode: ${performanceMode})`);
+    const result = await translateText(text, sourceLanguage, targetLanguage, context, performanceMode);
 
     console.log('Translation successful:', result);
     return createResponse(200, result, 'Translation completed successfully');

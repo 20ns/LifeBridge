@@ -136,9 +136,18 @@ export const translateText = async (
   text: string,
   sourceLanguage: string,
   targetLanguage: string,
-  context?: 'emergency' | 'consultation' | 'medication' | 'general'
-): Promise<TranslationResult> => {
-  try {
+  context?: 'emergency' | 'consultation' | 'medication' | 'general',
+  performanceMode: 'standard' | 'optimized' = 'standard'
+): Promise<TranslationResult> => {  try {
+    // Emergency keywords for priority processing
+    const emergencyKeywords = ['emergency', 'urgent', 'pain', 'heart', 'chest', 'breathe', 'breathing', 'help'];
+    const isEmergencyText = emergencyKeywords.some(keyword => 
+      text.toLowerCase().includes(keyword.toLowerCase())
+    );
+
+    // Performance mode optimization
+    console.log(`🚀 Performance mode: ${performanceMode}, Emergency: ${isEmergencyText}`);
+    
     // Same language check
     if (sourceLanguage === targetLanguage) {
       return {
@@ -151,8 +160,21 @@ export const translateText = async (
       };
     }
 
-    // Decide which service to use based on complexity
-    const useAI = needsAIReasoning(text, context);
+    // Performance-based service selection
+    let useAI = needsAIReasoning(text, context);
+    
+    // Optimized mode: Use faster Amazon Translate for emergencies to save time
+    if (performanceMode === 'optimized' && isEmergencyText) {
+      useAI = false; // Force fast translation for emergencies
+      console.log('⚡ Emergency + Optimized mode: Using fast Amazon Translate');
+    }
+    
+    // Standard mode: Be more conservative with AI usage to save costs
+    if (performanceMode === 'standard' && !isEmergencyText) {
+      // Only use AI for complex medical scenarios in standard mode
+      useAI = useAI && (context === 'medication' || text.length > 200);
+      console.log('💰 Standard mode: Conservative AI usage');
+    }
     
     if (useAI) {
       console.log('🧠 Using Bedrock AI for complex medical translation');

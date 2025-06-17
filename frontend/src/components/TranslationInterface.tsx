@@ -13,13 +13,15 @@ interface TranslationInterfaceProps {
   targetLanguage: string;
   isListening: boolean;
   setIsListening: (listening: boolean) => void;
+  performanceMode: 'standard' | 'optimized';
 }
 
 const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   sourceLanguage,
   targetLanguage,
   isListening,
-  setIsListening
+  setIsListening,
+  performanceMode
 }) => {
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
@@ -94,7 +96,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     
     setIsTranslating(true);
     try {
-      const result = await translateText(text, sourceLanguage, targetLanguage, context);
+      const result = await translateText(text, sourceLanguage, targetLanguage, context, performanceMode);
       
       // Record successful translation performance
       performanceMonitor.endOperation('translation');

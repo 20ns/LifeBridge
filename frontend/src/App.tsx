@@ -57,6 +57,7 @@ function App() {
           sourceLanguage={sourceLanguage}
           targetLanguage={targetLanguage}
           onLanguageSwitch={handleLanguageSwitch}
+          performanceMode={performanceMode}
         />
       </main>
 
