@@ -486,3 +486,17 @@
   background-color: #f3f4f6 !important;
 }
 
+/* Header specific alignment - targeted fix */
+.header-controls .controls-group {
+  align-items: baseline; /* Use baseline alignment for better control */
+}
+
+/* Ensure language selector doesn't interfere with header alignment */
+.header-controls .language-selector {
+  margin-bottom: 0;
+}
+
+.header-controls .language-selector:hover {
+  transform: translateY(0); /* Prevent vertical movement on hover in header */
+}
+
