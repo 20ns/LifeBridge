@@ -462,8 +462,10 @@ body {
 .performance-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-md);
+  width: 130px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: var(--text-inverse);
   border: none;
@@ -473,6 +475,7 @@ body {
   font-size: var(--font-size-sm);
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  text-align: center;
 }
 
 .performance-btn:hover {
