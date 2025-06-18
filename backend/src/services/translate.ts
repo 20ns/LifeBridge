@@ -131,6 +131,53 @@ export const translateWithBedrock = async (
   }
 };
 
+// Enhanced context detection based on medical content
+const detectMedicalContext = (text: string): 'emergency' | 'consultation' | 'medication' | 'general' => {
+  const lowerText = text.toLowerCase();
+  
+  // Emergency keywords that indicate critical situations
+  const emergencyKeywords = [
+    'emergency', 'urgent', 'critical', 'severe', 'acute', 'life-threatening',
+    'unconscious', 'seizure', 'stroke', 'heart attack', 'cardiac arrest',
+    'bleeding', 'hemorrhage', 'breathe', 'breathing', 'chest pain',
+    'allergic reaction', 'anaphylaxis', 'overdose', 'poisoning'
+  ];
+  
+  // Medication-related keywords that require pharmaceutical precision
+  const medicationKeywords = [
+    'dosage', 'dose', 'medication', 'prescription', 'pills', 'tablets',
+    'injection', 'insulin', 'mg', 'ml', 'units', 'times daily',
+    'before meals', 'after meals', 'side effects', 'drug interaction',
+    'allergy', 'contraindication', 'pharmacy', 'refill'
+  ];
+  
+  // Consultation keywords for clinical discussions
+  const consultationKeywords = [
+    'symptoms', 'diagnosis', 'examination', 'medical history',
+    'patient complains', 'presenting with', 'vital signs',
+    'blood pressure', 'temperature', 'pulse', 'examination reveals',
+    'treatment plan', 'follow-up', 'referral', 'specialist'
+  ];
+  
+  // Check for emergency context first (highest priority)
+  if (emergencyKeywords.some(keyword => lowerText.includes(keyword))) {
+    return 'emergency';
+  }
+  
+  // Check for medication context (high precision required)
+  if (medicationKeywords.some(keyword => lowerText.includes(keyword))) {
+    return 'medication';
+  }
+  
+  // Check for consultation context
+  if (consultationKeywords.some(keyword => lowerText.includes(keyword))) {
+    return 'consultation';
+  }
+  
+  // Default to general medical context
+  return 'general';
+};
+
 // Hybrid translation service - uses the right tool for the job
 export const translateText = async (
   text: string,
@@ -138,7 +185,16 @@ export const translateText = async (
   targetLanguage: string,
   context?: 'emergency' | 'consultation' | 'medication' | 'general',
   performanceMode: 'standard' | 'optimized' = 'standard'
-): Promise<TranslationResult> => {  try {
+): Promise<TranslationResult> => {
+  try {
+    // Intelligent context detection if not provided
+    const detectedContext = context || detectMedicalContext(text);
+    
+    // Log context detection for transparency
+    if (!context && detectedContext !== 'general') {
+      console.log(`🩺 Auto-detected medical context: ${detectedContext}`);
+    }
+
     // Emergency keywords for priority processing
     const emergencyKeywords = ['emergency', 'urgent', 'pain', 'heart', 'chest', 'breathe', 'breathing', 'help'];
     const isEmergencyText = emergencyKeywords.some(keyword => 
@@ -158,10 +214,8 @@ export const translateText = async (
         targetLanguage,        method: 'translate',
         reasoning: 'Same language - no translation needed'
       };
-    }
-
-    // Performance-based service selection
-    let useAI = needsAIReasoning(text, context);
+    }    // Performance-based service selection
+    let useAI = needsAIReasoning(text, detectedContext);
     
     // Optimized mode: Use faster Amazon Translate for emergencies to save time
     if (performanceMode === 'optimized' && isEmergencyText) {
@@ -172,13 +226,13 @@ export const translateText = async (
     // Standard mode: Be more conservative with AI usage to save costs
     if (performanceMode === 'standard' && !isEmergencyText) {
       // Only use AI for complex medical scenarios in standard mode
-      useAI = useAI && (context === 'medication' || text.length > 200);
+      useAI = useAI && (detectedContext === 'medication' || text.length > 200);
       console.log('💰 Standard mode: Conservative AI usage');
     }
     
     if (useAI) {
       console.log('🧠 Using Bedrock AI for complex medical translation');
-      return await translateWithBedrock(text, sourceLanguage, targetLanguage, context);
+      return await translateWithBedrock(text, sourceLanguage, targetLanguage, detectedContext);
     } else {
       console.log('⚡ Using Amazon Translate for fast basic translation');
       return await translateWithAmazonTranslate(text, sourceLanguage, targetLanguage);
@@ -191,11 +245,10 @@ export const translateText = async (
     try {
       const useAI = needsAIReasoning(text, context);
       console.log(`🔄 Falling back to ${useAI ? 'Amazon Translate' : 'Bedrock AI'}`);
-      
-      if (useAI) {
+        if (useAI) {
         return await translateWithAmazonTranslate(text, sourceLanguage, targetLanguage);
       } else {
-        return await translateWithBedrock(text, sourceLanguage, targetLanguage, context);
+        return await translateWithBedrock(text, sourceLanguage, targetLanguage, context || 'general');
       }
     } catch (fallbackError) {
       console.error('Fallback translation failed:', fallbackError);
