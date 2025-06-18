@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { AlertTriangle, Volume2, Copy, Check, Phone, Heart, Zap, Shield, Clock, LucideProps } from 'lucide-react'; // Added LucideProps
-import { speakText, translateText } from '../services/awsService'; // Import translateText, remove getEmergencyPhrases
+import { AlertTriangle, Volume2, Copy, Check, Phone, Heart, Zap, Shield, Clock, LucideProps } from 'lucide-react'; // Removed tab icons
+import { speakText, translateText } from '../services/awsService';
 import '../styles/emergency-themes.css';
 import './EmergencyPhrasesEnhanced.css';
 
@@ -40,6 +40,8 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
   currentTheme = 'light',
   textSize = 'normal'
 }) => {
+  const [isListening, setIsListening] = useState(false);
+
   // const [emergencyPhrases, setEmergencyPhrases] = useState<any[]>([]); // Remove unused state
   const [loading, setLoading] = useState(true); // Global loading for initial English setup
   const [categoryLoadingStates, setCategoryLoadingStates] = useState<Record<string, boolean>>({});
@@ -47,8 +49,7 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [translatedCategoriesForCurrentLang, setTranslatedCategoriesForCurrentLang] = useState<Set<string>>(new Set());
   const [copiedPhrase, setCopiedPhrase] = useState<string | null>(null);
-  const [speakingPhrase, setSpeakingPhrase] = useState<string | null>(null);
-  const [lastUsedPhrases, setLastUsedPhrases] = useState<string[]>([]);
+  const [speakingPhrase, setSpeakingPhrase] = useState<string | null>(null);  const [lastUsedPhrases, setLastUsedPhrases] = useState<string[]>([]);
 
   // Critical emergency phrases - always at top
   const criticalPhrases = useMemo(() => [
@@ -464,16 +465,16 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
         </div>
       </div>
     );
-  }
-  return (
+  }  return (
     <div className={`interface-container emergency-container ${isEmergencyMode ? 'emergency-mode' : ''} ${
       currentTheme === 'dark' ? 'emergency-theme-dark' : 
       currentTheme === 'high-contrast' ? 'emergency-theme-high-contrast' :
       'emergency-theme-light'
     } size-${textSize} ${largeButtons ? 'large-layout' : ''} ${accessibilityMode ? 'accessible-layout' : ''}`}>
+
       <div className="emergency-header emergency-section">
-        <h2>Emergency Medical Phrases</h2>
-        <p>Pre-translated emergency phrases ready for immediate use</p>
+        <h2>Emergency Medical Communication</h2>
+        <p>Critical medical translation and communication tools</p>
         
         {/* Quick access to recently used phrases */}
         {lastUsedPhrases.length > 0 && (
@@ -482,7 +483,7 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
             <span>Recently Used: {lastUsedPhrases.length} phrases</span>
           </div>
         )}
-      </div>      <div className={`emergency-grid emergency-grid-2 emergency-section ${largeButtons ? 'large-buttons' : ''}`}>
+      </div><div className={`emergency-grid emergency-grid-2 emergency-section ${largeButtons ? 'large-buttons' : ''}`}>
         {Object.entries(displayedCategories).map(([categoryName, category]) => {
           const isExpanded = !!expandedCategories[categoryName];
           const isLoadingCategory = !!categoryLoadingStates[categoryName];
