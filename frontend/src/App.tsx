@@ -4,11 +4,11 @@ import MultiModalInterface from './components/MultiModalInterface';
 import LanguageSelector from './components/LanguageSelector';
 import { Heart, Settings, Info } from 'lucide-react';
 
-function App() {
-  const [sourceLanguage, setSourceLanguage] = useState('en');
+function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
   const [targetLanguage, setTargetLanguage] = useState('es');
   const [performanceMode, setPerformanceMode] = useState<'standard' | 'optimized'>('optimized');
   const [showPerformanceTooltip, setShowPerformanceTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, right: 0 });
   const tooltipRef = useRef<HTMLDivElement>(null);
   const infoButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -62,8 +62,7 @@ function App() {
               targetLanguage={targetLanguage}
               onSourceChange={setSourceLanguage}
               onTargetChange={setTargetLanguage}
-            />
-              <div className="performance-toggle">
+            />              <div className="performance-toggle">
               <button
                 className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
                 onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
@@ -75,7 +74,18 @@ function App() {
                 ref={infoButtonRef}
                 className="performance-info-btn"
                 onClick={(e) => {
-                  e.stopPropagation(); // Stop this click from being caught by the document listener
+                  e.stopPropagation();
+                  
+                  // Calculate tooltip position relative to button
+                  if (infoButtonRef.current) {
+                    const buttonRect = infoButtonRef.current.getBoundingClientRect();
+                    const newPosition = {
+                      top: buttonRect.bottom + 8, // 8px gap below button
+                      right: window.innerWidth - buttonRect.right // align right edge with button
+                    };
+                    setTooltipPosition(newPosition);
+                  }
+                  
                   setShowPerformanceTooltip(prevState => !prevState);
                 }}
                 title="Performance Mode Information"
@@ -83,16 +93,34 @@ function App() {
                 <Info size={14} />
               </button>
             </div>
-          </nav>
-        </div>
+          </nav>        </div>
       </header>
 
-      {/* Performance Mode Tooltip - Moved outside header for proper positioning */}
+      <main className="main-content" id="main-content" role="main">
+        <MultiModalInterface
+          sourceLanguage={sourceLanguage}
+          targetLanguage={targetLanguage}
+          onLanguageSwitch={handleLanguageSwitch}
+          performanceMode={performanceMode}        />
+      </main>
+
+      {/* Performance Mode Tooltip - Positioned dynamically outside all containers */}
       {showPerformanceTooltip && (
         <div
           className="performance-tooltip"
           ref={tooltipRef}
-          onClick={(e) => e.stopPropagation()} // Stop clicks inside the tooltip from closing it
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'fixed',
+            top: `${tooltipPosition.top}px`,
+            right: `${tooltipPosition.right}px`,
+            zIndex: 999999,
+            width: '380px',
+            background: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #e2e8f0'
+          }}
         >
           <div className="tooltip-header">
             <h4>Performance Modes</h4>
@@ -102,7 +130,8 @@ function App() {
             >
               ×
             </button>
-          </div>          <div className="tooltip-content">
+          </div>
+          <div className="tooltip-content">
             <div className="mode-comparison">
               <div className="mode-section optimized">
                 <div className="mode-title">
@@ -138,14 +167,7 @@ function App() {
             </div>
           </div>
         </div>
-      )}<main className="main-content" id="main-content" role="main">
-        <MultiModalInterface
-          sourceLanguage={sourceLanguage}
-          targetLanguage={targetLanguage}
-          onLanguageSwitch={handleLanguageSwitch}
-          performanceMode={performanceMode}
-        />
-      </main>
+      )}
 
       <footer className="app-footer">
         <div className="footer-content">
