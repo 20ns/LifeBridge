@@ -428,6 +428,182 @@
   transition: width 0.5s ease;
 }
 
+/* Medical Analysis Panel */
+.medical-analysis-panel {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.analysis-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: #475569;
+}
+
+.analysis-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emergency-alert {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.analysis-metrics {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metric-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.metric-value {
+  font-weight: 600;
+}
+
+.metric-value.context-emergency {
+  color: #dc2626;
+}
+
+.metric-value.context-medication {
+  color: #059669;
+}
+
+.metric-value.context-consultation {
+  color: #2563eb;
+}
+
+.metric-value.context-general {
+  color: #6b7280;
+}
+
+.criticality-bar {
+  width: 60px;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.criticality-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+  transition: width 0.3s ease;
+}
+
+.detected-terms {
+  margin-top: 8px;
+}
+
+.terms-label {
+  color: #64748b;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.terms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.term-badge {
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.term-badge.critical {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.term-badge.high {
+  background: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fed7aa;
+}
+
+.term-badge.medium {
+  background: #dbeafe;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.term-badge.low {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.more-terms {
+  color: #6b7280;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Medical Context Selector Styles */
+.medical-context-selector {
+  margin-bottom: 16px;
+}
+
+.context-label {
+  display: flex;
+  align-items: center;
+  color: #374151;
+  font-weight: 500;
+}
+
+.context-grid {
+  gap: 8px;
+}
+
+.context-option {
+  min-height: 60px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.context-option:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.context-option:active {
+  transform: translateY(0);
+}
+
+.context-description {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .translation-interface {

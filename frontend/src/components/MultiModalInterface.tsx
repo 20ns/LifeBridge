@@ -14,12 +14,13 @@ import {
 } from 'lucide-react';
 import TranslationInterface from './TranslationInterface';
 import SpeechInterface from './SpeechInterface';
-import SignLanguageInterface, { SignLanguageInterfaceHandle } from './SignLanguageInterface'; // Import handle
+import SignLanguageInterface, { SignLanguageInterfaceHandle } from './SignLanguageInterface';
 import EmergencyPhrasesEnhanced from './EmergencyPhrasesEnhanced';
 import { translateText } from '../services/awsService';
 import './MultiModalInterface.css';
 
 type CommunicationMode = 'text' | 'speech' | 'sign' | 'emergency';
+type MedicalContextType = 'emergency' | 'consultation' | 'medication' | 'general';
 
 interface ConnectionQuality {
   status: 'excellent' | 'good' | 'poor' | 'offline';
@@ -48,8 +49,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   targetLanguage,
   onLanguageSwitch,
   performanceMode
-}) => {
-  // State management
+}) => {  // State management
   const [activeMode, setActiveMode] = useState<CommunicationMode>('text');
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
   const [connectionQuality, setConnectionQuality] = useState<ConnectionQuality>({
@@ -156,30 +156,22 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     translationCache.current.set(key, {
       data,
       timestamp: Date.now()
-    });
-  }, []);
+    });  }, []);
 
-  // Emergency mode handler with exit confirmation
-  const handleEmergencyMode = useCallback((enable: boolean) => {
-    if (!enable && isEmergencyMode) {
-      // Show confirmation dialog when trying to exit emergency mode
-      const confirmed = window.confirm(
-        'Are you sure you want to exit emergency mode?\n\nThis will return you to the normal interface.'
-      );
-      if (!confirmed) {
-        return; // User cancelled, stay in emergency mode
-      }
+  // Enhanced emergency mode handler
+  const handleEmergencyMode = useCallback((enabled: boolean) => {
+    setIsEmergencyMode(enabled);
+    if (enabled) {
+      setActiveMode('emergency');
     }
     
-    setIsEmergencyMode(enable);
-    if (enable) {
-      setActiveMode('emergency');
-      addNotification('🚨 Emergency mode activated');
+    // Add emergency notification
+    if (enabled) {
+      addNotification('🚨 Emergency mode activated - Priority processing enabled');
     } else {
-      setActiveMode('text');
       addNotification('Emergency mode deactivated');
     }
-  }, [isEmergencyMode]);
+  }, []);
 
   // Handle clicking on LifeBridge AI text when in emergency mode
   const handleHeaderClick = useCallback(() => {
@@ -388,9 +380,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
             </div>
           ))}
         </div>
-      )}
-
-      {/* Mode selection tabs */}
+      )}      {/* Mode selection tabs */}
       <div className={`mode-selector ${isEmergencyMode ? 'emergency-layout' : ''}`}>
         <button
           className={`mode-tab ${activeMode === 'text' ? 'active' : ''}`}
@@ -458,18 +448,17 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         {performanceMetrics.offlineMode ? (
           <OfflineFallback />
         ) : (
-          <>
-            {activeMode === 'text' && (              <TranslationInterface
+          <>            {activeMode === 'text' && (              <TranslationInterface
                 sourceLanguage={sourceLanguage}
                 targetLanguage={targetLanguage}
                 isListening={isListening}
                 setIsListening={setIsListening}
                 performanceMode={performanceMode}
+                medicalContext={isEmergencyMode ? 'emergency' : 'general'}
               />
             )}
             
-            {activeMode === 'speech' && (
-              <SpeechInterface
+            {activeMode === 'speech' && (              <SpeechInterface
                 language={sourceLanguage}
                 onSpeechToText={(text) => {
                   const startTime = Date.now();
