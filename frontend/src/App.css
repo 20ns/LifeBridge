@@ -1387,20 +1387,6 @@ a:focus {
   animation: tooltipFadeIn 0.2s ease-out;
 }
 
-/* Arrow pointing up to the info button */
-.performance-tooltip::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  right: 14px;
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 8px solid white;
-  filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
-}
-
 @keyframes tooltipFadeIn {
   from {
     opacity: 0;
