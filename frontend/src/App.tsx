@@ -54,24 +54,30 @@ function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
             <Heart className="logo-icon" />
             <h1>LifeBridge AI</h1>
             <p className="subtitle">Medical Translation Platform</p>
-          </div>          <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">            <div className="language-section">
-              <LanguageSelector
-                sourceLanguage={sourceLanguage}
-                targetLanguage={targetLanguage}
-                onSourceChange={setSourceLanguage}
-                onTargetChange={setTargetLanguage}
-              />
-            </div><div className="performance-toggle">
-              <button
-                className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
-                onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
-                title="Toggle Performance Mode"
-              >
-                <Settings size={16} />
-                {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
-              </button>              <button 
-                ref={infoButtonRef}
-                className="performance-info-btn"
+          </div>          <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
+            <div className="controls-group">
+              <div className="language-section">
+                <LanguageSelector
+                  sourceLanguage={sourceLanguage}
+                  targetLanguage={targetLanguage}
+                  onSourceChange={setSourceLanguage}
+                  onTargetChange={setTargetLanguage}
+                />
+              </div>
+
+              <div className="performance-toggle">
+                <button
+                  className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
+                  onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
+                  title="Toggle Performance Mode"
+                >
+                  <Settings size={16} />
+                  {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
+                </button>              
+
+                <button 
+                  ref={infoButtonRef}
+                  className="performance-info-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   
@@ -89,11 +95,11 @@ function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
                   setShowPerformanceTooltip(prevState => !prevState);
                 }}
                 title="Performance Mode Information"
-              >
-                <Info size={14} />
+              >                <Info size={14} />
               </button>
             </div>
-          </nav>        </div>
+            </div>
+          </nav></div>
       </header>
 
       <main className="main-content" id="main-content" role="main">

@@ -288,36 +288,32 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
           
           <button 
             ref={medicalInfoButtonRef}
-            className="medical-info-btn"
-            onClick={(e) => {
+            className="medical-info-btn"            onClick={(e) => {
               e.stopPropagation();
               
               // Calculate tooltip position relative to button and screen
               if (medicalInfoButtonRef.current) {
                 const buttonRect = medicalInfoButtonRef.current.getBoundingClientRect();
-                const tooltipWidth = 400;
+                const tooltipWidth = 350; // Made smaller for conciseness
                 const screenWidth = window.innerWidth;
-                const screenHeight = window.innerHeight;
                 
-                // Calculate horizontal position (prefer left side, but adjust if too close to screen edge)
-                let leftPosition = buttonRect.left + buttonRect.width / 2 - tooltipWidth / 2;
+                // Position to the right of the button with a small gap
+                let leftPosition = buttonRect.right + 8;
+                
+                // If tooltip would go off right edge, position it to the left of button
+                if (leftPosition + tooltipWidth > screenWidth - 10) {
+                  leftPosition = buttonRect.left - tooltipWidth - 8;
+                }
+                
+                // If still off screen, center it and position below
                 if (leftPosition < 10) {
-                  leftPosition = 10; // 10px margin from left edge
-                } else if (leftPosition + tooltipWidth > screenWidth - 10) {
-                  leftPosition = screenWidth - tooltipWidth - 10; // 10px margin from right edge
+                  leftPosition = Math.max(10, buttonRect.left + buttonRect.width / 2 - tooltipWidth / 2);
                 }
                 
-                // Calculate vertical position (below button with margin)
-                let topPosition = buttonRect.bottom + 12;
-                
-                // If tooltip would go below screen, position it above the button
-                const tooltipHeight = 500; // estimated height
-                if (topPosition + tooltipHeight > screenHeight - 20) {
-                  topPosition = buttonRect.top - tooltipHeight - 12;
-                }
+                const topPosition = buttonRect.top + buttonRect.height / 2 - 50; // Center vertically with button
                 
                 const newPosition = {
-                  top: topPosition,
+                  top: Math.max(10, topPosition),
                   left: leftPosition
                 };
                 setMedicalTooltipPosition(newPosition);
@@ -582,9 +578,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             context={context}
             symptoms={detectedSymptoms || undefined}
             patientAge={patientAge}
-            vitalSigns={Object.keys(vitalSigns).length > 0 ? vitalSigns : undefined}          />        </div>      )}
-
-      {/* Medical Context Tooltip */}
+            vitalSigns={Object.keys(vitalSigns).length > 0 ? vitalSigns : undefined}          />        </div>      )}      {/* Medical Context Tooltip */}
       {showMedicalContextTooltip && (
         <div
           className="medical-context-tooltip"
@@ -595,11 +589,11 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             top: `${medicalTooltipPosition.top}px`,
             left: `${medicalTooltipPosition.left}px`,
             zIndex: 999999,
-            width: '400px',
+            width: '350px',
             maxWidth: '90vw',
             background: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.15)',
+            borderRadius: '8px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
             border: '1px solid #e2e8f0'
           }}
         >
@@ -607,92 +601,105 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
           <div 
             style={{
               position: 'absolute',
-              top: '-8px',
-              left: medicalInfoButtonRef.current ? 
-                `${Math.max(20, Math.min(380, 
-                  (medicalInfoButtonRef.current.getBoundingClientRect().left + medicalInfoButtonRef.current.getBoundingClientRect().width / 2) - 
-                  medicalTooltipPosition.left
-                ))}px` : '50%',
-              transform: 'translateX(-50%)',
+              top: '50px', // Center vertically
+              left: medicalInfoButtonRef.current && 
+                    medicalTooltipPosition.left > (medicalInfoButtonRef.current.getBoundingClientRect().right + 8) ? 
+                    '-8px' : 'auto', // Left arrow if tooltip is to the right
+              right: medicalInfoButtonRef.current && 
+                     medicalTooltipPosition.left < (medicalInfoButtonRef.current.getBoundingClientRect().left - 8) ? 
+                     '-8px' : 'auto', // Right arrow if tooltip is to the left
+              transform: 'translateY(-50%)',
               width: '0',
               height: '0',
-              borderLeft: '8px solid transparent',
-              borderRight: '8px solid transparent',
-              borderBottom: '8px solid white',
-              filter: 'drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1))'
+              borderTop: '8px solid transparent',
+              borderBottom: '8px solid transparent',
+              borderRight: medicalTooltipPosition.left > (medicalInfoButtonRef.current?.getBoundingClientRect().right || 0) ? 
+                          '8px solid white' : 'none',
+              borderLeft: medicalTooltipPosition.left < (medicalInfoButtonRef.current?.getBoundingClientRect().left || 0) ? 
+                         '8px solid white' : 'none',
+              filter: 'drop-shadow(0 0 2px rgba(0, 0, 0, 0.1))'
             }}
           />
           
-          <div className="tooltip-header">
-            <h4>Medical Context Types</h4>
+          <div className="tooltip-header" style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            padding: '12px 16px 8px',
+            borderBottom: '1px solid #f1f5f9'
+          }}>
+            <h4 style={{ margin: '0', fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+              Medical Context Types
+            </h4>
             <button
               className="tooltip-close"
               onClick={() => setShowMedicalContextTooltip(false)}
               style={{
                 background: 'none',
                 border: 'none',
-                fontSize: '18px',
+                fontSize: '16px',
                 cursor: 'pointer',
-                padding: '4px',
-                color: '#6b7280'
+                padding: '2px',
+                color: '#6b7280',
+                borderRadius: '2px'
               }}
             >
               ×
             </button>
           </div>
           
-          <div className="tooltip-content" style={{ padding: '16px' }}>
+          <div className="tooltip-content" style={{ padding: '12px 16px' }}>
             <div className="medical-context-explanation">
-              <div className="context-item" style={{ marginBottom: '16px' }}>
-                <div className="context-title" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ marginRight: '8px', fontSize: '18px' }}>🚨</span>
-                  <strong style={{ color: '#dc2626' }}>Emergency</strong>
+              <div className="context-item" style={{ marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ marginRight: '6px', fontSize: '14px' }}>🚨</span>
+                  <strong style={{ color: '#dc2626', fontSize: '13px' }}>Emergency</strong>
                 </div>
-                <p style={{ margin: '0', fontSize: '14px', color: '#4b5563', lineHeight: '1.4' }}>
-                  Critical care situations requiring immediate attention. Uses priority processing with fastest AI responses for life-threatening scenarios.
+                <p style={{ margin: '0', fontSize: '12px', color: '#4b5563', lineHeight: '1.3' }}>
+                  Critical situations with priority processing and fastest responses.
                 </p>
               </div>
               
-              <div className="context-item" style={{ marginBottom: '16px' }}>
-                <div className="context-title" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ marginRight: '8px', fontSize: '18px' }}>🩺</span>
-                  <strong style={{ color: '#059669' }}>Consultation</strong>
+              <div className="context-item" style={{ marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ marginRight: '6px', fontSize: '14px' }}>🩺</span>
+                  <strong style={{ color: '#059669', fontSize: '13px' }}>Consultation</strong>
                 </div>
-                <p style={{ margin: '0', fontSize: '14px', color: '#4b5563', lineHeight: '1.4' }}>
-                  Patient examination and diagnosis discussions. Optimized for precise medical terminology and professional communication.
+                <p style={{ margin: '0', fontSize: '12px', color: '#4b5563', lineHeight: '1.3' }}>
+                  Patient examination with precise medical terminology.
                 </p>
               </div>
               
-              <div className="context-item" style={{ marginBottom: '16px' }}>
-                <div className="context-title" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ marginRight: '8px', fontSize: '18px' }}>💊</span>
-                  <strong style={{ color: '#7c3aed' }}>Medication</strong>
+              <div className="context-item" style={{ marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ marginRight: '6px', fontSize: '14px' }}>💊</span>
+                  <strong style={{ color: '#7c3aed', fontSize: '13px' }}>Medication</strong>
                 </div>
-                <p style={{ margin: '0', fontSize: '14px', color: '#4b5563', lineHeight: '1.4' }}>
-                  Prescription instructions and drug-related information. Enhanced accuracy for dosages, drug names, and safety warnings.
+                <p style={{ margin: '0', fontSize: '12px', color: '#4b5563', lineHeight: '1.3' }}>
+                  Enhanced accuracy for drug names, dosages, and safety warnings.
                 </p>
               </div>
               
-              <div className="context-item" style={{ marginBottom: '16px' }}>
-                <div className="context-title" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ marginRight: '8px', fontSize: '18px' }}>👥</span>
-                  <strong style={{ color: '#0f766e' }}>General</strong>
+              <div className="context-item" style={{ marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ marginRight: '6px', fontSize: '14px' }}>👥</span>
+                  <strong style={{ color: '#0f766e', fontSize: '13px' }}>General</strong>
                 </div>
-                <p style={{ margin: '0', fontSize: '14px', color: '#4b5563', lineHeight: '1.4' }}>
-                  General medical communication and information. Balanced processing for routine healthcare conversations.
+                <p style={{ margin: '0', fontSize: '12px', color: '#4b5563', lineHeight: '1.3' }}>
+                  Balanced processing for routine healthcare conversations.
                 </p>
               </div>
             </div>
             
-            <div className="context-note" style={{ 
-              marginTop: '16px', 
-              padding: '12px', 
+            <div style={{ 
+              marginTop: '12px', 
+              padding: '8px', 
               backgroundColor: '#f8fafc', 
-              borderRadius: '8px',
+              borderRadius: '4px',
               border: '1px solid #e2e8f0'
             }}>
-              <p style={{ margin: '0', fontSize: '13px', color: '#374151' }}>
-                <strong>How it works:</strong> LifeBridge automatically detects medical context from your text and applies the appropriate translation strategy for maximum accuracy and safety.
+              <p style={{ margin: '0', fontSize: '11px', color: '#374151' }}>
+                <strong>Auto-detection:</strong> LifeBridge detects context from your text for optimal translation accuracy.
               </p>
             </div>
           </div>
