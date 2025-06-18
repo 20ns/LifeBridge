@@ -53,6 +53,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
 }) => {  // State management
   const [activeMode, setActiveMode] = useState<CommunicationMode>('text');
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [connectionQuality, setConnectionQuality] = useState<ConnectionQuality>({
     status: 'excellent',
     latency: 50,
@@ -157,22 +158,38 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     translationCache.current.set(key, {
       data,
       timestamp: Date.now()
-    });  }, []);
-
-  // Enhanced emergency mode handler
+    });  }, []);  // Enhanced emergency mode handler
   const handleEmergencyMode = useCallback((enabled: boolean) => {
-    setIsEmergencyMode(enabled);
-    if (enabled) {
-      setActiveMode('emergency');
-    }
+    if (isTransitioning) return; // Prevent multiple rapid clicks
     
-    // Add emergency notification
-    if (enabled) {
-      addNotification('🚨 Emergency mode activated - Priority processing enabled');
-    } else {
-      addNotification('Emergency mode deactivated');
-    }
-  }, []);
+    setIsTransitioning(true);
+    
+    // Small delay for smooth visual transition
+    setTimeout(() => {
+      setIsEmergencyMode(enabled);
+      if (enabled) {
+        setActiveMode('emergency');
+      } else {
+        // When exiting emergency mode, smoothly transition back to text mode (home page)
+        setActiveMode('text');
+      }
+      
+      // Add emergency notification
+      if (enabled) {
+        setNotifications(prev => [...prev.slice(-4), '🚨 Emergency mode activated - Priority processing enabled']);
+      } else {
+        setNotifications(prev => [...prev.slice(-4), '✅ Emergency mode deactivated - Returned to normal interface']);
+      }
+      
+      // Auto-remove notification after 5 seconds
+      setTimeout(() => {
+        setNotifications(prev => prev.slice(1));
+      }, 5000);
+      
+      // Reset transition state
+      setTimeout(() => setIsTransitioning(false), 300);
+    }, 100);
+  }, [isTransitioning]);
 
   // Handle clicking on LifeBridge AI text when in emergency mode
   const handleHeaderClick = useCallback(() => {
@@ -498,11 +515,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       {/* Performance panel overlay */}
       <PerformancePanel />      {/* Quick access emergency button (always visible) */}
       <button 
-        className={`emergency-quick-access ${isEmergencyMode ? 'active' : ''}`}
+        className={`emergency-quick-access ${isEmergencyMode ? 'active' : ''} ${isTransitioning ? 'transitioning' : ''}`}
         onClick={() => handleEmergencyMode(!isEmergencyMode)}
-        title={isEmergencyMode ? "Exit Emergency Mode" : "Emergency Access"}
+        title={isEmergencyMode ? "Exit Emergency Mode & Return to Home" : "Emergency Access"}
+        disabled={isTransitioning}
       >
-        {isEmergencyMode ? '✕' : '🚨'}
+        {isTransitioning ? '⟳' : (isEmergencyMode ? '✕' : '🚨')}
       </button>
     </div>
   );

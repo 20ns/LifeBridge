@@ -7,6 +7,7 @@
   border: none;
   box-shadow: none;
   overflow: visible;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Enhanced Tab Navigation - Clear Active/Inactive States */
@@ -248,6 +249,7 @@
 /* Enhanced Emergency Mode Styling - Layout Consistent */
 .multi-modal-interface.emergency-mode {
   background: transparent;
+  animation: emergency-mode-enter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .multi-modal-interface.emergency-mode .mode-selector {
@@ -318,6 +320,61 @@
   }
   50% { 
     box-shadow: 0 0 25px rgba(220, 38, 38, 0.8);
+  }
+}
+
+/* Enhanced Emergency Mode Transitions */
+.multi-modal-interface {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.multi-modal-interface.emergency-mode {
+  animation: emergency-mode-enter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.multi-modal-interface:not(.emergency-mode) .mode-selector {
+  animation: normal-mode-enter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Keyframes for smooth emergency mode transitions */
+@keyframes emergency-mode-enter {
+  0% {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes normal-mode-enter {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.interface-content {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interface-content.emergency-layout {
+  animation: content-emergency-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes content-emergency-enter {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -653,8 +710,9 @@
   font-size: 24px;
   cursor: pointer;
   z-index: 1001;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+  transform: rotate(0deg);
 }
 
 .emergency-quick-access:hover {
@@ -665,6 +723,14 @@
 .emergency-quick-access.active {
   background: var(--secondary-green);
   animation: none;
+  transform: rotate(0deg);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emergency-quick-access.active:hover {
+  background: var(--secondary-green-dark, #10b981);
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.6);
 }
 
 .emergency-quick-access:not(.active) {
@@ -779,4 +845,16 @@
 .emergency-mode .performance-mode-indicator.optimized span {
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Transitioning state for emergency button */
+.emergency-quick-access.transitioning {
+  animation: button-transition-spin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+@keyframes button-transition-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(0.9); }
+  100% { transform: rotate(360deg) scale(1); }
 }
