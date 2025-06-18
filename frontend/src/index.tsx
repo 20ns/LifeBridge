@@ -1,5 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './styles/_variables.css';
+import './styles/global.css';
+import './styles/layout.css';
+import './styles/accessibility.css';
+import './styles/emergency.css';
+import './styles/tooltips.css';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
