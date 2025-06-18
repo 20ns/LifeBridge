@@ -1375,7 +1375,7 @@ a:focus {
   position: fixed;
   top: 70px;
   right: 20px;
-  width: 420px;
+  width: 380px;
   background: white;
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -1517,15 +1517,15 @@ a:focus {
 /* Responsive tooltip */
 @media (max-width: 768px) {
   .performance-tooltip {
-    width: 350px;
-    right: -50px;
+    width: 320px;
+    right: 10px;
   }
 }
 
 @media (max-width: 480px) {
   .performance-tooltip {
-    width: 300px;
-    right: -100px;
+    width: 280px;
+    right: 10px;
   }
 }
 
