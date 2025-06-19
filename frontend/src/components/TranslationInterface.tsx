@@ -33,15 +33,12 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>(medicalContext);  const [medicalAnalysis, setMedicalAnalysis] = useState<MedicalAnalysis | null>(null);
   const [showMedicalSuggestions, setShowMedicalSuggestions] = useState(false);
   const [realTimeMode, setRealTimeMode] = useState(false);
-  const [showQRecommendations, setShowQRecommendations] = useState(true);const [detectedSymptoms, setDetectedSymptoms] = useState<string>('');
-  const [patientAge] = useState<number | undefined>(undefined);
-  const [vitalSigns] = useState<{
-    heartRate?: number;
-    bloodPressure?: string;
-    temperature?: number;
-    respiratoryRate?: number;
-    oxygenSaturation?: number;
-  }>({});  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [showQRecommendations, setShowQRecommendations] = useState(false);
+  const [patientAge, setPatientAge] = useState<number | undefined>(undefined);
+  const [vitalSigns, setVitalSigns] = useState<Record<string, number>>({});  const [autoTranslating, setAutoTranslating] = useState(false); // New state for auto-translation feedback
+  const [detectedSymptoms, setDetectedSymptoms] = useState<string | null>(null); // Add missing state for symptoms
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const prevLanguagesRef = useRef({ sourceLanguage, targetLanguage }); // Track previous language values
 
   // Initialize performance monitoring (silent - for internal metrics only)
   const performanceMonitor = usePerformanceMonitor();
@@ -119,7 +116,63 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       setTranslatedText(lastTranslation.translatedText);
       setConfidence(lastTranslation.confidence);
     }
-  }, [lastTranslation, realTimeMode]);  const handleTranslate = useCallback(async (textToTranslate?: string) => {
+  }, [lastTranslation, realTimeMode]);  // Auto-translate when languages change if there's existing content
+  useEffect(() => {
+    const prevLanguages = prevLanguagesRef.current;
+    const languagesChanged = 
+      prevLanguages.sourceLanguage !== sourceLanguage || 
+      prevLanguages.targetLanguage !== targetLanguage;
+
+    // Update the ref with current values
+    prevLanguagesRef.current = { sourceLanguage, targetLanguage };
+
+    // Only auto-translate if:
+    // 1. Languages actually changed
+    // 2. There's text in the input field
+    // 3. There's already a translation (user has translated before)
+    // 4. We're not currently translating
+    // 5. Real-time mode is off (to avoid conflicts)
+    // 6. User isn't currently typing
+    if (
+      languagesChanged &&
+      inputText.trim() && 
+      translatedText && 
+      !isTranslating && 
+      !realTimeMode &&
+      !isTyping
+    ) {
+      // Set auto-translating state for UI feedback
+      setAutoTranslating(true);
+      
+      // Add a small delay to avoid rapid successive translations
+      const autoTranslateTimeout = setTimeout(async () => {
+        try {
+          const text = inputText;
+          if (!text.trim()) return;
+
+          setIsTranslating(true);
+          const result = await translateText(text, sourceLanguage, targetLanguage, context, performanceMode);
+          
+          setTranslatedText(result.translatedText);
+          setConfidence(result.confidence);
+        } catch (error) {
+          console.error('Auto-translation error:', error);
+          setTranslatedText('Auto-translation failed. Please try again.');
+          setConfidence(null);
+        } finally {
+          setIsTranslating(false);
+          setAutoTranslating(false);
+        }
+      }, 300);
+
+      return () => {
+        clearTimeout(autoTranslateTimeout);
+        setAutoTranslating(false);
+      };
+    }
+  }, [sourceLanguage, targetLanguage, inputText, translatedText, isTranslating, realTimeMode, isTyping, context, performanceMode]); // Dependencies are safe now
+
+  const handleTranslate = useCallback(async (textToTranslate?: string) => {
     const text = textToTranslate || inputText;
     if (!text.trim()) return;
 
@@ -127,6 +180,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     performanceMonitor.startOperation('translation');
     
     setIsTranslating(true);
+    setAutoTranslating(true); // Start auto-translation feedback
     try {
       const result = await translateText(text, sourceLanguage, targetLanguage, context, performanceMode);
       
@@ -150,6 +204,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       setConfidence(null);
     } finally {
       setIsTranslating(false);
+      setAutoTranslating(false); // Stop auto-translation feedback
     }
   }, [inputText, sourceLanguage, targetLanguage, context, performanceMonitor, realTimeMode]);
 
@@ -438,17 +493,25 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
                   )}
                 </div>
               </div>
-            )}
-
-            <div className="input-actions">
+            )}            <div className="input-actions">
               <button
                 onClick={() => handleTranslate()}
                 className="translate-button"
-                disabled={!inputText.trim() || isTranslating || (realTimeMode && isRealTimeTranslating)}
+                disabled={!inputText.trim() || isTranslating || autoTranslating || (realTimeMode && isRealTimeTranslating)}
               >
-                {isTranslating || (realTimeMode && isRealTimeTranslating) ? 'Translating...' : 'Translate'}
+                {isTranslating || autoTranslating || (realTimeMode && isRealTimeTranslating) 
+                  ? (autoTranslating ? 'Auto-translating...' : 'Translating...') 
+                  : 'Translate'}
               </button>
             </div>
+            
+            {/* Auto-translation status indicator */}
+            {autoTranslating && (
+              <div className="auto-translate-status">
+                <div className="pulse"></div>
+                <span>Auto-translating to new language...</span>
+              </div>
+            )}
             
             {/* Status Indicators */}
             {realTimeMode && (
