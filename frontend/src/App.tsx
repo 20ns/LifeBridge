@@ -189,16 +189,54 @@ function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
               </div>
             </div>
           </div>        </div>
-      )}
-
-      <footer className="app-footer">
+      )}      <footer className="app-footer">
         <div className="footer-content">
-          <p>© 2025 LifeBridge AI - Bridging Communication in Healthcare</p>
-          <div className="footer-stats">
-            <span>🌍 Multi-Modal</span>
-            <span>🚨 Emergency Ready</span>
-            <span>⚡ Optimized</span>
-            <span>♿ Accessible</span>
+          <div className="footer-section footer-brand">
+            <div className="footer-logo">
+              <Heart className="footer-logo-icon" />
+              <span className="footer-brand-name">LifeBridge</span>
+            </div>
+            <p className="footer-description">
+              Medical translation platform for healthcare communication
+            </p>
+          </div>
+          
+          <div className="footer-section footer-capabilities">
+            <h4 className="footer-heading">Available Features</h4>
+            <div className="capability-grid">
+              <span className="capability-item">
+                <span className="capability-icon">💬</span>
+                Text Translation
+              </span>
+              <span className="capability-item">
+                <span className="capability-icon">🎤</span>
+                Speech Recognition
+              </span>
+              <span className="capability-item">
+                <span className="capability-icon">👋</span>
+                Sign Language Detection
+              </span>
+              <span className="capability-item">
+                <span className="capability-icon">🚨</span>
+                Emergency Phrases
+              </span>
+            </div>
+          </div>
+          
+          <div className="footer-section footer-info">
+            <div className="footer-disclaimer">
+              <p className="disclaimer-text">
+                This tool assists healthcare communication and should supplement, not replace, professional medical interpretation services.
+              </p>
+            </div>
+            <div className="footer-bottom">
+              <p className="footer-copyright">
+                © 2025 LifeBridge - Healthcare Communication Platform
+              </p>
+              <div className="footer-tech">
+                <small>Powered by AWS Bedrock</small>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
