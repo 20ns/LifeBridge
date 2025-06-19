@@ -88,9 +88,7 @@ export const useSpeechRecognition = ({
         } catch (permError) {
           console.log('Permission check not available, proceeding...');
         }
-      }
-
-      const recognition = new SpeechRecognition();
+      }      const recognition = new SpeechRecognition();
       
       // Configure recognition settings
       recognition.continuous = false;
@@ -98,9 +96,45 @@ export const useSpeechRecognition = ({
       recognition.lang = language;
       recognition.maxAlternatives = 1;
 
-      recognition.onstart = () => {
+      // Set up audio level monitoring for the speech recognition session
+      let audioContext: AudioContext | null = null;
+      let analyser: AnalyserNode | null = null;
+      let microphone: MediaStreamAudioSourceNode | null = null;
+      let audioLevelInterval: NodeJS.Timeout | null = null;
+
+      recognition.onstart = async () => {
         console.log('Speech recognition started successfully');
         setState(prev => ({ ...prev, isRecording: true, error: null }));
+        
+        // Start audio level monitoring
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioContext = new AudioContext();
+          analyser = audioContext.createAnalyser();
+          microphone = audioContext.createMediaStreamSource(stream);
+          
+          analyser.fftSize = 256;
+          microphone.connect(analyser);
+          
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          
+          audioLevelInterval = setInterval(() => {
+            analyser!.getByteFrequencyData(dataArray);
+            
+            // Calculate average volume
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+              sum += dataArray[i];
+            }
+            const average = sum / dataArray.length;
+            const normalizedLevel = Math.min(1, average / 128); // Normalize to 0-1
+            
+            setState(prev => ({ ...prev, audioLevel: normalizedLevel }));
+          }, 100);
+          
+        } catch (error) {
+          console.warn('Could not set up audio level monitoring:', error);
+        }
       };
 
       recognition.onresult = (event: any) => {
@@ -149,13 +183,21 @@ export const useSpeechRecognition = ({
             errorMessage = 'Speech recognition service not allowed. Please check browser settings.';
             break;
         }
-        
-        setState(prev => ({ 
+          setState(prev => ({ 
           ...prev, 
           isRecording: false, 
           isProcessing: false,
-          error: errorMessage 
+          error: errorMessage,
+          audioLevel: 0
         }));
+        
+        // Clean up audio monitoring on error
+        if (audioLevelInterval) {
+          clearInterval(audioLevelInterval);
+        }
+        if (audioContext) {
+          audioContext.close();
+        }
         
         if (onError) {
           onError(errorMessage);
@@ -177,11 +219,17 @@ export const useSpeechRecognition = ({
             }, 1000);
           }
         }
-      };
-
-      recognition.onend = () => {
+      };      recognition.onend = () => {
         console.log('Speech recognition ended');
-        setState(prev => ({ ...prev, isRecording: false }));
+        setState(prev => ({ ...prev, isRecording: false, audioLevel: 0 }));
+        
+        // Clean up audio monitoring
+        if (audioLevelInterval) {
+          clearInterval(audioLevelInterval);
+        }
+        if (audioContext) {
+          audioContext.close();
+        }
       };
 
       speechRecognitionRef.current = recognition;

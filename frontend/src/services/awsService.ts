@@ -299,7 +299,11 @@ export const detectLanguage = async (text: string): Promise<string> => {
 };
 
 // Speech synthesis using browser text-to-speech service
-export const speakText = async (text: string, language: string): Promise<void> => {
+export const speakText = async (
+  text: string, 
+  language: string, 
+  onAudioLevel?: (level: number) => void
+): Promise<void> => {
   console.log('Using browser text-to-speech for:', text);
   
   return new Promise((resolve, reject) => {
@@ -362,14 +366,51 @@ export const speakText = async (text: string, language: string): Promise<void> =
           voice: utterance.voice?.name,
           rate: utterance.rate,
           volume: utterance.volume
-        });        utterance.onstart = () => {
+        });        let hasResolved = false;
+        let audioLevelInterval: NodeJS.Timeout | null = null;
+
+        utterance.onstart = () => {
           console.log('Speech started');
+            // Start audio level simulation since we can't easily capture TTS output
+          if (onAudioLevel) {
+            let animationFrame = 0;
+            audioLevelInterval = setInterval(() => {
+              // Create more realistic speech pattern animation
+              const time = animationFrame * 0.05;
+              
+              // Base speech envelope (speech has pauses and variations)
+              const speechEnvelope = Math.abs(Math.sin(time * 2)) * 0.8 + 0.2;
+              
+              // Add speech rhythm (syllables and words)
+              const syllablePattern = Math.sin(time * 8) * 0.3;
+              const wordPattern = Math.sin(time * 1.5) * 0.2;
+              
+              // Add some randomness for natural variation
+              const randomVariation = (Math.random() - 0.5) * 0.3;
+              
+              // Occasional pauses (simulate between words/sentences)
+              const pauseChance = Math.random();
+              const isPause = pauseChance < 0.05; // 5% chance of pause each frame
+              
+              let level;
+              if (isPause) {
+                level = 0.1; // Very low during pauses
+              } else {
+                level = speechEnvelope + syllablePattern + wordPattern + randomVariation;
+                level = Math.max(0.1, Math.min(0.9, level)); // Keep within bounds
+              }
+              
+              onAudioLevel(level);
+              animationFrame++;
+            }, 80); // Slightly slower updates for more natural feel
+          }
         };
-        
-        let hasResolved = false;
-        
-        utterance.onend = () => {
+          utterance.onend = () => {
           console.log('Text-to-speech completed via onend');
+          if (audioLevelInterval) {
+            clearInterval(audioLevelInterval);
+            if (onAudioLevel) onAudioLevel(0); // Reset to 0
+          }
           if (!hasResolved) {
             hasResolved = true;
             resolve();
@@ -378,6 +419,10 @@ export const speakText = async (text: string, language: string): Promise<void> =
         
         utterance.onerror = (event) => {
           console.error('Text-to-speech error:', event);
+          if (audioLevelInterval) {
+            clearInterval(audioLevelInterval);
+            if (onAudioLevel) onAudioLevel(0); // Reset to 0
+          }
           if (!hasResolved) {
             hasResolved = true;
             reject(new Error(`Speech synthesis failed: ${event.error}`));
@@ -394,14 +439,17 @@ export const speakText = async (text: string, language: string): Promise<void> =
         const maxDuration = Math.min(estimatedDuration * 2, 15000); // Cap at 15 seconds
         
         console.log(`Estimated speech duration: ${estimatedDuration}ms, max timeout: ${maxDuration}ms`);
-        
-        setTimeout(() => {
+          setTimeout(() => {
           console.log('Checking speech status after estimated duration...');
           if (!hasResolved) {
             // Give a bit more time, then resolve
             setTimeout(() => {
               if (!hasResolved) {
                 console.log('Speech timeout - resolving promise');
+                if (audioLevelInterval) {
+                  clearInterval(audioLevelInterval);
+                  if (onAudioLevel) onAudioLevel(0); // Reset to 0
+                }
                 hasResolved = true;
                 resolve();
               }
