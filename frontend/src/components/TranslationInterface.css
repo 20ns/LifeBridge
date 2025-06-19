@@ -562,6 +562,24 @@
   border: 1px solid #d1d5db;
 }
 
+.modifier-chronic {
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.modifier-acute {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .more-terms {
   color: #6b7280;
   font-size: 12px;

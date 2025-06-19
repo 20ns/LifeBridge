@@ -87,9 +87,21 @@ export const medicalTermsDictionary: MedicalTerm[] = [
 
 // Emergency keywords that trigger immediate priority processing
 export const emergencyKeywords = [
-  'emergency', 'urgent', 'help', 'pain', 'bleeding', 'breathe', 'breathing',
-  'chest', 'heart', 'unconscious', 'seizure', 'stroke', 'allergic reaction',
+  'emergency', 'urgent', 'help', 'sudden pain', 'severe pain', 'bleeding', 'breathe', 'breathing',
+  'chest', 'heart attack', 'unconscious', 'seizure', 'stroke', 'allergic reaction',
   'overdose', 'poisoning', 'burn', 'fracture', 'trauma'
+];
+
+// Medical modifiers that reduce criticality (chronic/ongoing conditions)
+export const chronicModifiers = [
+  'chronic', 'ongoing', 'regular', 'usual', 'daily', 'long-term', 'persistent',
+  'recurring', 'routine', 'managed', 'controlled', 'stable'
+];
+
+// Medical modifiers that increase criticality (acute conditions)
+export const acuteModifiers = [
+  'sudden', 'severe', 'acute', 'intense', 'sharp', 'crushing', 'stabbing',
+  'new', 'worsening', 'getting worse', 'unbearable', 'emergency'
 ];
 
 // Medication-related keywords that require high accuracy
@@ -136,6 +148,7 @@ export interface MedicalAnalysis {
   detectedTerms: MedicalTerm[];
   recommendedContext: 'emergency' | 'consultation' | 'medication' | 'general';
   criticalityScore: number; // 0-100
+  modifierContext: 'acute' | 'chronic' | 'neutral'; // New field for context
 }
 
 export const analyzeMedicalContent = (text: string): MedicalAnalysis => {
@@ -147,29 +160,59 @@ export const analyzeMedicalContent = (text: string): MedicalAnalysis => {
     term.alternatives.some(alt => lowercaseText.includes(alt.toLowerCase()))
   );
   
+  // Detect medical modifiers
+  const hasChronicModifiers = chronicModifiers.some(modifier => 
+    lowercaseText.includes(modifier.toLowerCase())
+  );
+  const hasAcuteModifiers = acuteModifiers.some(modifier => 
+    lowercaseText.includes(modifier.toLowerCase())
+  );
+  
+  // Determine modifier context
+  let modifierContext: 'acute' | 'chronic' | 'neutral';
+  if (hasAcuteModifiers) {
+    modifierContext = 'acute';
+  } else if (hasChronicModifiers) {
+    modifierContext = 'chronic';
+  } else {
+    modifierContext = 'neutral';
+  }
+  
   const containsMedical = detectedTerms.length > 0;
-  const isEmergency = containsEmergencyKeywords(text);
+  const isEmergency = containsEmergencyKeywords(text) && modifierContext !== 'chronic';
   const requiresMedicationAccuracy = containsMedicationKeywords(text);
   
-  // Calculate criticality score
+  // Calculate criticality score with modifier adjustments
   let criticalityScore = 0;
   detectedTerms.forEach(term => {
+    let baseScore = 0;
     switch (term.criticality) {
-      case 'critical': criticalityScore += 25; break;
-      case 'high': criticalityScore += 15; break;
-      case 'medium': criticalityScore += 10; break;
-      case 'low': criticalityScore += 5; break;
+      case 'critical': baseScore = 25; break;
+      case 'high': baseScore = 15; break;
+      case 'medium': baseScore = 10; break;
+      case 'low': baseScore = 5; break;
     }
+    
+    // Apply modifier adjustments
+    if (modifierContext === 'chronic') {
+      // Reduce criticality for chronic conditions
+      baseScore = Math.floor(baseScore * 0.4); // 60% reduction
+    } else if (modifierContext === 'acute') {
+      // Increase criticality for acute conditions
+      baseScore = Math.floor(baseScore * 1.2); // 20% increase
+    }
+    
+    criticalityScore += baseScore;
   });
   
-  // Determine recommended context
+  // Determine recommended context with modifier awareness
   let recommendedContext: 'emergency' | 'consultation' | 'medication' | 'general';
-  if (isEmergency || criticalityScore > 50) {
+  if (isEmergency && modifierContext !== 'chronic') {
     recommendedContext = 'emergency';
   } else if (requiresMedicationAccuracy) {
     recommendedContext = 'medication';
   } else if (containsMedical) {
-    recommendedContext = 'consultation';
+    recommendedContext = modifierContext === 'chronic' ? 'consultation' : 'consultation';
   } else {
     recommendedContext = 'general';
   }
@@ -180,6 +223,7 @@ export const analyzeMedicalContent = (text: string): MedicalAnalysis => {
     requiresMedicationAccuracy,
     detectedTerms,
     recommendedContext,
-    criticalityScore: Math.min(100, criticalityScore)
+    criticalityScore: Math.min(100, criticalityScore),
+    modifierContext
   };
 };

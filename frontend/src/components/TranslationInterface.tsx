@@ -392,14 +392,22 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
                       <span className="text-red-700 font-medium">Emergency content detected</span>
                     </div>
                   )}
-                  
-                  <div className="analysis-metrics">
+                    <div className="analysis-metrics">
                     <div className="metric">
                       <span className="metric-label">Context:</span>
                       <span className={`metric-value context-${medicalAnalysis.recommendedContext}`}>
                         {medicalAnalysis.recommendedContext}
                       </span>
                     </div>
+                    
+                    {medicalAnalysis.modifierContext !== 'neutral' && (
+                      <div className="metric">
+                        <span className="metric-label">Condition Type:</span>
+                        <span className={`metric-value modifier-${medicalAnalysis.modifierContext}`}>
+                          {medicalAnalysis.modifierContext}
+                        </span>
+                      </div>
+                    )}
                     
                     <div className="metric">
                       <span className="metric-label">Criticality:</span>
