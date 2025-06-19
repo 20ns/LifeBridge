@@ -1156,19 +1156,8 @@
   position: relative;
 }
 
-.detection-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-lg);
-  height: 100%;
-  min-height: 420px;
-}
-
-.detection-side, .feedback-side {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.visual-feedback-system-compact {
+  margin-top: var(--spacing-md);
 }
 
 .waiting-state {
@@ -1244,47 +1233,6 @@
   }
 }
 
-/* Status indicators for sign language */
-.status-indicators {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-  padding: var(--spacing-sm) 0;
-  margin-bottom: var(--spacing-md);
-  border-top: 1px solid var(--border-light);
-  padding-top: var(--spacing-md);
-}
-
-.status-item {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  background: var(--bg-tertiary);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-md);
-}
-
-.confidence-good {
-  color: var(--success-green) !important;
-  font-weight: 600;
-}
-
-.confidence-low {
-  color: var(--warning-orange) !important;
-  font-weight: 600;
-}
-
-.emergency-status {
-  background: rgba(254, 242, 242, 0.8) !important;
-  color: var(--accent-red) !important;
-  font-weight: 600;
-  border: 1px solid var(--accent-red);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
 
 /* Responsive design for sign language interface */
 @media (max-width: 768px) {

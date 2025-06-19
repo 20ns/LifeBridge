@@ -86,18 +86,6 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
     }
   }, [detectedSigns, isEmergencyDetected, getTextForTranslation, onEmergencyDetected]);
 
-  const handleManualTranslate = () => {
-    const textToTranslate = getTextForTranslation();
-    const medicalContext = getMedicalContext();
-    
-    if (textToTranslate) {
-      showAlert('Translating sign language...', 'info');
-      onTranslationRequest(textToTranslate, medicalContext);
-      setLastTranslationTime(Date.now());
-    } else {
-      showAlert('No signs detected to translate', 'warning');
-    }
-  };
 
   // Enhanced start/stop detection functions with alerts
   const handleStartDetection = () => {
@@ -124,12 +112,13 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
       }
     },
     isDetectionActive: () => isActive
-  }));return (
+  }));
+  return (
     <div className="translation-interface">
-      <div className="translation-layout">
-        {/* Input Section - Sign Detection */}
-        <div className="input-section">        <div className="section-header">
-          <h3>Sign Language Input</h3><button
+      <div className="input-section">
+        <div className="section-header">
+          <h3>Sign Language Input</h3>
+          <button
             onClick={isActive ? handleStopDetection : handleStartDetection}
             className={`start-recording-button ${isActive ? 'recording' : ''}`}
             title={isActive ? 'Stop Detection' : 'Start Detection'}
@@ -142,15 +131,13 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
         {/* Main Detection Area */}
         <div className="sign-detection-area">
           {isActive ? (
-            <div className="detection-layout">
-              <div className="detection-side">
-                <SignLanguageDetector
-                  onSignDetected={handleSignDetected}
-                  isActive={isActive}
-                  medicalContext={getMedicalContext()}
-                />
-              </div>
-              <div className="feedback-side">
+            <>
+              <SignLanguageDetector
+                onSignDetected={handleSignDetected}
+                isActive={isActive}
+                medicalContext={getMedicalContext()}
+              />
+              <div className="visual-feedback-system-compact">
                 <VisualFeedbackSystem
                   signData={{
                     gesture: feedbackData.currentGesture,
@@ -161,7 +148,7 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
                   isActive={isActive}
                 />
               </div>
-            </div>
+            </>
           ) : (
             <div className="waiting-state">
               <Hand size={64} />
@@ -170,68 +157,14 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
             </div>
           )}
         </div>
-
-        {/* Status indicators */}
-        {isActive && (
-          <div className="status-indicators">
-            <span className="status-item">
-              Gesture: <strong>{feedbackData.currentGesture || 'None'}</strong>
-            </span>
-            <span className="status-item">
-              Confidence: <strong className={`confidence-${confidenceScore > 70 ? 'good' : 'low'}`}>
-                {Math.round(confidenceScore)}%
-              </strong>
-            </span>
-            {feedbackData.isEmergency && (
-              <span className="emergency-status">🚨 Emergency Detected</span>
-            )}
-          </div>
-        )}
-
-        <div className="input-actions">
-          <button
-            onClick={handleManualTranslate}
-            className="translate-button"
-            disabled={!currentText.trim() || isTranslating}
-          >
-            {isTranslating ? 'Translating...' : 'Translate Signs'}
-          </button>
+      </div>
+      
+      {/* Alert system */}
+      {alertMessage && (
+        <div className={`sign-alert ${alertType}`}>
+          {alertMessage}
         </div>
-      </div>
-
-      {/* Output Section - Translation */}
-      <div className="output-section">
-        <div className="section-header">
-          <h3>Translation</h3>
-          <div className="output-controls">
-            <button 
-              onClick={handleManualTranslate}
-              className="control-button"
-              title="Retranslate signs"
-              disabled={isTranslating || !currentText.trim()}
-            >
-              {isTranslating ? '...' : '🔄'}
-            </button>
-          </div>
-        </div>
-          <div className={`translation-output ${!translatedText ? 'empty' : ''}`}>
-          {isTranslating ? (
-            <div className="translation-loading">
-              <div className="spinner"></div>
-              <span>Translating signs...</span>
-            </div>
-          ) : (
-            <p>{translatedText || 'Sign translation will appear here...'}</p>
-          )}        </div>
-      </div>
-    </div>
-    
-    {/* Alert system */}
-    {alertMessage && (
-      <div className={`sign-alert ${alertType}`}>
-        {alertMessage}
-      </div>
-    )}
+      )}
     </div>
   );
 });
