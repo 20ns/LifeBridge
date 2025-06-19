@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Mic, MicOff, Volume2, Loader, Activity, Volume1 } from 'lucide-react';
+import { Mic, MicOff, Volume2, Loader, Activity, Volume1, Languages } from 'lucide-react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
-import { speakText } from '../services/awsService';
+import { speakText, translateText } from '../services/awsService';
 import '../App.css';
 import './TranslationInterface.css';
 
@@ -13,6 +13,8 @@ interface SpeechInterfaceProps {
   medicalContext?: 'emergency' | 'consultation' | 'medication' | 'general';
   realTimeMode?: boolean;
   voiceActivityDetection?: boolean;
+  sourceLanguage?: string;
+  targetLanguage?: string;
 }
 
 const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
@@ -22,10 +24,46 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
   className = '',
   medicalContext = 'general',
   realTimeMode = false,
-  voiceActivityDetection = true
+  voiceActivityDetection = true,
+  sourceLanguage = 'en',
+  targetLanguage = 'es'
 }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [recognizedText, setRecognizedText] = useState<string>('');
+  const [translatedText, setTranslatedText] = useState<string>('');
+  const [isTranslating, setIsTranslating] = useState(false);  // Handle transcript from speech recognition and auto-translate
+  const handleTranscriptReceived = async (transcript: string) => {
+    setRecognizedText(transcript);
+    onSpeechToText(transcript);
+
+    // Auto-translate the recognized speech
+    if (transcript.trim()) {
+      try {
+        setIsTranslating(true);
+        setSpeechError(null);
+        
+        const translation = await translateText(
+          transcript,
+          sourceLanguage,
+          targetLanguage,
+          medicalContext
+        );
+        
+        setTranslatedText(translation.translatedText);
+        setIsTranslating(false);
+        
+        // Optionally speak the translation automatically
+        if (medicalContext === 'emergency') {
+          handleTextToSpeech(translation.translatedText);
+        }
+        
+      } catch (error) {
+        setIsTranslating(false);
+        setSpeechError(`Translation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+  };
 
   const {
     isRecording,
@@ -38,8 +76,8 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
     audioLevel,
     confidence
   } = useSpeechRecognition({
-    language,
-    onTranscript: onSpeechToText,
+    language: sourceLanguage,
+    onTranscript: handleTranscriptReceived,
     onError: (error) => setSpeechError(`Recognition: ${error}`),
     medicalContext,
     realTimeMode,
@@ -54,14 +92,14 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
       startRecording();
     }
   };
-
-  const handleTextToSpeech = async () => {
-    if (!textToSpeak || isSpeaking) return;
+  const handleTextToSpeech = async (textToSpeak?: string) => {
+    const textForSpeech = textToSpeak || translatedText;
+    if (!textForSpeech || isSpeaking) return;
 
     try {
       setIsSpeaking(true);
       setSpeechError(null);
-      await speakText(textToSpeak, language);
+      await speakText(textForSpeech, targetLanguage);
     } catch (error) {
       setSpeechError(`Speech: ${error instanceof Error ? error.message : 'Failed to speak text'}`);
     } finally {
@@ -154,15 +192,13 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
         </div>
 
         {/* Output Section - Recognition Results */}
-        <div className="output-section">
-          <div className="section-header">
-            <h3 className="section-title">Recognition Output</h3>
-            {textToSpeak && (
-              <button
-                onClick={handleTextToSpeech}
-                disabled={isSpeaking}
-                className={`text-to-speech-btn ${isSpeaking ? 'speaking' : ''}`}
-              >
+        <div className="output-section">          <div className="section-header">
+            <h3 className="section-title">Speech Recognition & Translation</h3>
+            {translatedText && (<button
+              onClick={() => handleTextToSpeech()}
+              disabled={isSpeaking || !translatedText}
+              className={`text-to-speech-btn ${isSpeaking ? 'speaking' : ''}`}
+            >
                 {isSpeaking ? (
                   <Loader className="w-4 h-4 animate-spin" />
                 ) : (
@@ -172,10 +208,28 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
               </button>
             )}
           </div>
-          
-          <div className="speech-output">
-            {textToSpeak ? (
-              <div className="recognized-text">{textToSpeak}</div>
+            <div className="speech-output">
+            {recognizedText ? (
+              <div className="recognition-results">
+                <div className="recognized-text">
+                  <h5>Recognized ({sourceLanguage}):</h5>
+                  <p>{recognizedText}</p>
+                </div>
+                
+                {isTranslating && (
+                  <div className="translation-loading">
+                    <Languages className="w-4 h-4 animate-spin" />
+                    <span>Translating...</span>
+                  </div>
+                )}
+                
+                {translatedText && (
+                  <div className="translated-text">
+                    <h5>Translation ({targetLanguage}):</h5>
+                    <p>{translatedText}</p>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="output-placeholder">
                 {isRecording ? 'Listening for speech...' : 'Click "Start Recording" to begin'}

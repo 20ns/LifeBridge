@@ -42,6 +42,7 @@ export const useSpeechRecognition = ({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const realTimeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const speechRecognitionRef = useRef<any>(null);
 
   // Voice activity detection for automatic recording control
   const vadHook = useVoiceActivityDetection({
@@ -66,22 +67,64 @@ export const useSpeechRecognition = ({
     sensitivity: 0.2, // Lower sensitivity for medical environments
     enabled: voiceActivityDetection && realTimeMode
   });
-  const startRecording = useCallback(async () => {
+
+  // Browser-based speech recognition (more reliable for basic use cases)
+  const startBrowserSpeechRecognition = useCallback((SpeechRecognition: any) => {
     try {
-      // Clear any pending timeouts
-      if (realTimeTimeoutRef.current) {
-        clearTimeout(realTimeTimeoutRef.current);
-        realTimeTimeoutRef.current = null;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = language;
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        const confidence = event.results[0][0].confidence;
+        
+        setState(prev => ({ 
+          ...prev, 
+          isRecording: false, 
+          isProcessing: false,
+          transcript,
+          confidence,
+          error: null 
+        }));
+
+        onTranscript(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        const errorMessage = `Speech recognition error: ${event.error}`;
+        setState(prev => ({ 
+          ...prev, 
+          isRecording: false, 
+          isProcessing: false,
+          error: errorMessage 
+        }));
+        
+        if (onError) {
+          onError(errorMessage);
+        }
+      };
+
+      recognition.onend = () => {
+        setState(prev => ({ ...prev, isRecording: false }));
+      };
+
+      speechRecognitionRef.current = recognition;
+      recognition.start();
+
+    } catch (error) {
+      const errorMessage = 'Browser speech recognition failed, falling back to AWS';
+      if (onError) {
+        onError(errorMessage);
       }
+      // Don't fallback automatically to avoid infinite loops
+    }
+  }, [language, onTranscript, onError]);
 
-      // Reset state
-      setState(prev => ({
-        ...prev,
-        isRecording: true,
-        error: null,
-        transcript: null
-      }));
-
+  // AWS-based transcription (for advanced features and medical context)
+  const startAWSTranscription = useCallback(async () => {
+    try {
       // Start voice activity detection if enabled
       if (voiceActivityDetection && !vadHook.isListening) {
         await vadHook.startListening();
@@ -120,7 +163,8 @@ export const useSpeechRecognition = ({
           
           // Convert to WAV for better AWS Transcribe compatibility
           const wavBlob = await convertToWav(audioBlob);
-            // Send to AWS Transcribe with medical context
+          
+          // Send to AWS Transcribe with medical context
           const result = await transcribeAudio(wavBlob, language, medicalContext);
           
           setState(prev => ({ 
@@ -164,7 +208,50 @@ export const useSpeechRecognition = ({
       if (onError) {
         onError(errorMessage);
       }
-    }  }, [language, onTranscript, onError, medicalContext, voiceActivityDetection, vadHook]);
+    }
+  }, [language, onTranscript, onError, medicalContext, voiceActivityDetection, vadHook]);
+
+  const startRecording = useCallback(async () => {
+    try {
+      // Clear any pending timeouts
+      if (realTimeTimeoutRef.current) {
+        clearTimeout(realTimeTimeoutRef.current);
+        realTimeTimeoutRef.current = null;
+      }
+
+      // Reset state
+      setState(prev => ({
+        ...prev,
+        isRecording: true,
+        error: null,
+        transcript: null
+      }));
+
+      // Try browser-based speech recognition first (faster and more reliable)
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      
+      if (SpeechRecognition && !realTimeMode) {
+        console.log('Using browser speech recognition');
+        return startBrowserSpeechRecognition(SpeechRecognition);
+      }
+
+      // Fallback to AWS transcription for real-time mode or if browser speech recognition is not available
+      console.log('Using AWS transcription');
+      return startAWSTranscription();
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start speech recognition';
+      setState(prev => ({ 
+        ...prev, 
+        isRecording: false, 
+        error: errorMessage 
+      }));
+      
+      if (onError) {
+        onError(errorMessage);
+      }
+    }
+  }, [startBrowserSpeechRecognition, startAWSTranscription, realTimeMode]);
 
   const stopRecording = useCallback(() => {
     // Clear any pending timeouts
@@ -173,6 +260,13 @@ export const useSpeechRecognition = ({
       realTimeTimeoutRef.current = null;
     }
 
+    // Stop browser speech recognition
+    if (speechRecognitionRef.current) {
+      speechRecognitionRef.current.stop();
+      speechRecognitionRef.current = null;
+    }
+
+    // Stop AWS media recorder
     if (mediaRecorderRef.current && state.isRecording) {
       mediaRecorderRef.current.stop();
     }
