@@ -64,7 +64,6 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
       }
     }
   };
-
   const {
     isRecording,
     isProcessing,
@@ -72,6 +71,7 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
     startRecording,
     stopRecording,
     isSupported,
+    isSpeechSupported,
     isVoiceDetected,
     audioLevel,
     confidence
@@ -108,13 +108,23 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
   };
 
   const currentError = recognitionError || speechError;
-
   if (!isSupported) {
     return (
       <div className={`interface-container flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg ${className}`}>
         <MicOff className="w-5 h-5 text-yellow-600" />
         <span className="text-sm text-yellow-800">
           Speech recognition not supported in this browser
+        </span>
+      </div>
+    );
+  }
+
+  if (!isSpeechSupported) {
+    return (
+      <div className={`interface-container flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg ${className}`}>
+        <MicOff className="w-5 h-5 text-yellow-600" />
+        <span className="text-sm text-yellow-800">
+          Browser speech recognition not available. Please use Chrome or Edge.
         </span>
       </div>
     );
@@ -174,9 +184,7 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
                 )}
               </div>
             )}
-          </div>
-
-          {/* Medical Context Instructions */}
+          </div>          {/* Medical Context Instructions */}
           <div className="medical-instructions">
             <h4>Medical Speech Tips:</h4>
             <ul>
@@ -188,6 +196,21 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
                 <li className="emergency-tip">Emergency mode: Priority processing for urgent terms</li>
               )}
             </ul>
+            
+            {/* Debug Info */}
+            <div className="debug-info" style={{ 
+              marginTop: '12px', 
+              padding: '8px', 
+              background: '#f8fafc', 
+              border: '1px solid #e2e8f0', 
+              borderRadius: '4px',
+              fontSize: '12px',
+              color: '#64748b'
+            }}>
+              <strong>Debug:</strong> Using {isSpeechSupported ? 'Browser' : 'AWS'} Speech Recognition
+              <br />
+              Language: {sourceLanguage} → {targetLanguage}
+            </div>
           </div>
         </div>
 
@@ -257,14 +280,36 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
               <div className="status-message confidence">
                 <span>Confidence: {Math.round(confidence * 100)}%</span>
               </div>
-            )}
-
-            {currentError && (
+            )}            {currentError && (
               <div className="status-message error">
                 <div className="error-dot"></div>
                 <span>{currentError}</span>
+                
+                {/* Enhanced error guidance */}
+                {currentError.includes('multiple attempts') && (
+                  <div className="error-guidance">
+                    <strong>💡 Suggestion:</strong> Speech recognition failed after multiple attempts. 
+                    Please try using the <strong>Text</strong> mode instead for reliable translation.
+                  </div>
+                )}
+                {currentError.includes('network') && (
+                  <div className="error-guidance">
+                    <strong>💡 Try:</strong> Check your internet connection or use <strong>Text</strong> mode.
+                  </div>
+                )}
+                {currentError.includes('permission') && (
+                  <div className="error-guidance">
+                    <strong>💡 Fix:</strong> Click the microphone icon in your browser's address bar to allow access.
+                  </div>
+                )}
+                {currentError.includes('not supported') && (
+                  <div className="error-guidance">
+                    <strong>💡 Alternative:</strong> Your browser doesn't support speech recognition. 
+                    Please use the <strong>Text</strong> mode instead.
+                  </div>
+                )}
               </div>
-            )}          </div>
+            )}</div>
         </div>
       </div>
     </div>
