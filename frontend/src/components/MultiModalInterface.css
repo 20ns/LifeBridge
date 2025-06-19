@@ -548,6 +548,25 @@
   border-color: var(--secondary-green);
   background: #ecfdf5;
   color: var(--secondary-green-dark);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid var(--secondary-green);
+}
+
+.active-indicator.sign:hover {
+  background: #dcfce7;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.active-indicator.sign.active {
+  background: var(--secondary-green);
+  color: white;
+  border-color: var(--secondary-green-dark);
+}
+
+.active-indicator.sign.active:hover {
+  background: var(--secondary-green-dark);
 }
 
 .active-indicator.emergency {
@@ -931,4 +950,199 @@
   0% { transform: rotate(0deg) scale(1); }
   50% { transform: rotate(180deg) scale(0.9); }
   100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Enhanced Detection Toggle Button - More Responsive */
+.active-indicator.sign.detection-toggle {
+  position: relative;
+  min-width: 160px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.5px;
+  border-radius: var(--radius-xl);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+  user-select: none;
+  overflow: hidden;
+}
+
+.active-indicator.sign.detection-toggle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.active-indicator.sign.detection-toggle:hover::before {
+  left: 100%;
+}
+
+.active-indicator.sign.detection-toggle:hover {
+  background: #d1fae5;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.25);
+  border-color: var(--secondary-green-dark);
+}
+
+.active-indicator.sign.detection-toggle:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+  transition: all 0.1s ease;
+}
+
+.active-indicator.sign.detection-toggle.active {
+  background: linear-gradient(135deg, var(--secondary-green), var(--secondary-green-dark));
+  color: white;
+  border-color: var(--secondary-green-dark);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+}
+
+.active-indicator.sign.detection-toggle.active:hover {
+  background: linear-gradient(135deg, var(--secondary-green-dark), #15803d);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+}
+
+.active-indicator.sign.detection-toggle.active:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 3px 12px rgba(34, 197, 94, 0.3);
+}
+
+.active-indicator.sign.detection-toggle .indicator-icon {
+  transition: all 0.3s ease;
+  margin-right: var(--spacing-xs);
+}
+
+.active-indicator.sign.detection-toggle:hover .indicator-icon {
+  transform: scale(1.1);
+}
+
+.active-indicator.sign.detection-toggle.active .indicator-icon.pulsing {
+  animation: detection-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes detection-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+}
+
+/* Add ripple effect on click */
+.active-indicator.sign.detection-toggle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+  pointer-events: none;
+}
+
+.active-indicator.sign.detection-toggle:active::after {
+  width: 200px;
+  height: 200px;
+  transition: width 0.1s ease, height 0.1s ease;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .active-indicator.sign.detection-toggle {
+    min-width: 140px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem;
+  }
+  
+  .active-indicator.sign.detection-toggle:hover {
+    transform: translateY(-1px) scale(1.01);
+  }
+  
+  .active-indicator.sign.detection-toggle.active:hover {
+    transform: translateY(-1px) scale(1.01);
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .active-indicator.sign.detection-toggle {
+    padding: var(--spacing-md) var(--spacing-lg);
+    min-height: 48px; /* Minimum touch target size */
+    font-size: 1rem;
+  }
+  
+  .active-indicator.sign.detection-toggle:hover {
+    transform: none; /* Remove hover transforms on touch devices */
+  }
+  
+  .active-indicator.sign.detection-toggle:active {
+    transform: scale(0.95);
+    background: #bbf7d0;
+  }
+  
+  .active-indicator.sign.detection-toggle.active:active {
+    background: var(--secondary-green-dark);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .active-indicator.sign.detection-toggle {
+    border-width: 3px;
+    font-weight: 800;
+  }
+  
+  .active-indicator.sign.detection-toggle.active {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .active-indicator.sign.detection-toggle,
+  .active-indicator.sign.detection-toggle .indicator-icon,
+  .active-indicator.sign.detection-toggle::before,
+  .active-indicator.sign.detection-toggle::after {
+    transition: none;
+    animation: none;
+  }
+  
+  .active-indicator.sign.detection-toggle:hover {
+    transform: none;
+  }
+  
+  .active-indicator.sign.detection-toggle:active {
+    transform: none;
+  }
+}
+
+/* Button text responsiveness */
+.active-indicator.sign.detection-toggle span {
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.active-indicator.sign.detection-toggle:hover span {
+  letter-spacing: 0.8px;
+}
+
+/* Small screen text adjustment */
+@media (max-width: 480px) {
+  .active-indicator.sign.detection-toggle span {
+    font-size: 0.8rem;
+  }
 }

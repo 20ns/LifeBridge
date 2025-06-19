@@ -472,21 +472,30 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
             <span className="large-text">EMERGENCY</span>
           </button>
         )}
-      </div>
-
-      {/* Visual indicators for active modes */}
+      </div>      {/* Visual indicators for active modes */}
       <div className="mode-indicators">
         {activeMode === 'speech' && isListening && (
           <div className="active-indicator speech">
             <Mic className="indicator-icon pulsing" />
             <span>Listening...</span>
           </div>
-        )}
-        {activeMode === 'sign' && (
-          <div className="active-indicator sign">
-            <Hand className="indicator-icon" />
-            <span>Sign Detection Active</span>
-          </div>
+        )}        {activeMode === 'sign' && (
+          <button 
+            className={`active-indicator sign detection-toggle ${signLanguageInterfaceRef.current?.isDetectionActive() ? 'active' : ''}`}
+            onClick={() => {
+              const isCurrentlyActive = signLanguageInterfaceRef.current?.isDetectionActive();
+              if (isCurrentlyActive) {
+                signLanguageInterfaceRef.current?.triggerStopDetection();
+              } else {
+                signLanguageInterfaceRef.current?.triggerStartDetection();
+              }
+            }}
+            title={signLanguageInterfaceRef.current?.isDetectionActive() ? 'Click to stop sign detection' : 'Click to start sign detection'}
+            aria-label={signLanguageInterfaceRef.current?.isDetectionActive() ? 'Stop sign language detection' : 'Start sign language detection'}
+          >
+            <Hand className={`indicator-icon ${signLanguageInterfaceRef.current?.isDetectionActive() ? 'pulsing' : ''}`} />
+            <span>{signLanguageInterfaceRef.current?.isDetectionActive() ? 'Stop Detection' : 'Start Detection'}</span>
+          </button>
         )}
         {isEmergencyMode && (
           <div className="active-indicator emergency">
@@ -525,11 +534,11 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
               />
             )}
             {/* Always render SignLanguageInterface but control visibility */}
-            <div className="translation-card" style={{ display: activeMode === 'sign' ? 'block' : 'none' }}>
-              <SignLanguageInterface
+            <div className="translation-card" style={{ display: activeMode === 'sign' ? 'block' : 'none' }}>              <SignLanguageInterface
                 ref={signLanguageInterfaceRef} // Assign ref
                 onEmergencyDetected={handleSignEmergencyDetected}
                 onTranslationRequest={handleSignTranslationRequest}
+                addNotification={addNotification}
                 isTranslating={false} // Consider if this should be dynamic
                 currentLanguage={targetLanguage}
                 translatedText={translatedText} // This is passed down
