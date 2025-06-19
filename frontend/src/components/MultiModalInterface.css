@@ -1,3 +1,26 @@
+/* Fix for translation-card container to prevent overlapping */
+.translation-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.interface-content {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Ensure sign interface doesn't overlap with other elements */
+.interface-content .sign-interface-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
 /* Multi-Modal Interface Styles - Enhanced Visual Refinement */
 .multi-modal-interface {
   width: 100%;
