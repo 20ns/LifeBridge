@@ -113,11 +113,10 @@ function AppContent() {
           </div>
 
           <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
-            <div className="controls-group">
-              {/* User info and role-based navigation */}
+            <div className="controls-group">              {/* User info and role-based navigation */}
               <div className="user-info-section">
                 <span className="user-welcome">
-                  Welcome, {user.name} ({user.role})
+                  Welcome, {user.name.split(' ')[0]} ({user.role})
                 </span>
               </div>
 

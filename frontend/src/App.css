@@ -299,7 +299,8 @@
 .controls-group {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
 .language-section {
@@ -310,7 +311,7 @@
 .performance-toggle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
 }
 
 /* Mode Switcher */
@@ -320,7 +321,7 @@
   padding: 4px;
   border-radius: 24px;
   gap: 4px;
-  margin-right: 1rem;
+  margin-right: var(--spacing-sm);
 }
 
 .mode-btn {
@@ -341,17 +342,18 @@
 
 .mode-btn:hover {
   background: var(--neutral-200);
-  color: var(--neutral-700);
+  color: var(--text-primary);
 }
 
 .mode-btn.active {
   background: var(--primary-blue);
-  color: white;
+  color: var(--text-inverse);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .mode-btn.active:hover {
   background: var(--primary-blue-dark);
+  color: var(--text-inverse);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
@@ -361,7 +363,7 @@
 .user-info-section {
   display: flex;
   align-items: center;
-  margin-right: 1rem;
+  margin-right: var(--spacing-sm);
 }
 
 .user-welcome {
@@ -497,22 +499,43 @@
 }
 
 /* Responsive adjustments for authentication UI */
+@media (max-width: 1024px) {
+  .controls-group {
+    gap: var(--spacing-xs);
+  }
+  
+  .user-welcome {
+    font-size: var(--font-size-xs);
+  }
+}
+
 @media (max-width: 768px) {
+  .controls-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-xs);
+  }
+  
   .user-info-section {
-    display: none; /* Hide on mobile to save space */
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
+    margin-bottom: var(--spacing-xs);
   }
   
   .mode-switcher {
-    flex-wrap: wrap;
+    margin-right: 0;
   }
   
   .mode-btn {
     padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
   }
   
   .logout-btn {
     padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
   }
   
   .access-denied-message {
@@ -531,10 +554,6 @@
     flex: 1;
     justify-content: center;
     min-width: 0;
-  }
-  
-  .mode-btn span:not(.sr-only) {
-    display: none; /* Hide text on very small screens, keep icons */
   }
 }
 
