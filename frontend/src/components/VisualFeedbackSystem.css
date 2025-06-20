@@ -12,26 +12,6 @@
   border-color: #ced4da;
 }
 
-/* Audio optimization status indicator */
-.visual-feedback-system.audio-optimized {
-  position: relative;
-  border-left: 3px solid #28a745;
-}
-
-.visual-feedback-system.audio-optimized::before {
-  content: '🔇 Audio Spam Reduced';
-  position: absolute;
-  top: -12px;
-  right: 8px;
-  background: #28a745;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  z-index: 10;
-}
-
 /* Feedback Controls */
 .feedback-controls {
   display: flex;
