@@ -1,0 +1,135 @@
+{
+  "timestamp": "2025-06-20T14:23:35.945Z",
+  "overallStatus": "CRITICAL_FAILURE",
+  "totalSuites": 9,
+  "passedSuites": 0,
+  "failedSuites": 9,
+  "criticalFailures": 7,
+  "suiteResults": [
+    {
+      "name": "PHI Redaction",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": true,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:35.952Z",
+      "duration": 7,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:35.959Z"
+    },
+    {
+      "name": "Audit Logging",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": true,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:36.964Z",
+      "duration": 5,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:36.969Z"
+    },
+    {
+      "name": "Quality Assurance",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": true,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:37.976Z",
+      "duration": 4,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:37.980Z"
+    },
+    {
+      "name": "Offline Capabilities",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": false,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:39.005Z",
+      "duration": 4,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:39.009Z"
+    },
+    {
+      "name": "Impact Metrics",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": false,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:40.021Z",
+      "duration": 4,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:40.025Z"
+    },
+    {
+      "name": "Complete Workflow",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": true,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:41.029Z",
+      "duration": 4,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:41.033Z"
+    },
+    {
+      "name": "Human Review",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": true,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:42.044Z",
+      "duration": 4,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:42.048Z"
+    },
+    {
+      "name": "Emergency Scenarios",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": true,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:43.061Z",
+      "duration": 4,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:43.065Z"
+    },
+    {
+      "name": "Compliance & Security",
+      "file": "e2e-medical-grade-features.test.js",
+      "critical": true,
+      "status": "ERROR",
+      "startTime": "2025-06-20T14:23:44.070Z",
+      "duration": 4,
+      "tests": [],
+      "errors": [
+        "spawn npx ENOENT"
+      ],
+      "endTime": "2025-06-20T14:23:44.074Z"
+    }
+  ],
+  "summary": {
+    "totalTests": 0,
+    "passedTests": 0,
+    "failedTests": 0,
+    "totalDuration": 40,
+    "criticalSuitesPassed": 0,
+    "criticalSuitesTotal": 7
+  }
+}
