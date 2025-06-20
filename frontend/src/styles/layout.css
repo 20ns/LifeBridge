@@ -18,9 +18,9 @@
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
 }
 
 .logo-section {
@@ -54,10 +54,10 @@
 .header-controls {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  justify-content: center;
   flex-wrap: wrap;
-  flex-shrink: 1;
-  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
 /* Main Content */
