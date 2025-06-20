@@ -3,9 +3,22 @@ import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types/auth';
 import { Eye, EyeOff, Heart, Lock, Mail, User, Shield, UserPlus } from 'lucide-react';
 import '../styles/LoginPage.css';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-export default function LoginPage() {
-  const [isSignUp, setIsSignUp] = useState(false);
+type LoginPageProps = {
+  initialMode?: 'signin' | 'signup';
+};
+
+export default function LoginPage({ initialMode }: LoginPageProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const pathMode = location.pathname === '/signup' ? 'signup' : location.pathname === '/signin' ? 'signin' : undefined;
+  const [isSignUp, setIsSignUp] = useState(() => {
+    if (initialMode) return initialMode === 'signup';
+    if (pathMode) return pathMode === 'signup';
+    return false;
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,7 +28,8 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
   const { login, register, isLoading, rateLimitInfo } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,14 +70,17 @@ export default function LoginPage() {
         setConfirmPassword('');
         setName('');
         setDepartment('');
+        navigate('/signin');
       } else {
         setError(result.error || 'Registration failed');
       }
     } else {
       // Handle sign in
-      const success = await login(email, password);
-      if (!success) {
+      const successLogin = await login(email, password);
+      if (!successLogin) {
         setError('Invalid credentials. Please check your email and password.');
+      } else {
+        navigate('/');
       }
     }
   };
@@ -109,7 +126,9 @@ export default function LoginPage() {
   };
 
   const toggleMode = () => {
-    setIsSignUp(!isSignUp);
+    const newIsSignUp = !isSignUp;
+    setIsSignUp(newIsSignUp);
+    navigate(newIsSignUp ? '/signup' : '/signin');
     setError('');
     setSuccess('');
     setEmail('');
@@ -120,17 +139,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-container">
+    <div className="login-container" style={{ overflowX: 'hidden' }}>
       <div className="login-background">
         <div className="login-card">
           {/* Header */}
           <div className="login-header">
-            <div className="logo-container">
+            <Link to="/" className="logo-container" aria-label="Go to Home">
               <div className="logo-icon">
                 <Heart className="logo-heart" />
               </div>
               <h1 className="logo-title">LifeBridge</h1>
-            </div>
+            </Link>
             <h2 className="login-title">
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h2>

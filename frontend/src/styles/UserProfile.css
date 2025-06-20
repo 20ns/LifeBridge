@@ -1,0 +1,104 @@
+.user-profile-container {
+  max-width: 680px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.user-info-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary-blue);
+  color: var(--text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+}
+
+.user-details h2 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+}
+
+.user-details p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  border: 1px solid var(--border-light);
+}
+
+.section {
+  border-top: 1px solid var(--border-light);
+  padding-top: 1.25rem;
+}
+
+.section h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+}
+
+.permission-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.permission-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.permission-granted {
+  background: var(--secondary-green-light);
+  color: var(--text-inverse);
+}
+
+.permission-restricted {
+  background: var(--accent-red);
+  color: var(--text-inverse);
+}
+
+.additional-info dt {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.additional-info dd {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+} 
