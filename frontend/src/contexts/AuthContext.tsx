@@ -28,29 +28,34 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Initialise synchronously so the first render already knows if a user was stored
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const storedStr = localStorage.getItem('lifebridge_user');
+      if (storedStr) {
+        return JSON.parse(storedStr) as User;
+      }
+    } catch {
+      /* ignore JSON parse issues */
+    }
+
+    const demo = demoUserStorage.getCurrentUser();
+    if (demo) {
+      return {
+        ...demo,
+        lastLogin: demo.lastLogin ? new Date(demo.lastLogin) : undefined,
+      } as User;
+    }
+    return null;
+  });
+
+  // While we already have a synchronous value, we still briefly verify asynchronously
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [rateLimitInfo, setRateLimitInfo] = useState({ isBlocked: false, remainingTime: 0 });
 
-  // Check for existing session on mount
+  // Verify stored credentials once React is mounted (e.g., token expiry checks could be added here)
   useEffect(() => {
-    const storedUser = localStorage.getItem('lifebridge_user');
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
-      } catch (_) {
-        // ignore parse errors
-      }
-    } else {
-      const currentUser = demoUserStorage.getCurrentUser();
-      if (currentUser) {
-        setUser({
-          ...currentUser,
-          lastLogin: currentUser.lastLogin ? new Date(currentUser.lastLogin) : undefined,
-        });
-      }
-    }
+    // For now just finish the loading state – all work was done synchronously above.
     setIsLoading(false);
   }, []);
 
