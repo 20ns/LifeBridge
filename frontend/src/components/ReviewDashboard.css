@@ -155,14 +155,20 @@
 }
 
 .reviews-list.no-reviews {
+  grid-column: 1 / -1; /* Span full width */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .reviews-list.no-reviews h2 {
   text-align: center;
+  margin-bottom: 40px;
+  font-size: 24px;
 }
 
 .reviews-list h2 {
@@ -174,22 +180,29 @@
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 40px;
   color: #7f8c8d;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .empty-state svg {
   color: #95a5a6;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .empty-state p {
-  margin: 8px 0;
-  font-size: 16px;
+  margin: 12px 0;
+  font-size: 18px;
+  max-width: 400px;
 }
 
 .empty-state-subtitle {
-  font-size: 14px !important;
+  font-size: 16px !important;
+  opacity: 0.8;
 }
 
 /* Review Cards */
