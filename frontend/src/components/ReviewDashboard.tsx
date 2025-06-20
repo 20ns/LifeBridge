@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Clock, CheckCircle, XCircle, Users, TrendingUp } from 'lucide-react';
 import './ReviewDashboard.css';
+import { API_BASE_URL } from '../config';
 
 interface ReviewRequest {
   requestId: string;
@@ -53,13 +54,12 @@ const ReviewDashboard: React.FC = () => {
     const interval = setInterval(loadPendingReviews, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, [filter]);
-
   const loadPendingReviews = async () => {
     try {
       const emergency = filter === 'emergency';
       const priority = filter !== 'all' && filter !== 'emergency' ? filter : undefined;
       
-      const response = await fetch(`/api/review/pending?${new URLSearchParams({
+      const response = await fetch(`${API_BASE_URL}/review/pending?${new URLSearchParams({
         ...(priority && { priority }),
         ...(emergency && { emergency: 'true' })
       })}`);
@@ -75,10 +75,9 @@ const ReviewDashboard: React.FC = () => {
       setLoading(false);
     }
   };
-
   const loadMetrics = async () => {
     try {
-      const response = await fetch('/api/review/metrics');
+      const response = await fetch(`${API_BASE_URL}/review/metrics`);
       if (!response.ok) throw new Error('Failed to load metrics');
       
       const data = await response.json();
@@ -87,7 +86,6 @@ const ReviewDashboard: React.FC = () => {
       console.error('Error loading metrics:', err);
     }
   };
-
   const submitReview = async (
     reviewId: string,
     reviewStatus: 'approved' | 'rejected' | 'requires_revision',
@@ -95,7 +93,7 @@ const ReviewDashboard: React.FC = () => {
     finalTranslation?: string
   ) => {
     try {
-      const response = await fetch('/api/review/submit', {
+      const response = await fetch(`${API_BASE_URL}/review/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,10 +118,9 @@ const ReviewDashboard: React.FC = () => {
       console.error('Error submitting review:', err);
     }
   };
-
   const escalateReview = async (reviewId: string, escalationReason: string) => {
     try {
-      const response = await fetch('/api/review/escalate', {
+      const response = await fetch(`${API_BASE_URL}/review/escalate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

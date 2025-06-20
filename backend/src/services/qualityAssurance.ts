@@ -54,9 +54,8 @@ class QualityAssuranceService {
   private snsClient: SNSClient;
   private reviewTableName: string;
   private alertTopicArn: string;
-  constructor() {
-    this.dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION || 'eu-north-1' });
-    this.snsClient = new SNSClient({ region: process.env.AWS_REGION || 'eu-north-1' });
+  constructor() {    this.dynamoClient = new DynamoDBClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
+    this.snsClient = new SNSClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
     this.reviewTableName = process.env.REVIEW_REQUESTS_TABLE || 'lifebridge-review-requests-dev';
     this.alertTopicArn = process.env.REVIEW_ALERTS_TOPIC_ARN || 'arn:aws:sns:eu-north-1:123456789012:lifebridge-review-alerts';
   }
@@ -525,6 +524,44 @@ class QualityAssuranceService {
     } catch (error) {
       console.error('Failed to get pending reviews:', error);
       return [];
+    }
+  }
+
+  // Get individual review request by ID
+  async getReviewRequest(reviewId: string): Promise<ReviewRequest | null> {
+    try {
+      const getCommand = new GetItemCommand({
+        TableName: this.reviewTableName,
+        Key: {
+          requestId: { S: reviewId }
+        }
+      });
+
+      const response = await this.dynamoClient.send(getCommand);
+      if (!response.Item) {
+        return null;
+      }
+
+      return {
+        requestId: response.Item.requestId?.S || '',
+        originalText: response.Item.originalText?.S || '',
+        translatedText: response.Item.translatedText?.S || '',
+        sourceLanguage: response.Item.sourceLanguage?.S || '',
+        targetLanguage: response.Item.targetLanguage?.S || '',
+        context: response.Item.context?.S || '',
+        priority: response.Item.priority?.S as 'low' | 'medium' | 'high' | 'critical' || 'medium',
+        qualityMetrics: JSON.parse(response.Item.qualityMetrics?.S || '{}'),
+        flaggedIssues: JSON.parse(response.Item.flaggedIssues?.S || '[]'),
+        timestamp: response.Item.timestamp?.S || '',
+        sessionId: response.Item.sessionId?.S || '',
+        reviewStatus: response.Item.reviewStatus?.S as 'pending' | 'in_review' | 'approved' | 'rejected' | 'requires_revision' || 'pending',
+        reviewerId: response.Item.reviewerId?.S,
+        reviewNotes: response.Item.reviewNotes?.S,
+        finalTranslation: response.Item.finalTranslation?.S
+      };
+    } catch (error) {
+      console.error('Failed to get review request:', error);
+      return null;
     }
   }
 

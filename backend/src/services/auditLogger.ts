@@ -46,10 +46,9 @@ class AuditLogger {
   private logGroupName: string;
   private kmsKeyId: string;
 
-  constructor() {
-    this.dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION || 'eu-north-1' });
-    this.cloudWatchClient = new CloudWatchLogsClient({ region: process.env.AWS_REGION || 'eu-north-1' });
-    this.kmsClient = new KMSClient({ region: process.env.AWS_REGION || 'eu-north-1' });
+  constructor() {    this.dynamoClient = new DynamoDBClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
+    this.cloudWatchClient = new CloudWatchLogsClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
+    this.kmsClient = new KMSClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
       this.tableName = process.env.AUDIT_LOGS_TABLE || 'lifebridge-audit-logs-dev';
     this.logGroupName = process.env.AUDIT_LOG_GROUP || '/aws/lifebridge/audit-dev';
     this.kmsKeyId = process.env.KMS_KEY_ID || 'alias/aws/dynamodb';
