@@ -772,3 +772,8 @@ export const batchSignProcessing = async (
     throw error;
   }
 };
+
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('lifebridge_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};

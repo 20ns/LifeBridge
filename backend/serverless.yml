@@ -10,6 +10,9 @@ provider:
 
   environment:
     STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+    USERS_TABLE: lifebridge-users-${self:provider.stage}
+    JWT_SECRET: ${env:JWT_SECRET, 'change_this_dev_secret'}
 
     # Medical-grade compliance configuration
     AUDIT_LOGS_TABLE: lifebridge-audit-logs-${self:provider.stage}
@@ -18,7 +21,6 @@ provider:
     KMS_KEY_ID: alias/aws/dynamodb
     REVIEW_ALERTS_TOPIC_ARN: !Ref ReviewAlertsSnsTopic
     AUDIT_LOG_GROUP: /aws/lifebridge/audit-${self:provider.stage}
-    REGION: ${self:provider.region}
 
   iamRoleStatements:
     # Bedrock (LLM) access
@@ -54,6 +56,7 @@ provider:
         - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-audit-logs-${self:provider.stage}
         - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-review-requests-${self:provider.stage}
         - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-impact-metrics-${self:provider.stage}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-users-${self:provider.stage}
         - arn:aws:dynamodb:${self:provider.region}:*:index/*
 
     # KMS
@@ -226,6 +229,25 @@ functions:
           method: post
           cors: true
 
+  # ------------------ AUTH FUNCTIONS ------------------
+  authLogin:
+    handler: dist/handlers/auth.login
+    timeout: 15
+    events:
+      - http:
+          path: /auth/login
+          method: post
+          cors: true
+
+  authRegister:
+    handler: dist/handlers/auth.register
+    timeout: 15
+    events:
+      - http:
+          path: /auth/register
+          method: post
+          cors: true
+
 plugins:
   - serverless-offline
 
@@ -347,6 +369,19 @@ resources:
       Properties:
         LogGroupName: /aws/lifebridge/audit-${self:provider.stage}
         RetentionInDays: 2557   # 7 years
+
+    # Users table for authentication
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: lifebridge-users-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
 
   Outputs:
     AuditLogsTableName:
