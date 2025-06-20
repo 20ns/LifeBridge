@@ -82,6 +82,9 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   const performanceTimers = useRef<Map<string, number>>(new Map());
   const signLanguageInterfaceRef = useRef<SignLanguageInterfaceHandle>(null); // Ref for SignLanguageInterface
 
+  // Temporary debug flag: set to true if you need detailed console output during development
+  const DEBUG = false;
+
   // Check if device is mobile
   useEffect(() => {
     const checkMobileDevice = () => {
@@ -143,7 +146,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     }));
 
     // Log performance for optimization
-    console.log(`${operation} completed in ${latency}ms`);
+    if (DEBUG) console.log(`${operation} completed in ${latency}ms`);
   }, []);
 
   // Cache management
@@ -230,18 +233,19 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   const handleEmergencyMode = useCallback((enabled: boolean, isManualTrigger = false) => {
     // Prevent multiple rapid clicks using ref instead of state
     if (isTransitioningRef.current) {
-      console.log('[Emergency Button] Already transitioning, ignoring click');
+      if (DEBUG) console.log('[Emergency Button] Already transitioning, ignoring click');
       return;
     }
     
     // Prevent redundant state changes - if already in the target state, do nothing
     if (enabled === isEmergencyMode) {
-      console.log(`[Emergency Button] Already in ${enabled ? 'emergency' : 'normal'} mode, no action needed`);
+      if (DEBUG) console.log(`[Emergency Button] Already in ${enabled ? 'emergency' : 'normal'} mode, no action needed`);
       return;
     }
     
-    console.log(`[Emergency Button] Starting transition to ${enabled ? 'emergency' : 'normal'} mode`);
-    console.log(`[Emergency Button] Current states: isEmergencyMode=${isEmergencyMode}, activeMode=${activeMode}`);
+    if (DEBUG) {
+      console.log(`[Emergency Button] Starting transition to ${enabled ? 'emergency' : 'normal'} mode`);
+    }
     
     // Clean up any existing transition
     cleanupTransition();
@@ -253,20 +257,20 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     // Use a small delay to ensure smooth visual transition
     setTimeout(() => {
       // Update the emergency mode and active mode
-      console.log(`[Emergency Button] Setting emergency mode to: ${enabled}`);
+      if (DEBUG) console.log(`[Emergency Button] Setting emergency mode to: ${enabled}`);
       setIsEmergencyMode(enabled);
         if (enabled) {
-        console.log('[Emergency Button] Switching to emergency mode');
+        if (DEBUG) console.log('[Emergency Button] Switching to emergency mode');
         setActiveMode('emergency');
         addNotification('🚨 Emergency mode activated - Priority processing enabled');
       } else {
-        console.log('[Emergency Button] Switching to text mode (home page)');
+        if (DEBUG) console.log('[Emergency Button] Switching to text mode (home page)');
         setActiveMode('text'); // Return to text mode when exiting emergency
         addNotification('✅ Emergency mode deactivated - Returned to normal interface');
         
         // If manually exiting emergency mode, set override to prevent gesture auto-trigger
         if (isManualTrigger) {
-          console.log('[Emergency Button] Setting manual override to prevent gesture re-triggering');
+          if (DEBUG) console.log('[Emergency Button] Setting manual override to prevent gesture re-triggering');
           setManualEmergencyOverride(true);
           
           // Clear the override after a cooldown period
@@ -274,7 +278,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
             clearTimeout(overrideCooldownRef.current);
           }
           overrideCooldownRef.current = setTimeout(() => {
-            console.log('[Emergency Button] Clearing manual override after cooldown');
+            if (DEBUG) console.log('[Emergency Button] Clearing manual override after cooldown');
             setManualEmergencyOverride(false);
             overrideCooldownRef.current = null;
           }, 10000); // 10 second cooldown to prevent immediate re-triggering
@@ -283,7 +287,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       
       // Set a timeout to reset the transition state after CSS animation completes
       transitionTimeoutRef.current = setTimeout(() => {
-        console.log('[Emergency Button] Transition complete, resetting state');
+        if (DEBUG) console.log('[Emergency Button] Transition complete, resetting state');
         isTransitioningRef.current = false;
         setIsTransitioning(false);
         transitionTimeoutRef.current = null;
@@ -329,14 +333,14 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   // Effect to manage sign language detection based on activeMode
   useEffect(() => {
     if (activeMode === 'sign') {
-      console.log('[MultiModalInterface] Mode switched to sign. Attempting to triggerStartDetection.');
+      if (DEBUG) console.log('[MultiModalInterface] Mode switched to sign. Attempting to triggerStartDetection.');
       signLanguageInterfaceRef.current?.triggerStartDetection();
       // Reset audio throttling when entering sign mode for fresh start
       audioManager.resetThrottling();
     } else {
       // If mode is not 'sign', ensure detection is stopped if it was active
       if (signLanguageInterfaceRef.current?.isDetectionActive()) {
-        console.log('[MultiModalInterface] Mode switched away from sign. Attempting to triggerStopDetection.');
+        if (DEBUG) console.log('[MultiModalInterface] Mode switched away from sign. Attempting to triggerStopDetection.');
         signLanguageInterfaceRef.current?.triggerStopDetection();
       }
       // Stop any ongoing audio when leaving sign mode
@@ -349,10 +353,10 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     // Only trigger emergency mode if we're not already in emergency mode
     // AND not under manual override AND not transitioning
     if (!isEmergencyMode && !isTransitioningRef.current && !manualEmergencyOverride) {
-      console.log('[Gesture Detection] Emergency gesture detected, activating emergency mode');
+      if (DEBUG) console.log('[Gesture Detection] Emergency gesture detected, activating emergency mode');
       handleEmergencyMode(true);
     } else {
-      console.log('[Gesture Detection] Emergency gesture detected but ignoring due to:', {
+      if (DEBUG) console.log('[Gesture Detection] Emergency gesture detected but ignoring due to:', {
         isEmergencyMode,
         isTransitioning: isTransitioningRef.current,
         manualOverride: manualEmergencyOverride      });
@@ -361,7 +365,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
 
   const handleSignTranslationRequest = useCallback(async (text: string, context: string) => {
     const startTime = Date.now();
-    console.log(`[MultiModalInterface] Sign translation requested. Text: "${text}", Context: "${context}"`);
+    if (DEBUG) console.log(`[MultiModalInterface] Sign translation requested. Text: "${text}", Context: "${context}"`);
     
     try {
       // Determine the context based on sign language detection
@@ -471,7 +475,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     
     // Failsafe: reset transition state after maximum expected time
     const failsafeTimeout = setTimeout(() => {
-      console.log('[Emergency Button] Failsafe timeout triggered, resetting transition state');
+      if (DEBUG) console.log('[Emergency Button] Failsafe timeout triggered, resetting transition state');
       cleanupTransition();
     }, 800); // Longer than the normal timeout
     
@@ -654,18 +658,18 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
           // If the button somehow becomes unresponsive due to a lingering transition
           // state, force-reset the transition so that the click can take effect.
           if (isTransitioningRef.current) {
-            console.log('[Emergency Button] Transition appeared stuck - performing manual cleanup before toggling mode');
+            if (DEBUG) console.log('[Emergency Button] Transition appeared stuck - performing manual cleanup before toggling mode');
             cleanupTransition();
           }
 
-          console.log(`[Emergency Button] Manual click detected. Current state: emergency=${isEmergencyMode}, transitioning=${isTransitioning}`);
+          if (DEBUG) console.log(`[Emergency Button] Manual click detected. Current state: emergency=${isEmergencyMode}, transitioning=${isTransitioning}`);
           handleEmergencyMode(!isEmergencyMode, true); // Pass true for manual trigger
         }}
         onDoubleClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           // Double-click as emergency reset if button gets stuck
-          console.log('[Emergency Button] Double-click detected, forcing reset');
+          if (DEBUG) console.log('[Emergency Button] Double-click detected, forcing reset');
           cleanupTransition();
         }}
         title={isEmergencyMode ? "Exit Emergency Mode & Return to Home" : "Emergency Access"}
