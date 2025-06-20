@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { AlertTriangle, Volume2, Copy, Check, Phone, Heart, Zap, Shield, Clock, LucideProps } from 'lucide-react'; // Removed tab icons
+import AccessibleModal from './AccessibleModal';
 import { speakText, translateText } from '../services/awsService';
 import '../styles/emergency-themes.css';
 import './EmergencyPhrasesEnhanced.css';
@@ -45,11 +46,14 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
   // const [emergencyPhrases, setEmergencyPhrases] = useState<any[]>([]); // Remove unused state
   const [loading, setLoading] = useState(true); // Global loading for initial English setup
   const [categoryLoadingStates, setCategoryLoadingStates] = useState<Record<string, boolean>>({});
-  const [categoryErrorStates, setCategoryErrorStates] = useState<Record<string, boolean>>({});
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [categoryErrorStates, setCategoryErrorStates] = useState<Record<string, boolean>>({});  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [translatedCategoriesForCurrentLang, setTranslatedCategoriesForCurrentLang] = useState<Set<string>>(new Set());
   const [copiedPhrase, setCopiedPhrase] = useState<string | null>(null);
-  const [speakingPhrase, setSpeakingPhrase] = useState<string | null>(null);  const [lastUsedPhrases, setLastUsedPhrases] = useState<string[]>([]);
+  const [speakingPhrase, setSpeakingPhrase] = useState<string | null>(null);
+  const [lastUsedPhrases, setLastUsedPhrases] = useState<string[]>([]);
+  
+  // Modal state for emergency call confirmation
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   // Critical emergency phrases - always at top
   const criticalPhrases = useMemo(() => [
@@ -547,17 +551,45 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
       <div className="emergency-section emergency-contact">
         <button 
           className={`emergency-btn-critical emergency-contact-button emergency-pulse ${largeButtons ? 'large' : ''}`}
-          onClick={() => {
-            if (window.confirm('Do you want to call emergency services (911)?')) {
-              window.location.href = 'tel:911';
-            }
-          }}
+          onClick={() => setShowEmergencyModal(true)}
           aria-label="Call emergency services - Critical emergency action"
         >
-          <Phone size={largeButtons ? 32 : 24} />
+          <Phone size={largeButtons ? 32 : 24} aria-hidden="true" />
           <span className={largeButtons ? 'large-text' : ''}>CALL 911</span>
         </button>
       </div>
+
+      {/* Accessible Emergency Call Modal */}
+      <AccessibleModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        onConfirm={() => {
+          window.location.href = 'tel:911';
+        }}
+        title="Emergency Services"
+        type="emergency"
+        confirmText="Call 911 Now"
+        cancelText="Cancel"
+        emergencyAction={true}
+      >
+        <div className="emergency-modal-content">
+          <p className="emergency-warning">
+            <strong>This will dial 911 emergency services.</strong>
+          </p>
+          <p>
+            Only use this for genuine medical emergencies requiring immediate assistance.
+          </p>
+          <p className="emergency-instructions">
+            Be prepared to provide:
+          </p>
+          <ul className="emergency-checklist">
+            <li>Your exact location</li>
+            <li>Nature of the medical emergency</li>
+            <li>Patient's condition and consciousness level</li>
+            <li>Any immediate dangers present</li>
+          </ul>
+        </div>
+      </AccessibleModal>
     </div>
   );
 };
