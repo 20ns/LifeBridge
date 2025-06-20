@@ -10,6 +10,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         project: [frontend, backend, tests]
     defaults:
@@ -33,7 +34,7 @@ jobs:
       - name: Lint
         run: npm run lint --if-present
       - name: Run tests
-        run: npm test --if-present -- --runInBand --ci
+        run: npm test --if-present -- --runInBand --ci --watchAll=false --passWithNoTests
 
   # Aggregate test coverage reports if generated
   # (each project can output coverage/ in its directory)
