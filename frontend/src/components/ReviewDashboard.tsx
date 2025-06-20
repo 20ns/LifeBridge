@@ -164,7 +164,10 @@ const ReviewDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="review-dashboard loading">
-        <div className="loading-spinner">Loading review dashboard...</div>
+        <div className="loading-wrapper" role="status" aria-live="polite">
+          <div className="loading-spinner" />
+          <span className="loading-text">Loading review dashboard...</span>
+        </div>
       </div>
     );
   }
