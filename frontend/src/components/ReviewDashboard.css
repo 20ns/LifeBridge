@@ -154,6 +154,17 @@
   max-height: 80vh;
 }
 
+.reviews-list.no-reviews {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.reviews-list.no-reviews h2 {
+  text-align: center;
+}
+
 .reviews-list h2 {
   color: #2c3e50;
   margin-bottom: 20px;

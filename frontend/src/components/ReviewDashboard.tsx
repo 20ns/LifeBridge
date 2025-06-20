@@ -230,7 +230,7 @@ const ReviewDashboard: React.FC = () => {
       </div>
 
       <div className="dashboard-content">
-        <div className="reviews-list">
+        <div className={`reviews-list ${pendingReviews.length === 0 ? 'no-reviews' : ''}`}>
           <h2>Pending Reviews ({pendingReviews.length})</h2>
           {pendingReviews.length === 0 ? (
             <div className="empty-state">
