@@ -18,6 +18,7 @@ import SignLanguageInterface, { SignLanguageInterfaceHandle } from './SignLangua
 import EmergencyPhrasesEnhanced from './EmergencyPhrasesEnhanced';
 import MedicalContextIndicator from './MedicalContextIndicator';
 import { translateText } from '../services/awsService';
+import { audioManager } from '../utils/audioManager';
 import './MultiModalInterface.css';
 
 type CommunicationMode = 'text' | 'speech' | 'sign' | 'emergency';
@@ -271,18 +272,21 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     trackPerformance('modeSwitch', startTime);
     addNotification(`Switched to ${mode} mode`);
   }, [trackPerformance, addNotification]);
-
   // Effect to manage sign language detection based on activeMode
   useEffect(() => {
     if (activeMode === 'sign') {
       console.log('[MultiModalInterface] Mode switched to sign. Attempting to triggerStartDetection.');
       signLanguageInterfaceRef.current?.triggerStartDetection();
+      // Reset audio throttling when entering sign mode for fresh start
+      audioManager.resetThrottling();
     } else {
       // If mode is not 'sign', ensure detection is stopped if it was active
       if (signLanguageInterfaceRef.current?.isDetectionActive()) {
         console.log('[MultiModalInterface] Mode switched away from sign. Attempting to triggerStopDetection.');
         signLanguageInterfaceRef.current?.triggerStopDetection();
       }
+      // Stop any ongoing audio when leaving sign mode
+      audioManager.stopAllAudio();
     }
   }, [activeMode]);
 

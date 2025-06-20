@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, Info, X, Volume2 } from 'lucide-react';
+import { audioManager } from '../utils/audioManager';
+import './VisualFeedbackSystem.css';
 
 interface VisualFeedbackProps {
   signData?: {
@@ -31,12 +33,38 @@ const VisualFeedbackSystem: React.FC<VisualFeedbackProps> = ({
 }) => {
   const [messages, setMessages] = useState<FeedbackMessage[]>([]);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [lastFeedbackTime, setLastFeedbackTime] = useState(0);
+  const [lastGesture, setLastGesture] = useState<string>('');
 
-  // Process sign detection feedback
+  // Sync with audio manager
+  useEffect(() => {
+    audioManager.setAudioEnabled(isAudioEnabled);
+  }, [isAudioEnabled]);
+  // Process sign detection feedback with debouncing
   useEffect(() => {
     if (!signData || !isActive) return;
 
     const { gesture, confidence, medicalPriority, translationText } = signData;
+    
+    // Debounce feedback - don't spam for the same gesture repeatedly
+    const now = Date.now();
+    const MIN_FEEDBACK_INTERVAL = 1500; // 1.5 seconds between same gesture feedback
+    const MIN_ANY_FEEDBACK_INTERVAL = 800; // 0.8 seconds between any feedback
+    
+    const isSameGesture = gesture === lastGesture;
+    const timeSinceLastFeedback = now - lastFeedbackTime;
+    
+    // Skip if it's the same gesture and too soon, or any feedback too soon
+    // Exception: Always allow emergency/critical signs through
+    if (medicalPriority !== 'critical' && (
+        (isSameGesture && timeSinceLastFeedback < MIN_FEEDBACK_INTERVAL) ||
+        (!isSameGesture && timeSinceLastFeedback < MIN_ANY_FEEDBACK_INTERVAL)
+      )) {
+      return;
+    }
+    
+    setLastFeedbackTime(now);
+    setLastGesture(gesture);
     
     // Determine feedback type based on confidence and priority
     let feedbackType: FeedbackMessage['type'] = 'info';
@@ -77,12 +105,11 @@ const VisualFeedbackSystem: React.FC<VisualFeedbackProps> = ({
 
     setMessages(prev => [newMessage, ...prev.slice(0, 4)]); // Keep max 5 messages
 
-    // Play audio feedback if enabled
+    // Play audio feedback if enabled (with smart throttling)
     if (isAudioEnabled) {
-      playAudioFeedback(feedbackType, gesture, confidence);
+      playAudioFeedback(feedbackType, gesture, confidence, medicalPriority);
     }
-
-  }, [signData, isActive, isAudioEnabled]);
+  }, [signData, isActive, isAudioEnabled, lastFeedbackTime, lastGesture]);
 
   // Auto-hide messages
   useEffect(() => {
@@ -97,62 +124,38 @@ const VisualFeedbackSystem: React.FC<VisualFeedbackProps> = ({
 
     return () => clearInterval(timer);
   }, []);
-
-  const playAudioFeedback = (type: FeedbackMessage['type'], gesture: string, confidence: number) => {
-    // Create audio cues for different feedback types
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const playAudioFeedback = (type: FeedbackMessage['type'], gesture: string, confidence: number, medicalPriority?: 'critical' | 'high' | 'medium' | 'low') => {
+    // Use audio manager for throttled, non-spammy feedback
     
-    if (type === 'success') {
-      // High confidence success tone
-      playTone(audioContext, 800, 0.1, 0.2);
-      setTimeout(() => playTone(audioContext, 1000, 0.1, 0.2), 150);
+    if (type === 'success' && confidence >= 0.8) {
+      // High confidence success - subtle positive sound
+      audioManager.playSuccessSound();
     } else if (type === 'warning') {
-      // Medium confidence warning tone
-      playTone(audioContext, 600, 0.15, 0.3);
+      // Medium confidence - subtle warning
+      audioManager.playWarningSound();
     } else if (type === 'error') {
-      // Low confidence or emergency tone
-      if (gesture.toLowerCase().includes('emergency')) {
-        // Urgent beeping for emergency
-        for (let i = 0; i < 3; i++) {
-          setTimeout(() => playTone(audioContext, 1200, 0.2, 0.4), i * 300);
-        }
+      // Low confidence or emergency
+      if (gesture.toLowerCase().includes('emergency') || medicalPriority === 'critical') {
+        audioManager.playEmergencyAlert();
+        // Also speak for emergency
+        audioManager.speakText(`Emergency sign detected: ${gesture}`, {
+          volume: 0.4,
+          priority: 'emergency'
+        });
       } else {
-        // Single low tone for poor detection
-        playTone(audioContext, 300, 0.2, 0.4);
+        audioManager.playWarningSound();
       }
     }
 
-    // Speak the feedback if speech synthesis is available
-    if ('speechSynthesis' in window && confidence > 0.7) {
-      const utterance = new SpeechSynthesisUtterance(
-        gesture.toLowerCase().includes('emergency') 
-          ? `Emergency sign detected` 
-          : `${gesture} detected`
-      );
-      utterance.volume = 0.3;
-      utterance.rate = 1.2;
-      speechSynthesis.speak(utterance);
+    // Only speak for high-confidence non-emergency detections (to reduce spam)
+    if (confidence > 0.8 && medicalPriority !== 'critical' && !gesture.toLowerCase().includes('emergency')) {
+      audioManager.speakText(`${gesture} detected`, {
+        volume: 0.2,
+        rate: 1.3,
+        priority: 'low'
+      });
     }
   };
-
-  const playTone = (audioContext: AudioContext, frequency: number, duration: number, volume: number) => {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + duration);
-  };
-
   const dismissMessage = (id: string) => {
     setMessages(prev => prev.filter(msg => msg.id !== id));
   };
@@ -200,9 +203,8 @@ const VisualFeedbackSystem: React.FC<VisualFeedbackProps> = ({
       </div>
     );
   }
-
   return (
-    <div className={`visual-feedback-system compact ${className}`} style={{
+    <div className={`visual-feedback-system compact ${isAudioEnabled ? 'audio-optimized' : ''} ${className}`} style={{
       padding: '12px',
       borderRadius: '8px',
       backgroundColor: '#f0f0f0', // Light grey background for better visibility

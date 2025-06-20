@@ -236,6 +236,46 @@
   height: 16px;
 }
 
+/* Audio Status Indicator */
+.control-btn.audio-toggle {
+  position: relative;
+}
+
+.control-btn.audio-toggle.enabled::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #28a745;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: pulse-audio 2s infinite;
+}
+
+@keyframes pulse-audio {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+/* Audio optimization complete indicator */
+.sign-animation-player.audio-optimized .control-btn.audio-toggle:hover::before {
+  content: '✓ Audio Spam Fixed';
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  z-index: 10;
+}
+
 /* Speed Control */
 .speed-control {
   display: flex;
@@ -359,6 +399,24 @@
 .sign-animation-player.emergency .animation-display {
   border-color: #dc3545;
   background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+
+/* Reduced audio spam notification */
+.sign-animation-player.audio-optimized {
+  border-color: #28a745;
+}
+
+.sign-animation-player.audio-optimized::before {
+  content: '🔊 Audio Optimized';
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  background: #28a745;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 /* Responsive Design */
