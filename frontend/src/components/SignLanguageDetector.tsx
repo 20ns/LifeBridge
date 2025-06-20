@@ -1,4 +1,32 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+// Add the following immediately after React imports to suppress noisy debug logs
+/* eslint-disable no-console */
+// -----------------------------------------------------------------------------
+// Suppress verbose logging originating from this detector component to keep the
+// browser console clean in production. Developers can re-enable the logs by
+// changing the `enableDetectorDebugLogs` flag below.
+// -----------------------------------------------------------------------------
+const enableDetectorDebugLogs = false;
+
+if (!enableDetectorDebugLogs) {
+  // Preserve original console.log so we can still allow other logs through
+  const originalConsoleLog = console.log.bind(console);
+  const suppressedPrefixes = [
+    '[SignLangDetector]',
+    '[GestureAnalysis]',
+    '[FingerStates]',
+    '[ThumbDetection]'
+  ];
+
+  console.log = (...args: unknown[]) => {
+    const firstArg = args[0];
+    if (typeof firstArg === 'string' && suppressedPrefixes.some(prefix => firstArg.startsWith(prefix))) {
+      return; // Skip noisy detector-specific log line
+    }
+    originalConsoleLog(...args as []);
+  };
+}
+// -----------------------------------------------------------------------------
 // Import MediaPipe solutions properly
 // Import MediaPipe libraries via CDN to avoid bundling issues
 const loadMediaPipe = async () => {
@@ -330,7 +358,7 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
           return null;
         }
       }
-        // � Pain: Thumb + index + middle (3 fingers - this is the common pain gesture)
+        // 💊 Medicine: Thumb + index + middle (3 fingers - this is the common pain gesture)
       if (indexUp && middleUp && !ringUp && !pinkyUp && upCount === 3) {
         console.log('[GestureAnalysis] ✅ PAIN (3 fingers: thumb+index+middle) detected');
         return 'pain';
@@ -362,7 +390,7 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
         return 'pain';
       }
       
-      // �‍⚕️ Doctor: Index finger only
+      // 💊 Doctor: Index finger only
       if (indexUp && !middleUp && !ringUp && !pinkyUp && upCount === 1) {
         console.log('[GestureAnalysis] ✅ DOCTOR (index up) detected');
         return 'doctor';
