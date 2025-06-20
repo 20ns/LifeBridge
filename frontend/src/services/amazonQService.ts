@@ -5,10 +5,11 @@ import {
   ListApplicationsCommand,
   GetApplicationCommand
 } from '@aws-sdk/client-qbusiness';
+import { AWS_REGION } from '../config';
 
 // Configure AWS Q Business client
 const qBusinessClient = new QBusinessClient({
-  region: 'eu-north-1', // Using Stockholm region as specified
+  region: AWS_REGION,
   credentials: {
     accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY || ''
