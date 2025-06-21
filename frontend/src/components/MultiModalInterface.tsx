@@ -1,17 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  MessageSquare,
-  Mic,
-  Hand,
-  AlertTriangle,
-  Monitor,
-  Smartphone,
-} from 'lucide-react';
 import TranslationInterface from './TranslationInterface';
 import SpeechInterface from './SpeechInterface';
 import SignLanguageInterface, { SignLanguageInterfaceHandle } from './SignLanguageInterface';
 import EmergencyPhrasesEnhanced from './EmergencyPhrasesEnhanced';
-import ConnectionIndicator from './ConnectionIndicator';
 import PerformancePanel from './PerformancePanel';
 import OfflineFallback from './OfflineFallback';
 import { useConnectionQuality } from '../hooks/useConnectionQuality';
@@ -19,6 +10,8 @@ import { usePerformanceMetrics } from '../hooks/usePerformanceMetrics';
 import { useNotifications } from '../hooks/useNotifications';
 import { translateText } from '../services/awsService';
 import { audioManager } from '../utils/audioManager';
+import InterfaceHeader from './InterfaceHeader';
+import ModeSelector from './ModeSelector';
 import './MultiModalInterface.css';
 
 type CommunicationMode = 'text' | 'speech' | 'sign' | 'emergency';
@@ -121,24 +114,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   /* ------------------------------------------------------------------ */
   return (
     <div className={`multi-modal-interface ${isEmergencyMode ? 'emergency-mode' : ''}`}>
-      {/* Header */}
-      <div className="interface-header">
-        <div className="header-left">
-          <ConnectionIndicator connectionQuality={connectionQuality} />
-          {/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && <Smartphone className="device-indicator" />}
-        </div>
-        <div className="header-center">
-          <h2>LifeBridge Communication</h2>
-        </div>
-        <div className="header-right">
-          <button className="performance-toggle" onClick={() => setShowPerformancePanel(p => !p)}>
-            <Monitor />
-          </button>
-          <button className={`emergency-toggle ${isEmergencyMode ? 'active' : ''}`} onClick={handleEmergencyToggle}>
-            <AlertTriangle />
-          </button>
-        </div>
-      </div>
+      <InterfaceHeader
+        connectionQuality={connectionQuality}
+        isEmergencyMode={isEmergencyMode}
+        onTogglePerformance={() => setShowPerformancePanel(p => !p)}
+        onToggleEmergency={handleEmergencyToggle}
+      />
 
       {/* Notifications */}
       {currentNotification && (
@@ -147,23 +128,11 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         </div>
       )}
 
-      {/* Mode selector */}
-      <div className="mode-selector">
-        {(['text', 'speech', 'sign'] as CommunicationMode[]).map(m => (
-          <button key={m} className={`mode-tab ${activeMode === m ? 'active' : ''}`} onClick={() => handleModeSwitch(m)}>
-            {m === 'text' && <MessageSquare className="mode-icon" />}
-            {m === 'speech' && <Mic className="mode-icon" />}
-            {m === 'sign' && <Hand className="mode-icon" />}
-            <span>{m.charAt(0).toUpperCase() + m.slice(1)}</span>
-          </button>
-        ))}
-        {isEmergencyMode && (
-          <button className={`mode-tab emergency-tab ${activeMode === 'emergency' ? 'active' : ''}`} onClick={() => handleModeSwitch('emergency')}>
-            <AlertTriangle className="mode-icon" />
-            <span>EMERGENCY</span>
-          </button>
-        )}
-      </div>
+      <ModeSelector
+        activeMode={activeMode}
+        isEmergencyMode={isEmergencyMode}
+        onSelectMode={handleModeSwitch}
+      />
 
       {/* Main content */}
       <div className="interface-content">

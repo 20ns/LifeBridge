@@ -1,49 +1,58 @@
-name: CI
+name: Continuous Integration
 
 on:
   push:
-    branches: ["**"]
+    branches: [ "main", "cleaning_up" ]
   pull_request:
-    branches: ["**"]
+    branches: [ "main", "cleaning_up" ]
 
 jobs:
-  build-and-test:
+  backend-frontend-ci:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        project: [frontend, backend, tests]
-    defaults:
-      run:
-        working-directory: ${{ matrix.project }}
+        node-version: [18.x]
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - name: Install dependencies
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install root scripts
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
-          # For tests, also install backend dependencies since tests import backend services
-          if [ "${{ matrix.project }}" = "tests" ]; then
-            cd ../backend && npm install
-          fi
-      - name: Type check (ts)
-        run: npm run type-check --if-present
-      - name: Lint
-        run: npm run lint --if-present
-      - name: Run tests
-        run: npm test --if-present -- --runInBand --ci --watchAll=false --passWithNoTests
+          npm install -g npm@latest
+
+      - name: Install Backend dependencies
+        working-directory: backend
+        run: npm ci --ignore-scripts
+
+      - name: Backend ESLint
+        working-directory: backend
+        run: npx eslint "src/**/*.ts" --max-warnings 0
+
+      - name: Run Backend Tests
+        working-directory: tests
+        run: npm ci && npm test -- --coverage
+
+      - name: Install Frontend dependencies
+        working-directory: frontend
+        run: npm ci --ignore-scripts
+
+      - name: Frontend ESLint
+        working-directory: frontend
+        run: npx eslint "src/**/*.tsx" --max-warnings 0
+
+      - name: Frontend Unit Tests
+        working-directory: frontend
+        run: npm test -- --watchAll=false --coverage
 
   # Aggregate test coverage reports if generated
   # (each project can output coverage/ in its directory)
   upload-coverage:
-    needs: build-and-test
+    needs: backend-frontend-ci
     runs-on: ubuntu-latest
     if: always()
     steps:

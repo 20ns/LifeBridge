@@ -5,6 +5,7 @@ import { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand } from '@a
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { auditLogger } from './auditLogger';
 import * as crypto from 'crypto';
+import { AWS_REGION, REVIEW_ALERTS_TOPIC_ARN, REVIEW_REQUESTS_TABLE } from '../config';
 
 export interface QualityMetrics {
   confidence: number;
@@ -55,10 +56,11 @@ export class QualityAssuranceService {
   private reviewTableName: string;
   private alertTopicArn: string;
   private inMemoryReviews: any[] = [];
-  constructor() {    this.dynamoClient = new DynamoDBClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
-    this.snsClient = new SNSClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
-    this.reviewTableName = process.env.REVIEW_REQUESTS_TABLE || 'lifebridge-review-requests-dev';
-    this.alertTopicArn = process.env.REVIEW_ALERTS_TOPIC_ARN || 'arn:aws:sns:eu-north-1:123456789012:lifebridge-review-alerts';
+  constructor() {
+    this.dynamoClient = new DynamoDBClient({ region: AWS_REGION });
+    this.snsClient = new SNSClient({ region: AWS_REGION });
+    this.reviewTableName = REVIEW_REQUESTS_TABLE;
+    this.alertTopicArn = REVIEW_ALERTS_TOPIC_ARN;
   }
 
   // Main quality assessment function

@@ -4,4 +4,7 @@ export const AWS_REGION = process.env.REGION || process.env.AWS_REGION || 'eu-no
 export const BEDROCK_MODEL_ID = process.env.BEDROCK_MODEL_ID || 'arn:aws:bedrock:eu-north-1:272942077493:inference-profile/eu.amazon.nova-micro-v1:0';
 
 // Cache TTL for translations (in ms)
-export const TRANSLATE_CACHE_TTL = process.env.TRANSLATE_CACHE_TTL ? Number(process.env.TRANSLATE_CACHE_TTL) : 300_000; 
+export const TRANSLATE_CACHE_TTL = process.env.TRANSLATE_CACHE_TTL ? Number(process.env.TRANSLATE_CACHE_TTL) : 300_000;
+
+export const REVIEW_ALERTS_TOPIC_ARN = process.env.REVIEW_ALERTS_TOPIC_ARN || 'arn:aws:sns:eu-north-1:123456789012:lifebridge-review-alerts';
+export const REVIEW_REQUESTS_TABLE = process.env.REVIEW_REQUESTS_TABLE || 'lifebridge-review-requests-dev'; 
