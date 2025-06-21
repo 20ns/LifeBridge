@@ -4,6 +4,7 @@ import { UserRole } from '../types/auth';
 import { Eye, EyeOff, Heart, Lock, Mail, User, Shield, UserPlus } from 'lucide-react';
 import '../styles/LoginPage.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { validateEmail, validatePasswordPolicy, defaultPasswordPolicy } from '../utils/authUtils';
 
 type LoginPageProps = {
   initialMode?: 'signin' | 'signup';
@@ -45,16 +46,27 @@ export default function LoginPage({ initialMode }: LoginPageProps) {
     }
     
     if (isSignUp) {
-      // Handle sign up
-      if (password !== confirmPassword) {
-        setError('Passwords do not match');
+      // --- Client-side validations specific to sign-up ---
+      // Validate email format
+      if (!validateEmail(email)) {
+        setError('Please enter a valid email address.');
         return;
       }
-      if (password.length < 8) {
-        setError('Password must be at least 8 characters long');
+
+      // Validate password policy (strength, length, etc.)
+      const policyCheck = validatePasswordPolicy(password, defaultPasswordPolicy, { name, email });
+      if (!policyCheck.isValid) {
+        setError(policyCheck.errors.join(' • '));
+        return;
+      }
+
+      // Confirm password match
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.');
         return;
       }
       
+      // Handle sign up
       const result = await register({
         email,
         password,
@@ -161,7 +173,8 @@ export default function LoginPage({ initialMode }: LoginPageProps) {
           </div>
 
           {/* Form */}
-          <form className="login-form" onSubmit={handleSubmit}>
+          {/* noValidate disables native browser validation pop-ups, letting us handle messaging ourselves */}
+          <form className="login-form" noValidate onSubmit={handleSubmit}>
             {isSignUp && (
               <div className="form-group">
                 <label htmlFor="name" className="form-label">
