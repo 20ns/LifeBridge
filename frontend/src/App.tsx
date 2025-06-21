@@ -97,16 +97,6 @@ function AppContent() {
 
   return (
     <div className="App">
-      {/* Skip Links for Accessibility */}
-      <div className="skip-links">
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        <a href="#navigation" className="skip-link">
-          Skip to navigation
-        </a>
-      </div>
-
       <header className="app-header" role="banner">
         <div className="header-content">
           <div className="logo-section" style={{cursor:'pointer'}} onClick={() => navigate('/') }>
@@ -118,7 +108,6 @@ function AppContent() {
               height="40"
             />
             <h1>LifeBridgeAI</h1>
-            <p className="subtitle">Medical Translation Platform</p>
           </div>
 
           <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
