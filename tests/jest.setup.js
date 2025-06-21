@@ -89,3 +89,41 @@ jest.mock('node-fetch', () => jest.fn(() => Promise.resolve({
   json: () => Promise.resolve({}),
   text: () => Promise.resolve(''),
 })), { virtual: true });
+
+// Generic factory to create AWS SDK v3 client mocks
+const createAwsClientMock = () => jest.fn().mockImplementation(() => ({
+  send: jest.fn().mockResolvedValue({})
+}));
+
+// Mock DynamoDB client and commands
+jest.mock('@aws-sdk/client-dynamodb', () => ({
+  DynamoDBClient: createAwsClientMock(),
+  PutItemCommand: jest.fn().mockImplementation((params) => params),
+  GetItemCommand: jest.fn().mockImplementation((params) => params),
+  UpdateItemCommand: jest.fn().mockImplementation((params) => params),
+  QueryCommand: jest.fn().mockImplementation((params) => params)
+}), { virtual: true });
+
+// Mock CloudWatch Logs client and commands
+jest.mock('@aws-sdk/client-cloudwatch-logs', () => ({
+  CloudWatchLogsClient: createAwsClientMock(),
+  PutLogEventsCommand: jest.fn().mockImplementation((params) => params)
+}), { virtual: true });
+
+// Mock CloudWatch Metrics client and commands
+jest.mock('@aws-sdk/client-cloudwatch', () => ({
+  CloudWatchClient: createAwsClientMock(),
+  PutMetricDataCommand: jest.fn().mockImplementation((params) => params)
+}), { virtual: true });
+
+// Mock KMS client and commands
+jest.mock('@aws-sdk/client-kms', () => ({
+  KMSClient: createAwsClientMock(),
+  EncryptCommand: jest.fn().mockImplementation((params) => ({ CiphertextBlob: Buffer.from('mock'), ...params }))
+}), { virtual: true });
+
+// Mock SNS client and commands
+jest.mock('@aws-sdk/client-sns', () => ({
+  SNSClient: createAwsClientMock(),
+  PublishCommand: jest.fn().mockImplementation((params) => params)
+}), { virtual: true });
