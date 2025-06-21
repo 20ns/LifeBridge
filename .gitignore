@@ -139,7 +139,6 @@ cdk.out/
 .pnp.*
 
 # NPM
-package-lock.json
 .npm
 
 # PNPM
