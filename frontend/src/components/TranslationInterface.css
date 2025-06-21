@@ -1272,3 +1272,39 @@
 .emergency-mode .waiting-state h3 {
   color: var(--accent-red);
 }
+
+/* ===== Output Controls (Copy + Speak) ===== */
+.output-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.output-controls .control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.output-controls .control-button:hover:not(:disabled) {
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+}
+
+.output-controls .control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.output-controls .confidence-score {
+  font-weight: 600;
+  color: var(--primary-blue-dark);
+  margin-right: var(--spacing-xs);
+}
