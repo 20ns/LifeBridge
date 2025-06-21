@@ -2,8 +2,6 @@
 // Provides cached translations, emergency phrase banks, and fallback mechanisms
 
 import { translateText as bedrockTranslate } from './bedrock';
-// Legacy AWS SDK v2 (not used here but keep consistency)
-import * as AWS from 'aws-sdk';
 
 export interface OfflineTranslationCache {
   id: string;
