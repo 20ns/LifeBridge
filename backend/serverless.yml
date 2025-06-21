@@ -21,6 +21,7 @@ provider:
     KMS_KEY_ID: alias/aws/dynamodb
     REVIEW_ALERTS_TOPIC_ARN: !Ref ReviewAlertsSnsTopic
     AUDIT_LOG_GROUP: /aws/lifebridge/audit-${self:provider.stage}
+    POWERTOOLS_PARAMETERS_MAX_AGE: "43200" # Reduce Secrets Manager calls
 
   iamRoleStatements:
     # Bedrock (LLM) access
@@ -83,6 +84,10 @@ provider:
       Action:
         - cloudwatch:PutMetricData
       Resource: '*'
+
+  logRetentionInDays: 3  # Keep Lambda logs for 3 days to save costs
+  tracing:
+    lambda: ${env:DEV_MODE, false}  # Enable X-Ray only when DEV_MODE=true
 
 functions:
   translate:
