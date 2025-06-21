@@ -5,7 +5,7 @@ import { auditLogger } from '../services/auditLogger';
 import { qualityAssuranceService } from '../services/qualityAssurance';
 import { phiRedactionService } from '../services/phiRedaction';
 import { impactMetricsService } from '../services/impactMetrics';
-import { offlineService } from '../services/offlineService';
+import { offlineService } from '../services/offlineService.core';
 import * as crypto from 'crypto';
 
 export const handler = async (
