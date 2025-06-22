@@ -1617,3 +1617,78 @@ a:focus {
   color: #1d4ed8;
 }
 
+/* Medical Context Tooltip Styles */
+.medical-context-explanation {
+  padding: 0;
+}
+
+.context-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.context-item.emergency {
+  background: #fef2f2;
+  border-left-color: #dc2626;
+}
+
+.context-item.consultation {
+  background: #eff6ff;
+  border-left-color: #2563eb;
+}
+
+.context-item.medication {
+  background: #ecfdf5;
+  border-left-color: #059669;
+}
+
+.context-item.general {
+  background: #f9fafb;
+  border-left-color: #6b7280;
+}
+
+.context-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.context-indicator {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.context-item p {
+  margin: 0;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.context-note {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.context-note p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.language-section {
+  display: flex;
+  align-items: center;
+}
+
+.medical-info-btn:hover {
+  background-color: #f3f4f6 !important;
+}
+
