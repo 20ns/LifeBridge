@@ -383,6 +383,33 @@ resources:
           - AttributeName: email
             KeyType: HASH
 
+    # KMS Key for encrypting sensitive data
+    LifeBridgeKMSKey:
+      Type: AWS::KMS::Key
+      Properties:
+        Description: LifeBridge encryption key for PHI and sensitive data
+        EnableKeyRotation: true
+        KeyPolicy:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: AllowRootAccount
+              Effect: Allow
+              Principal:
+                AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+              Action: "kms:*"
+              Resource: "*"
+            - Sid: AllowDynamoDBAndLambda
+              Effect: Allow
+              Principal:
+                Service:
+                  - dynamodb.amazonaws.com
+                  - lambda.amazonaws.com
+              Action:
+                - kms:Encrypt
+                - kms:Decrypt
+                - kms:GenerateDataKey*
+              Resource: "*"
+
   Outputs:
     AuditLogsTableName:
       Description: Name of the audit logs DynamoDB table

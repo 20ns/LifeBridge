@@ -82,3 +82,10 @@ jest.mock('lucide-react', () => ({
   Pause: jest.fn(() => ({ $$typeof: Symbol.for('react.element'), type: 'div', props: { 'data-testid': 'pause' } })),
   X: jest.fn(() => ({ $$typeof: Symbol.for('react.element'), type: 'div', props: { 'data-testid': 'x' } }))
 }), { virtual: true });
+
+// Mock node-fetch to avoid ESM/CommonJS issues
+jest.mock('node-fetch', () => jest.fn(() => Promise.resolve({
+  ok: true,
+  json: () => Promise.resolve({}),
+  text: () => Promise.resolve(''),
+})), { virtual: true });
