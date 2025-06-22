@@ -1316,3 +1316,7 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Import component-specific styles */
+@import './components/SignAnimationPlayer.css';
+@import './components/VisualFeedbackSystem.css';

@@ -451,9 +451,91 @@ export const getContextualAdvice = async (
       throw new Error('Failed to get contextual advice');
     }
 
+    return await response.json();  } catch (error) {
+    console.error('Contextual advice error:', error);
+    throw error;
+  }
+};
+
+// Sign Language to Translation Service
+export interface SignToTranslationResult {
+  detectedSign: string;
+  translatedText: string;
+  confidence: number;
+  medicalContext: string;
+  isEmergency: boolean;
+}
+
+export interface BatchSignResult {
+  signs: Array<{
+    gesture: string;
+    confidence: number;
+    timestamp: number;
+  }>;
+  combinedText: string;
+  translatedText: string;
+  medicalContext: string;
+  isEmergency: boolean;
+}
+
+export const signToTranslation = async (
+  signData: {
+    gesture: string;
+    confidence: number;
+    timestamp: number;
+  },
+  targetLanguage: string = 'en'
+): Promise<SignToTranslationResult> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sign-to-translation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        signData,
+        targetLanguage
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to translate sign language');
+    }
+
     return await response.json();
   } catch (error) {
-    console.error('Contextual advice error:', error);
+    console.error('Sign to translation error:', error);
+    throw error;
+  }
+};
+
+export const batchSignProcessing = async (
+  signs: Array<{
+    gesture: string;
+    confidence: number;
+    timestamp: number;
+  }>,
+  targetLanguage: string = 'en'
+): Promise<BatchSignResult> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/batch-sign-processing`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        signs,
+        targetLanguage
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to process batch signs');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Batch sign processing error:', error);
     throw error;
   }
 };

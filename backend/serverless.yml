@@ -124,13 +124,30 @@ functions:
           path: /contextual-advice
           method: post
           cors: true
-
   signLanguageProcessor:
     handler: dist/handlers/signLanguageProcessor.handler
     timeout: 20
     events:
       - http:
           path: /sign-language-process
+          method: post
+          cors: true
+
+  signToTranslation:
+    handler: dist/handlers/signLanguageProcessor.signToTranslation
+    timeout: 30
+    events:
+      - http:
+          path: /sign-to-translation
+          method: post
+          cors: true
+
+  batchSignProcessing:
+    handler: dist/handlers/signLanguageProcessor.batchSignProcessing
+    timeout: 45
+    events:
+      - http:
+          path: /batch-sign-processing
           method: post
           cors: true
 

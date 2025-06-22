@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { signToTranslation, batchSignProcessing } from '../services/awsService';
 
 interface SignData {
   landmarks: any[];
@@ -262,7 +263,6 @@ export const useSignLanguageDetection = () => {
         : 0
     };
   }, [detectionHistory]);
-
   // Check if current signs indicate emergency
   const isEmergencyDetected = useCallback(() => {
     const recentSigns = detectedSigns.slice(-3);
@@ -273,7 +273,43 @@ export const useSignLanguageDetection = () => {
       return originalGesture && medicalSignMappings[originalGesture].medicalPriority === 'critical';
     });
   }, [detectedSigns]);
-  return {
+
+  // Translate single sign to target language
+  const translateSign = useCallback(async (
+    signData: { gesture: string; confidence: number; timestamp: number },
+    targetLanguage: string = 'en'
+  ) => {
+    try {
+      const result = await signToTranslation(signData, targetLanguage);
+      return result;
+    } catch (error) {
+      console.error('Error translating sign:', error);
+      return null;
+    }
+  }, []);
+
+  // Process multiple signs and get combined translation
+  const translateBatchSigns = useCallback(async (
+    signs: Array<{ gesture: string; confidence: number; timestamp: number }>,
+    targetLanguage: string = 'en'
+  ) => {
+    try {
+      const result = await batchSignProcessing(signs, targetLanguage);
+      return result;
+    } catch (error) {
+      console.error('Error processing batch signs:', error);
+      return null;
+    }
+  }, []);
+
+  // Get recent signs for batch processing
+  const getRecentSignsForTranslation = useCallback((count: number = 5) => {
+    return detectedSigns.slice(-count).map(sign => ({
+      gesture: sign.gesture,
+      confidence: sign.confidence,
+      timestamp: sign.timestamp
+    }));
+  }, [detectedSigns]);  return {
     // State
     isActive,
     detectedSigns,
@@ -288,6 +324,11 @@ export const useSignLanguageDetection = () => {
     handleSignDetected,
     clearHistory,
     recognizeGestureML,
+    
+    // Translation methods
+    translateSign,
+    translateBatchSigns,
+    getRecentSignsForTranslation,
     
     // Utility functions
     getTextForTranslation,

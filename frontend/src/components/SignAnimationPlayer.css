@@ -1,0 +1,448 @@
+/* Sign Animation Player Styles */
+.sign-animation-player {
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
+  border: 2px solid #e9ecef;
+}
+
+.sign-animation-player.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Loading State */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: #6c757d;
+}
+
+.loading-indicator .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e9ecef;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Animation Display */
+.animation-display {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #dee2e6;
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gesture-visualization {
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.gesture-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hand-shape {
+  position: relative;
+  padding: 1rem;
+}
+
+.hand-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  animation: gesture-pulse 2s infinite;
+}
+
+@keyframes gesture-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.hand-visual {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+/* Specific gesture animations */
+.hand-icon.emergency {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  animation: emergency-shake 0.5s infinite;
+}
+
+@keyframes emergency-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.hand-icon.help {
+  animation: help-wave 1s infinite;
+}
+
+@keyframes help-wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-15deg); }
+  75% { transform: rotate(15deg); }
+}
+
+.hand-icon.pain {
+  background: linear-gradient(135deg, #ff9f43 0%, #ee5a24 100%);
+  animation: pain-point 1.5s infinite;
+}
+
+@keyframes pain-point {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Gesture Information */
+.gesture-info {
+  text-align: center;
+}
+
+.gesture-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.gesture-description {
+  font-size: 1rem;
+  color: #495057;
+  margin: 0 0 1rem 0;
+  font-style: italic;
+}
+
+.gesture-details {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hand-shape-info,
+.movement-info {
+  background: #e9ecef;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+.no-gesture {
+  color: #6c757d;
+  font-style: italic;
+  padding: 2rem;
+}
+
+/* Animation Controls */
+.animation-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.control-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.control-btn:hover:not(:disabled) {
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.control-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.control-btn.play-pause {
+  background: #28a745;
+}
+
+.control-btn.play-pause:hover:not(:disabled) {
+  background: #1e7e34;
+}
+
+.control-btn.reset {
+  background: #6c757d;
+}
+
+.control-btn.reset:hover:not(:disabled) {
+  background: #545b62;
+}
+
+.control-btn.audio-toggle {
+  background: #17a2b8;
+}
+
+.control-btn.audio-toggle:hover:not(:disabled) {
+  background: #117a8b;
+}
+
+.control-btn .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Speed Control */
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.speed-control label {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.speed-select {
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: white;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+/* Progress Bar */
+.progress-bar {
+  margin-bottom: 1rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.frame-info {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Sequence Preview */
+.sequence-preview {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+}
+
+.sequence-preview h5 {
+  margin: 0 0 0.75rem 0;
+  color: #495057;
+  font-weight: 600;
+}
+
+.sequence-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sequence-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.sequence-item:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.sequence-item.current {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.sequence-item.completed {
+  background: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+.sequence-item .gesture-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.sequence-item .gesture-duration {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* Emergency Mode Styling */
+.sign-animation-player.emergency {
+  border-color: #dc3545;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe0e1 100%);
+}
+
+.sign-animation-player.emergency .animation-display {
+  border-color: #dc3545;
+  background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sign-animation-player {
+    padding: 1rem;
+  }
+
+  .animation-display {
+    padding: 1rem;
+    min-height: 150px;
+  }
+
+  .hand-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .hand-visual {
+    font-size: 2rem;
+  }
+
+  .gesture-name {
+    font-size: 1.2rem;
+  }
+
+  .animation-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .control-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .sequence-list {
+    justify-content: center;
+  }
+
+  .sequence-item {
+    min-width: 60px;
+    padding: 0.4rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gesture-details {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .hand-shape-info,
+  .movement-info {
+    align-self: center;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .hand-icon,
+  .gesture-pulse,
+  .emergency-shake,
+  .help-wave,
+  .pain-point {
+    animation: none !important;
+  }
+
+  .control-btn:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .sign-animation-player {
+    border: 3px solid #000;
+  }
+
+  .animation-display {
+    border: 2px solid #000;
+  }
+
+  .control-btn {
+    border: 2px solid #000;
+  }
+}
