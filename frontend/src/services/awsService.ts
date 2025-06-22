@@ -1,6 +1,6 @@
 // Backend API Configuration
-// Use deployed AWS API Gateway URL
-const API_BASE_URL = 'http://localhost:3001/dev'; // Using local backend for testing
+// Use production AWS API Gateway URL
+const API_BASE_URL = 'https://9t2to2akvf.execute-api.eu-north-1.amazonaws.com/dev';
 
 // Rate limiting and retry configuration
 const RATE_LIMIT_DELAY = 1500; // 1.5 seconds between requests
