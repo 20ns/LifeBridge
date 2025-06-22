@@ -11,10 +11,13 @@
     "test:services": "jest backend/services",
     "test:integration": "jest integration",
     "test:frontend": "jest frontend"
-  },
-  "dependencies": {
+  },  "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.830.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.832.0",
+    "@aws-sdk/client-dynamodb": "^3.830.0",
+    "@aws-sdk/client-kms": "^3.830.0",
     "@aws-sdk/client-qbusiness": "^3.830.0",
+    "@aws-sdk/client-sns": "^3.830.0",
     "axios": "^1.9.0"
   },
   "keywords": [
@@ -33,9 +36,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/jest": "^30.0.0",
-    "aws-sdk": "^2.1692.0",
+    "@testing-library/user-event": "^14.6.1",    "@types/jest": "^30.0.0",
     "aws-sdk-client-mock": "^4.1.0",
     "babel-jest": "^30.0.0",
     "identity-obj-proxy": "^3.0.0",
