@@ -72,6 +72,8 @@ const medicalSignMappings: SignToTextMapping = {
 };
 
 export const useSignLanguageDetection = () => {
+  console.log('[useSignLangDetection] Hook execution started/re-executed.'); // Log hook execution
+
   const [isActive, setIsActive] = useState(false);
   const [detectedSigns, setDetectedSigns] = useState<SignData[]>([]);
   const [currentText, setCurrentText] = useState<string>('');
@@ -109,16 +111,20 @@ export const useSignLanguageDetection = () => {
 
   // Start sign language detection
   const startDetection = useCallback(() => {
+    console.log('[useSignLangDetection] startDetection called. Current isActive:', isActive);
     setIsActive(true);
+    console.log('[useSignLangDetection] setIsActive(true) called.');
     setDetectedSigns([]);
     setCurrentText('');
     gestureStabilityRef.current = {};
-  }, []);
+  }, [isActive]); // Added isActive to dependency array to log its current value
 
   // Stop sign language detection
   const stopDetection = useCallback(() => {
+    console.log('[useSignLangDetection] stopDetection called. Current isActive:', isActive);
     setIsActive(false);
-  }, []);
+    console.log('[useSignLangDetection] setIsActive(false) called.');
+  }, [isActive]); // Added isActive to dependency array
 
   // Enhanced sign detection handler with ML integration
   const handleSignDetected = useCallback(async (signData: SignData) => {

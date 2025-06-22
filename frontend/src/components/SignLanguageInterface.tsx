@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import SignLanguageDetector from './SignLanguageDetector';
 import SignAnimationPlayer from './SignAnimationPlayer';
 import VisualFeedbackSystem from './VisualFeedbackSystem';
@@ -12,13 +12,19 @@ interface SignLanguageInterfaceProps {
   translatedText?: string;
 }
 
-const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
+export interface SignLanguageInterfaceHandle {
+  triggerStartDetection: () => void;
+  triggerStopDetection: () => void;
+  isDetectionActive: () => boolean;
+}
+
+const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLanguageInterfaceProps>(({
   onTranslationRequest,
   onEmergencyDetected,
   isTranslating = false,
   currentLanguage = 'en',
   translatedText = ''
-}) => {
+}, ref) => {
   const {
     isActive,
     detectedSigns,
@@ -34,9 +40,33 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
     getDetectionStats,
     isEmergencyDetected
   } = useSignLanguageDetection();
+
+  // Log to check if startDetection and stopDetection are functions
+  console.log('[SignLangInterface] After hook. typeof startDetection:', typeof startDetection, 'typeof stopDetection:', typeof stopDetection, 'isActive from hook:', isActive);
+
   const [autoTranslate, setAutoTranslate] = useState(false);
   const [lastTranslationTime, setLastTranslationTime] = useState(0);
   const [showAnimationPlayer, setShowAnimationPlayer] = useState(false);
+
+  const prevPropsRef = useRef<SignLanguageInterfaceProps | undefined>(undefined);
+
+  useEffect(() => {
+    const currentProps = { onTranslationRequest, onEmergencyDetected, isTranslating, currentLanguage, translatedText };
+    if (prevPropsRef.current) {
+      const changedProps = Object.keys(currentProps).filter(
+        key => prevPropsRef.current![key as keyof SignLanguageInterfaceProps] !== currentProps[key as keyof SignLanguageInterfaceProps]
+      );
+      if (changedProps.length > 0) {
+        console.log('[SignLangInterface] Re-rendered due to changed props:', changedProps.join(', '));
+      } else {
+        console.log('[SignLangInterface] Re-rendered without prop changes.');
+      }
+    } else {
+      console.log('[SignLangInterface] Initial render.');
+    }
+    prevPropsRef.current = currentProps;
+  });
+
 
   // Visual feedback for current detection state
   const feedbackData = {
@@ -86,6 +116,26 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
 
   const detectionStats = getDetectionStats();
 
+  // Expose methods via ref
+  useImperativeHandle(ref, () => ({
+    triggerStartDetection: () => {
+      console.log('[SignLangInterface via ref] triggerStartDetection called');
+      if (!isActive) {
+        startDetection();
+      }
+    },
+    triggerStopDetection: () => {
+      console.log('[SignLangInterface via ref] triggerStopDetection called');
+      if (isActive) {
+        stopDetection();
+      }
+    },
+    isDetectionActive: () => isActive
+  }));
+
+  // Log isActive state before returning JSX
+  console.log('[SignLangInterface] Rendering. isActive:', isActive);
+
   return (
     <div className="interface-container sign-language-interface">
       <div className="interface-header">
@@ -102,7 +152,18 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
         </div>
         <div className="controls">
           <button
-            onClick={isActive ? stopDetection : startDetection}
+            onClick={() => {
+              console.log('[SignLangInterface] "Start/Stop Detection" BUTTON CLICKED.');
+              console.log('[SignLangInterface] typeof startDetection:', typeof startDetection, 'typeof stopDetection:', typeof stopDetection);
+              console.log('[SignLangInterface] Current isActive state before action:', isActive);
+              if (isActive) {
+                stopDetection();
+                console.log('[SignLangInterface] Called stopDetection. New isActive should be false.');
+              } else {
+                startDetection();
+                console.log('[SignLangInterface] Called startDetection. New isActive should be true.');
+              }
+            }}
             className={`detection-toggle ${isActive ? 'active' : ''}`}
             disabled={isTranslating}
           >
@@ -119,8 +180,12 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
             Auto-translate
           </label>
         </div>
-      </div>      {isActive && (
+      </div>
+      {isActive && (
         <>
+          {/* This log is fine inside a JS block if not directly returned by JSX */}
+          {/* However, to be safe and explicit, we can use an IIFE returning null */}
+          {(() => { console.log('[SignLangInterface] isActive is true, rendering SignLanguageDetector.'); return null; })()}
           <SignLanguageDetector
             onSignDetected={handleSignDetected}
             isActive={isActive}
@@ -240,6 +305,6 @@ const SignLanguageInterface: React.FC<SignLanguageInterfaceProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default SignLanguageInterface;
