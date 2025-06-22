@@ -781,3 +781,44 @@
   background: #ffffff !important;
   border-color: #dc2626 !important;
 }
+
+/* Start Recording Button - Positioned next to Source Text */
+.translation-interface .start-recording-button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2) !important;
+}
+
+.translation-interface .start-recording-button:hover {
+  background: #2563eb !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3) !important;
+}
+
+.translation-interface .start-recording-button.recording {
+  background: #dc2626 !important;
+  animation: pulse-recording 2s infinite !important;
+}
+
+.translation-interface .start-recording-button.recording:hover {
+  background: #b91c1c !important;
+}
+
+@keyframes pulse-recording {
+  0%, 100% { 
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+  }
+  50% { 
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.5);
+  }
+}
