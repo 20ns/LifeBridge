@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [frontend, backend]
+        project: [frontend, backend, tests]
     defaults:
       run:
         working-directory: ${{ matrix.project }}
