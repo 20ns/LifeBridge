@@ -17,4 +17,5 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   font-size: var(--font-size-base);
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }

@@ -11,6 +11,7 @@ import { AppStateProvider } from './contexts/AppStateContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Heart, Settings, Info, Users, MessageSquare, Shield, User, LogOut } from 'lucide-react';
 import './styles/accessibility-enhanced.css';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function App() {
   return (
@@ -28,7 +29,16 @@ function App() {
 
 function AppContent() {
   const { user, logout, canAccessReviewDashboard } = useAuth();
-  const [currentView, setCurrentView] = useState<'translation' | 'review' | 'profile'>('translation');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const pathToView = (path: string): 'translation' | 'review' | 'profile' => {
+    if (path.startsWith('/review')) return 'review';
+    if (path.startsWith('/profile')) return 'profile';
+    return 'translation';
+  };
+
+  const [currentView, setCurrentView] = useState<'translation' | 'review' | 'profile'>(pathToView(location.pathname));
   const [sourceLanguage, setSourceLanguage] = useState('en');
   const [targetLanguage, setTargetLanguage] = useState('es');
   const [performanceMode, setPerformanceMode] = useState<'standard' | 'optimized'>('optimized');
@@ -36,6 +46,10 @@ function AppContent() {
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, right: 0 });
   const tooltipRef = useRef<HTMLDivElement>(null);
   const infoButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setCurrentView(pathToView(location.pathname));
+  }, [location.pathname]);
 
   // Handle language switching
   const handleLanguageSwitch = () => {
@@ -86,7 +100,7 @@ function AppContent() {
 
       <header className="app-header" role="banner">
         <div className="header-content">
-          <div className="logo-section">
+          <div className="logo-section" style={{cursor:'pointer'}} onClick={() => navigate('/') }>
             <img 
               src="/logo.png" 
               alt="LifeBridgeAI Logo" 
@@ -110,7 +124,7 @@ function AppContent() {
               <div className="mode-switcher">
                 <button
                   className={`mode-btn ${currentView === 'translation' ? 'active' : ''}`}
-                  onClick={() => setCurrentView('translation')}
+                  onClick={() => { setCurrentView('translation'); navigate('/'); }}
                   aria-label="Switch to Translation Mode"
                 >
                   <MessageSquare size={16} aria-hidden="true" />
@@ -121,7 +135,7 @@ function AppContent() {
                 {hasReviewAccess && (
                   <button
                     className={`mode-btn ${currentView === 'review' ? 'active' : ''}`}
-                    onClick={() => setCurrentView('review')}
+                    onClick={() => { setCurrentView('review'); navigate('/review'); }}
                     aria-label="Switch to Review Dashboard"
                   >
                     <Users size={16} aria-hidden="true" />
@@ -131,7 +145,7 @@ function AppContent() {
                 
                 <button
                   className={`mode-btn ${currentView === 'profile' ? 'active' : ''}`}
-                  onClick={() => setCurrentView('profile')}
+                  onClick={() => { setCurrentView('profile'); navigate('/profile'); }}
                   aria-label="View Profile"
                 >
                   <User size={16} aria-hidden="true" />

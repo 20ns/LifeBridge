@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types/auth';
+import '../styles/UserProfile.css';
 
 export default function UserProfile() {
   const { user, logout, canAccessReviewDashboard, canAccessAdminPanel } = useAuth();
@@ -48,24 +49,20 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <div className="flex items-center space-x-4">
-        <div className="flex-shrink-0">
-          <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center">
-            <span className="text-white font-medium text-lg">
-              {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-            </span>
-          </div>
+    <div className="user-profile-container">
+      <div className="user-info-header">
+        <div className="avatar-circle">
+          {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-medium text-gray-900 truncate">{user.name}</h2>
-          <p className="text-sm text-gray-500 truncate">{user.email}</p>
+          <h2>{user.name}</h2>
+          <p>{user.email}</p>
           <div className="mt-2 flex items-center space-x-2">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+            <span className={`badge`} style={{backgroundColor:'var(--neutral-100)'}}>
               {getRoleDisplayName(user.role)}
             </span>
             {user.department && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              <span className="badge">
                 {user.department}
               </span>
             )}
@@ -73,14 +70,14 @@ export default function UserProfile() {
         </div>
         <button
           onClick={logout}
-          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="badge permission-restricted"
         >
           Sign Out
         </button>
       </div>
 
       {/* Access Level Information */}
-      <div className="mt-6 border-t border-gray-200 pt-6">
+      <div className="section">
         <h3 className="text-sm font-medium text-gray-900 mb-3">Access Permissions</h3>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -91,21 +88,13 @@ export default function UserProfile() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Review Dashboard</span>
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-              canAccessReviewDashboard() 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`permission-badge ${ canAccessReviewDashboard() ? 'permission-granted' : 'permission-restricted' }`}>
               {canAccessReviewDashboard() ? '✓ Granted' : '✗ Restricted'}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Admin Panel</span>
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-              canAccessAdminPanel() 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`permission-badge ${ canAccessAdminPanel() ? 'permission-granted' : 'permission-restricted' }`}>
               {canAccessAdminPanel() ? '✓ Granted' : '✗ Restricted'}
             </span>
           </div>
@@ -114,7 +103,7 @@ export default function UserProfile() {
 
       {/* Additional Info */}
       {(user.certifications || user.hospitalId || user.lastLogin) && (
-        <div className="mt-6 border-t border-gray-200 pt-6">
+        <div className="section additional-info">
           <h3 className="text-sm font-medium text-gray-900 mb-3">Additional Information</h3>
           <dl className="space-y-2">
             {user.hospitalId && (
