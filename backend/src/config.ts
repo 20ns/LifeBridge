@@ -39,12 +39,9 @@ const envSchema = z
     REGION: z.string().default('eu-north-1'),
     AWS_REGION: z.string().optional(), // Allow AWS default env var
     STAGE: z.string().default('dev'),
-    USERS_TABLE: z.string(),
-    BEDROCK_MODEL_ID: z
+    USERS_TABLE: z.string(),    BEDROCK_MODEL_ID: z
       .string()
-      .default(
-        'arn:aws:bedrock:eu-north-1:272942077493:inference-profile/eu.amazon.nova-micro-v1:0'
-      ),
+      .default('amazon.nova-micro-v1:0'),
     TRANSLATE_CACHE_TTL: z.string().optional(),
     REVIEW_ALERTS_TOPIC_ARN: z.string(),
     REVIEW_REQUESTS_TABLE: z.string(),
