@@ -324,7 +324,9 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
   };
 
   const [displayedCategories, setDisplayedCategories] = useState<Record<string, CategoryWithDisplayedPhrases>>({});
-  const criticalCategoryKey = 'Critical Emergency'; // Define this once
+  const criticalCategoryKey = 'Critical Emergency';
+  const painAssessmentCategoryKey = 'Pain Assessment';
+
   // Helper function to translate phrases for a single category if needed
   const translateSingleCategoryIfNeeded = useCallback(async (categoryKey: string) => {
     // Type assertion for categoryKey when indexing emergencyCategories
@@ -420,20 +422,18 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
       };
     }
     setDisplayedCategories(initialDisplaySetup);
-    
     setTranslatedCategoriesForCurrentLang(new Set());
-    setExpandedCategories({ [criticalCategoryKey]: true });
     setCategoryLoadingStates({});
     setCategoryErrorStates({});
+
+    // No categories expanded by default
+    setExpandedCategories({});
     setLoading(false);
 
-    if (targetLanguage !== sourceLanguage && targetLanguage && initialDisplaySetup[criticalCategoryKey]) {
-      translateSingleCategoryIfNeeded(criticalCategoryKey);
-    } else if (initialDisplaySetup[criticalCategoryKey]) {
-      setTranslatedCategoriesForCurrentLang(prev => new Set(prev).add(criticalCategoryKey));
-    }
+    // Since no categories are expanded by default, no initial translations are triggered here.
+    // Translations will occur when a user expands a category via handleToggleCategory.
 
-  }, [targetLanguage, sourceLanguage, emergencyCategories, translateSingleCategoryIfNeeded]);
+  }, [targetLanguage, sourceLanguage, emergencyCategories, largeButtons]); // Removed translateSingleCategoryIfNeeded from deps as it's not called here
 
 
   const handleToggleCategory = (categoryKey: string) => {
@@ -456,7 +456,6 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
     return (
       <div className={`emergency-phrases ${largeButtons ? 'large-layout' : ''} ${accessibilityMode ? 'accessible-layout' : ''}`}>
         <div className="emergency-header">
-          <AlertTriangle className="emergency-icon" />
           <h2>Emergency Medical Phrases</h2>
           <p>Loading emergency phrases...</p>
         </div>
@@ -469,11 +468,10 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
   return (
     <div className={`emergency-container ${isEmergencyMode ? 'emergency-mode' : ''} ${
       currentTheme === 'dark' ? 'emergency-theme-dark' : 
-      currentTheme === 'high-contrast' ? 'emergency-theme-high-contrast' : 
+      currentTheme === 'high-contrast' ? 'emergency-theme-high-contrast' :
       'emergency-theme-light'
     } size-${textSize} ${largeButtons ? 'large-layout' : ''} ${accessibilityMode ? 'accessible-layout' : ''}`}>
       <div className="emergency-header emergency-section">
-        <AlertTriangle className="emergency-icon" />
         <h2>Emergency Medical Phrases</h2>
         <p>Pre-translated emergency phrases ready for immediate use</p>
         
