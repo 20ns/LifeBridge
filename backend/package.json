@@ -11,14 +11,19 @@
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.821.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.832.0",
     "@aws-sdk/client-comprehend": "^3.830.0",
+    "@aws-sdk/client-dynamodb": "^3.830.0",
+    "@aws-sdk/client-kms": "^3.830.0",
     "@aws-sdk/client-polly": "^3.821.0",
     "@aws-sdk/client-qbusiness": "^3.830.0",
     "@aws-sdk/client-s3": "^3.824.0",
+    "@aws-sdk/client-sns": "^3.830.0",
     "@aws-sdk/client-transcribe": "^3.830.0",
     "@aws-sdk/client-translate": "^3.828.0",
     "aws-lambda": "^1.0.7"
-  },  "devDependencies": {
+  },
+  "devDependencies": {
     "@types/aws-lambda": "^8.10.145",
     "@types/node": "^20.0.0",
     "serverless": "^3.38.0",

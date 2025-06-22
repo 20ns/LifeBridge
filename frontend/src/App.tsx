@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import MultiModalInterface from './components/MultiModalInterface';
 import LanguageSelector from './components/LanguageSelector';
+import ReviewDashboard from './components/ReviewDashboard';
 import { AriaLiveProvider } from './components/AriaLive';
 import { AccessibilityProvider } from './contexts/AccessibilityContext';
 import { AppStateProvider } from './contexts/AppStateContext';
-import { Heart, Settings, Info } from 'lucide-react';
+import { Heart, Settings, Info, Users, MessageSquare } from 'lucide-react';
 import './styles/accessibility-enhanced.css';
 
 function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
@@ -57,6 +58,7 @@ const AppContent: React.FC = () => {
   const [performanceMode, setPerformanceMode] = useState<'standard' | 'optimized'>('optimized');
   const [showPerformanceTooltip, setShowPerformanceTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, right: 0 });
+  const [appMode, setAppMode] = useState<'translation' | 'review'>('translation');
   const tooltipRef = useRef<HTMLDivElement>(null);
   const infoButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -113,66 +115,90 @@ const AppContent: React.FC = () => {
             <p className="subtitle">Medical Translation Platform</p>
           </div>
 
-          <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
-            <div className="controls-group">
-              <div className="language-section">
-                <LanguageSelector
-                  sourceLanguage={sourceLanguage}
-                  targetLanguage={targetLanguage}
-                  onSourceChange={setSourceLanguage}
-                  onTargetChange={setTargetLanguage}
-                />
-              </div>
-
-              <div className="performance-toggle">
+          <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">            <div className="controls-group">
+              <div className="mode-switcher">
                 <button
-                  className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
-                  onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
-                  aria-label={`Toggle Performance Mode - Currently ${performanceMode}`}
+                  className={`mode-btn ${appMode === 'translation' ? 'active' : ''}`}
+                  onClick={() => setAppMode('translation')}
+                  aria-label="Switch to Translation Mode"
                 >
-                  <Settings size={16} aria-hidden="true" />
-                  <span className="sr-only">Performance Mode: </span>
-                  {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
+                  <MessageSquare size={16} aria-hidden="true" />
+                  Translation
                 </button>
-
-                <button 
-                  ref={infoButtonRef}
-                  className="performance-info-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    
-                    // Calculate tooltip position relative to button
-                    if (infoButtonRef.current) {
-                      const buttonRect = infoButtonRef.current.getBoundingClientRect();
-                      const tooltipWidth = 380;
-                      const newPosition = {
-                        top: buttonRect.bottom + 8, // 8px gap below button
-                        right: window.innerWidth - (buttonRect.left + buttonRect.width/2 + tooltipWidth/2) // center tooltip under the icon
-                      };
-                      setTooltipPosition(newPosition);
-                    }
-                    
-                    setShowPerformanceTooltip(prevState => !prevState);
-                  }}
-                  aria-label="Performance Mode Information"
-                  aria-expanded={showPerformanceTooltip}
-                  aria-controls="performance-tooltip"
+                <button
+                  className={`mode-btn ${appMode === 'review' ? 'active' : ''}`}
+                  onClick={() => setAppMode('review')}
+                  aria-label="Switch to Review Dashboard"
                 >
-                  <Info size={14} aria-hidden="true" />
+                  <Users size={16} aria-hidden="true" />
+                  Review Dashboard
                 </button>
               </div>
+
+              {appMode === 'translation' && (
+                <>
+                  <div className="language-section">
+                    <LanguageSelector
+                      sourceLanguage={sourceLanguage}
+                      targetLanguage={targetLanguage}
+                      onSourceChange={setSourceLanguage}
+                      onTargetChange={setTargetLanguage}
+                    />
+                  </div>
+
+                  <div className="performance-toggle">
+                    <button
+                      className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
+                      onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
+                      aria-label={`Toggle Performance Mode - Currently ${performanceMode}`}
+                    >
+                      <Settings size={16} aria-hidden="true" />
+                      <span className="sr-only">Performance Mode: </span>
+                      {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
+                    </button>
+
+                    <button 
+                      ref={infoButtonRef}
+                      className="performance-info-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        
+                        // Calculate tooltip position relative to button
+                        if (infoButtonRef.current) {
+                          const buttonRect = infoButtonRef.current.getBoundingClientRect();
+                          const tooltipWidth = 380;
+                          const newPosition = {
+                            top: buttonRect.bottom + 8, // 8px gap below button
+                            right: window.innerWidth - (buttonRect.left + buttonRect.width/2 + tooltipWidth/2) // center tooltip under the icon
+                          };
+                          setTooltipPosition(newPosition);
+                        }
+                        
+                        setShowPerformanceTooltip(prevState => !prevState);
+                      }}
+                      aria-label="Performance Mode Information"
+                      aria-expanded={showPerformanceTooltip}
+                      aria-controls="performance-tooltip"
+                    >
+                      <Info size={14} aria-hidden="true" />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </nav>
         </div>
-      </header>
-
-      <main className="main-content" id="main-content" role="main">
-        <MultiModalInterface
-          sourceLanguage={sourceLanguage}
-          targetLanguage={targetLanguage}
-          onLanguageSwitch={handleLanguageSwitch}
-          performanceMode={performanceMode}
-        />
+      </header>      <main className="main-content" id="main-content" role="main">
+        {appMode === 'translation' ? (
+          <MultiModalInterface
+            sourceLanguage={sourceLanguage}
+            targetLanguage={targetLanguage}
+            onLanguageSwitch={handleLanguageSwitch}
+            performanceMode={performanceMode}
+          />
+        ) : (
+          <ReviewDashboard />
+        )}
       </main>
 
       {/* Performance Mode Tooltip - Positioned dynamically outside all containers */}

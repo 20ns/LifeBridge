@@ -15,8 +15,7 @@
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",
     "@aws-sdk/client-qbusiness": "^3.830.0",
-    "axios": "^1.9.0",
-    "node-fetch": "^2.7.0"
+    "axios": "^1.9.0"
   },
   "keywords": [
     "medical",
@@ -36,12 +35,14 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
+    "aws-sdk": "^2.1692.0",
     "aws-sdk-client-mock": "^4.1.0",
     "babel-jest": "^30.0.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
     "lucide-react": "^0.514.0",
+    "node-fetch": "^3.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   }
