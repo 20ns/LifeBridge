@@ -198,7 +198,7 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
         )}
       </div>
 
-      <div className="speech-instructions usage-tips">
+      <div className="speech-instructions usage-tips" style={{ marginTop: '20px' }}>
         <h4>Medical Sign Language Tips:</h4>
         <ul>
           <li>🚨 <strong>Emergency:</strong> Make a fist and hold for 2 seconds</li>

@@ -335,7 +335,12 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
         <div className="status">{detectionStatus}</div>
       </div>
       
-      <div className="video-container">
+      <div className="video-container" style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%'
+      }}>
         <video
           ref={videoRef}
           className="input-video"
