@@ -22,23 +22,20 @@ provider:
     KMS_KEY_ID: alias/aws/dynamodb
     REVIEW_ALERTS_TOPIC_ARN: !Ref ReviewAlertsSnsTopic
     AUDIT_LOG_GROUP: /aws/lifebridge/audit-${self:provider.stage}
-    POWERTOOLS_PARAMETERS_MAX_AGE: "43200" # Reduce Secrets Manager calls
+    POWERTOOLS_PARAMETERS_MAX_AGE: "43200"    # cut Secrets Manager calls
 
   iamRoleStatements:
-    # Bedrock (LLM) access
     - Effect: Allow
       Action:
         - bedrock:InvokeModel
         - bedrock:ListFoundationModels
       Resource: '*'
 
-    # Amazon Polly
     - Effect: Allow
       Action:
         - polly:SynthesizeSpeech
       Resource: '*'
 
-    # CloudWatch Logs
     - Effect: Allow
       Action:
         - logs:CreateLogGroup
@@ -46,7 +43,6 @@ provider:
         - logs:PutLogEvents
       Resource: '*'
 
-    # DynamoDB – medical-grade compliance + analytics
     - Effect: Allow
       Action:
         - dynamodb:PutItem
@@ -62,7 +58,6 @@ provider:
         - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-translate-cache-${self:provider.stage}
         - arn:aws:dynamodb:${self:provider.region}:*:index/*
 
-    # KMS
     - Effect: Allow
       Action:
         - kms:Encrypt
@@ -73,7 +68,6 @@ provider:
       Resource:
         - arn:aws:kms:${self:provider.region}:*:key/*
 
-    # SNS Alerts
     - Effect: Allow
       Action:
         - sns:Publish
@@ -81,15 +75,14 @@ provider:
         - sns:CreateTopic
       Resource: '*'
 
-    # CloudWatch Metrics
     - Effect: Allow
       Action:
         - cloudwatch:PutMetricData
       Resource: '*'
 
-  logRetentionInDays: 3  # Keep Lambda logs for 3 days to save costs
+  logRetentionInDays: 3            # keep logs 3 days
   tracing:
-    lambda: ${env:DEV_MODE, false}  # Enable X-Ray only when DEV_MODE=true
+    lambda: ${env:DEV_MODE, false} # X-Ray only when DEV_MODE=true
 
 functions:
   translate:
@@ -99,7 +92,7 @@ functions:
       - http:
           path: /translate
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   detectLanguage:
     handler: dist/handlers/detectLanguage.handler
@@ -108,7 +101,7 @@ functions:
       - http:
           path: /detect-language
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   textToSpeech:
     handler: dist/handlers/textToSpeech.handler
@@ -117,7 +110,7 @@ functions:
       - http:
           path: /text-to-speech
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   emergencyPhrases:
     handler: dist/handlers/emergencyPhrases.handler
@@ -126,7 +119,7 @@ functions:
       - http:
           path: /emergency-phrases
           method: get
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   speechToText:
     handler: dist/handlers/speechToText.handler
@@ -135,7 +128,7 @@ functions:
       - http:
           path: /speech-to-text
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   emergencyProtocol:
     handler: dist/handlers/amazonQ.getEmergencyProtocol
@@ -144,7 +137,7 @@ functions:
       - http:
           path: /emergency-protocol
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   triageSuggestion:
     handler: dist/handlers/amazonQ.getTriageSuggestion
@@ -153,7 +146,7 @@ functions:
       - http:
           path: /triage-suggestion
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   contextualAdvice:
     handler: dist/handlers/amazonQ.getContextualAdvice
@@ -162,7 +155,7 @@ functions:
       - http:
           path: /contextual-advice
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   signLanguageProcessor:
     handler: dist/handlers/signLanguageProcessor.handler
@@ -171,7 +164,7 @@ functions:
       - http:
           path: /sign-language-process
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   signToTranslation:
     handler: dist/handlers/signLanguageProcessor.signToTranslation
@@ -180,7 +173,7 @@ functions:
       - http:
           path: /sign-to-translation
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   batchSignProcessing:
     handler: dist/handlers/signLanguageProcessor.batchSignProcessing
@@ -189,43 +182,7 @@ functions:
       - http:
           path: /batch-sign-processing
           method: post
-          cors: true
-
-  getPendingReviews:
-    handler: dist/handlers/humanReview.getPendingReviews
-    timeout: 30
-    events:
-      - http:
-          path: /review/pending
-          method: get
-          cors: true
-
-  submitReview:
-    handler: dist/handlers/humanReview.submitReview
-    timeout: 30
-    events:
-      - http:
-          path: /review/submit
-          method: post
-          cors: true
-
-  escalateReview:
-    handler: dist/handlers/humanReview.escalateEmergencyReview
-    timeout: 30
-    events:
-      - http:
-          path: /review/escalate
-          method: post
-          cors: true
-
-  getReviewMetrics:
-    handler: dist/handlers/humanReview.getReviewMetrics
-    timeout: 30
-    events:
-      - http:
-          path: /review/metrics
-          method: get
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   gestureRecognition:
     handler: dist/handlers/gestureRecognition.handler
@@ -234,9 +191,9 @@ functions:
       - http:
           path: /gesture-recognition
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
-  # ------------------ AUTH FUNCTIONS ------------------
+  # ------------- AUTH --------------
   authLogin:
     handler: dist/handlers/auth.login
     timeout: 15
@@ -244,7 +201,7 @@ functions:
       - http:
           path: /auth/login
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   authRegister:
     handler: dist/handlers/auth.register
@@ -253,7 +210,7 @@ functions:
       - http:
           path: /auth/register
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
 
   offlineSync:
     handler: dist/handlers/offlineSync.handler
@@ -262,14 +219,51 @@ functions:
       - http:
           path: /sync
           method: post
-          cors: true
+          cors: ${self:custom.corsConfig}
+
+  # -------- HUMAN REVIEW -----------
+  getPendingReviews:
+    handler: dist/handlers/humanReview.getPendingReviews
+    timeout: 30
+    events:
+      - http:
+          path: /review/pending
+          method: get
+          cors: ${self:custom.corsConfig}
+
+  submitReview:
+    handler: dist/handlers/humanReview.submitReview
+    timeout: 30
+    events:
+      - http:
+          path: /review/submit
+          method: post
+          cors: ${self:custom.corsConfig}
+
+  escalateReview:
+    handler: dist/handlers/humanReview.escalateEmergencyReview
+    timeout: 30
+    events:
+      - http:
+          path: /review/escalate
+          method: post
+          cors: ${self:custom.corsConfig}
+
+  getReviewMetrics:
+    handler: dist/handlers/humanReview.getReviewMetrics
+    timeout: 30
+    events:
+      - http:
+          path: /review/metrics
+          method: get
+          cors: ${self:custom.corsConfig}
 
 plugins:
   - serverless-offline
 
 resources:
   Resources:
-    # Medical-grade audit logging table (HIPAA compliant)
+    # Medical-grade audit logging table (HIPAA)
     AuditLogsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -338,7 +332,7 @@ resources:
           - Key: Environment
             Value: ${self:provider.stage}
 
-    # Impact metrics and analytics table
+    # Impact metrics
     ImpactMetricsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -367,7 +361,7 @@ resources:
           - Key: Environment
             Value: ${self:provider.stage}
 
-    # Translation cache table
+    # Translation cache
     TranslateCacheTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -400,14 +394,14 @@ resources:
           - Key: Environment
             Value: ${self:provider.stage}
 
-    # CloudWatch Log Group for audit logs
+    # CloudWatch log group for audit logs
     AuditLogGroup:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lifebridge/audit-${self:provider.stage}
         RetentionInDays: 2557   # 7 years
 
-    # Users table for authentication
+    # Users table
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -420,7 +414,7 @@ resources:
           - AttributeName: email
             KeyType: HASH
 
-    # KMS Key for encrypting sensitive data
+    # KMS key
     LifeBridgeKMSKey:
       Type: AWS::KMS::Key
       Properties:
@@ -473,6 +467,17 @@ resources:
         Name: ${self:service}-${self:provider.stage}-ReviewAlertsTopic
 
 custom:
+  corsConfig:
+    origin: '*'
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+    allowCredentials: false
+
   serverless-offline:
     httpPort: 3001
     host: localhost
