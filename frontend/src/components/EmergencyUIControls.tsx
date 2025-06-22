@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   AlertTriangle, 
   Phone, 
@@ -8,7 +8,6 @@ import {
   Moon, 
   Sun, 
   Contrast,
-  ZoomIn,
   Monitor,
   Smartphone,
   Tablet,
@@ -69,8 +68,27 @@ const EmergencyUIControls: React.FC<EmergencyUIControlsProps> = ({
 
     updateViewport();
     window.addEventListener('resize', updateViewport);
-    return () => window.removeEventListener('resize', updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);  }, []);
+
+  const announceToScreenReader = useCallback((message: string) => {
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
+    announcement.className = 'emergency-sr-only';
+    announcement.textContent = message;
+    
+    document.body.appendChild(announcement);
+    setTimeout(() => document.body.removeChild(announcement), 1000);
   }, []);
+
+  const handleThemeChange = useCallback((theme: 'light' | 'dark' | 'high-contrast') => {
+    setCurrentTheme(theme);
+    onThemeChange?.(theme);
+    
+    // Announce theme change for screen readers
+    const announcement = `Theme changed to ${theme} mode`;
+    announceToScreenReader(announcement);
+  }, [onThemeChange, announceToScreenReader]);
 
   // Auto-switch to dark mode in emergency situations
   useEffect(() => {
@@ -79,7 +97,7 @@ const EmergencyUIControls: React.FC<EmergencyUIControlsProps> = ({
       const emergencyTheme = prefersDark ? 'dark' : 'high-contrast';
       handleThemeChange(emergencyTheme);
     }
-  }, [isEmergencyMode]);
+  }, [isEmergencyMode, handleThemeChange]);
 
   // Apply theme to body
   useEffect(() => {
@@ -93,17 +111,7 @@ const EmergencyUIControls: React.FC<EmergencyUIControlsProps> = ({
     } else if (currentTheme === 'high-contrast') {
       root.style.setProperty('--emergency-bg', 'var(--emergency-contrast-bg)');
       root.style.setProperty('--emergency-text', 'var(--emergency-contrast-text)');
-    }
-  }, [currentTheme, accessibilityMode]);
-
-  const handleThemeChange = (theme: 'light' | 'dark' | 'high-contrast') => {
-    setCurrentTheme(theme);
-    onThemeChange?.(theme);
-    
-    // Announce theme change for screen readers
-    const announcement = `Theme changed to ${theme} mode`;
-    announceToScreenReader(announcement);
-  };
+    }  }, [currentTheme, accessibilityMode]);
 
   const handleSizeChange = (size: 'normal' | 'large' | 'extra-large') => {
     setCurrentSize(size);
@@ -121,20 +129,8 @@ const EmergencyUIControls: React.FC<EmergencyUIControlsProps> = ({
     const newMode = !accessibilityMode;
     setAccessibilityMode(newMode);
     onAccessibilityChange?.(newMode);
-    
-    const announcement = `Accessibility mode ${newMode ? 'enabled' : 'disabled'}`;
+      const announcement = `Accessibility mode ${newMode ? 'enabled' : 'disabled'}`;
     announceToScreenReader(announcement);
-  };
-
-  const announceToScreenReader = (message: string) => {
-    const announcement = document.createElement('div');
-    announcement.setAttribute('aria-live', 'polite');
-    announcement.setAttribute('aria-atomic', 'true');
-    announcement.className = 'emergency-sr-only';
-    announcement.textContent = message;
-    
-    document.body.appendChild(announcement);
-    setTimeout(() => document.body.removeChild(announcement), 1000);
   };
 
   const getDeviceIcon = () => {

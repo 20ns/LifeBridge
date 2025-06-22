@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
+import { usePerformanceMonitor } from '../utils/performanceMonitor';
 import SpeechInterface from './SpeechInterface';
 import EmergencyScenarioWorkflow from './EmergencyScenarioWorkflow';
 import QRecommendations from './QRecommendations';
@@ -26,18 +27,18 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   const [confidence, setConfidence] = useState<number | null>(null);
   const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>('general');  const [realTimeMode, setRealTimeMode] = useState(true);
   const [showEmergencyWorkflow, setShowEmergencyWorkflow] = useState(false);
-  const [showQRecommendations, setShowQRecommendations] = useState(true);
-  const [detectedSymptoms, setDetectedSymptoms] = useState<string>('');
-  const [patientAge, setPatientAge] = useState<number | undefined>(undefined);
-  const [vitalSigns, setVitalSigns] = useState<{
+  const [showQRecommendations, setShowQRecommendations] = useState(true);  const [detectedSymptoms, setDetectedSymptoms] = useState<string>('');
+  const [patientAge] = useState<number | undefined>(undefined);
+  const [vitalSigns] = useState<{
     heartRate?: number;
     bloodPressure?: string;
     temperature?: number;
     respiratoryRate?: number;
     oxygenSaturation?: number;
-  }>({});
+  }>({});const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Initialize performance monitoring
+  const performanceMonitor = usePerformanceMonitor();
 
   // Emergency quick phrases
   const emergencyPhrases = [
@@ -61,9 +62,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     sourceLanguage,
     targetLanguage,
     context
-  });
-
-  // Handle input changes with real-time translation
+  });  // Handle input changes with real-time translation
   const handleInputChange = (value: string) => {
     setInputText(value);
     
@@ -79,24 +78,34 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       setConfidence(lastTranslation.confidence);
     }
   }, [lastTranslation, realTimeMode]);
-  
-  const handleTranslate = useCallback(async (textToTranslate?: string) => {
+    const handleTranslate = useCallback(async (textToTranslate?: string) => {
     const text = textToTranslate || inputText;
     if (!text.trim()) return;
 
+    // Start performance monitoring for translation
+    performanceMonitor.startOperation('translation');
+    
     setIsTranslating(true);
     try {
       const result = await translateText(text, sourceLanguage, targetLanguage, context);
+      
+      // Record successful translation performance
+      performanceMonitor.endOperation('translation');
+      
       setTranslatedText(result.translatedText);
       setConfidence(result.confidence);
     } catch (error) {
       console.error('Translation error:', error);
+      
+      // Record translation error
+      performanceMonitor.recordError();
+      
       setTranslatedText('Translation failed. Please try again.');
       setConfidence(null);
     } finally {
       setIsTranslating(false);
     }
-  }, [inputText, sourceLanguage, targetLanguage, context]);
+  }, [inputText, sourceLanguage, targetLanguage, context, performanceMonitor]);
 
   const handleCopy = async () => {
     if (translatedText) {
@@ -108,19 +117,24 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
         console.error('Copy failed:', error);
       }
     }
-  };
-
-  const handleSpeak = async () => {
+  };  const handleSpeak = async () => {
     if (translatedText) {
+      // Start performance monitoring for speech synthesis
+      performanceMonitor.startOperation('speech');
+      
       try {
         await speakText(translatedText, targetLanguage);
+        performanceMonitor.endOperation('speech');
       } catch (error) {
         console.error('Text-to-speech failed:', error);
+        performanceMonitor.recordError();
+        
         // Fallback to browser speech synthesis
         if ('speechSynthesis' in window) {
           const utterance = new SpeechSynthesisUtterance(translatedText);
           utterance.lang = targetLanguage;
           speechSynthesis.speak(utterance);
+          performanceMonitor.endOperation('speech');
         }
       }
     }
@@ -371,7 +385,29 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             symptoms={detectedSymptoms || undefined}
             patientAge={patientAge}
             vitalSigns={Object.keys(vitalSigns).length > 0 ? vitalSigns : undefined}
-          />
+          />        </div>
+      )}      {/* Performance Monitoring Dashboard */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Performance Monitor</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div className="bg-white p-2 rounded">
+              <div className="text-gray-500">Health Score</div>
+              <div className="font-bold text-lg">{performanceMonitor.getHealthScore()}%</div>
+            </div>
+            <div className="bg-white p-2 rounded">
+              <div className="text-gray-500">Avg Translation</div>
+              <div className="font-bold">{performanceMonitor.getMetrics().translationLatency}ms</div>
+            </div>
+            <div className="bg-white p-2 rounded">
+              <div className="text-gray-500">Cache Hit Rate</div>
+              <div className="font-bold">{(performanceMonitor.getMetrics().cacheHitRate).toFixed(1)}%</div>
+            </div>
+            <div className="bg-white p-2 rounded">
+              <div className="text-gray-500">Error Rate</div>
+              <div className="font-bold text-red-600">{(performanceMonitor.getMetrics().errorRate).toFixed(1)}%</div>
+            </div>
+          </div>
         </div>
       )}
     </div>

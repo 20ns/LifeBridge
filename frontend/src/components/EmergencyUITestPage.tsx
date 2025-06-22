@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Smartphone, Tablet, Monitor, Maximize2, Eye, Settings, Accessibility } from 'lucide-react';
+import { Smartphone, Tablet, Monitor, Maximize2, Eye, Accessibility } from 'lucide-react';
 import EmergencyScenarioWorkflow from './EmergencyScenarioWorkflow';
 import EmergencyPhrasesEnhanced from './EmergencyPhrasesEnhanced';
 import EmergencyUIControls from './EmergencyUIControls';

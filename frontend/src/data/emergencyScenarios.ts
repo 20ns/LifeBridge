@@ -1,7 +1,7 @@
 // Comprehensive Emergency Scenarios Data
 // Medical scenarios for LifeBridge translation app
 
-import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Brain, Zap, Shield, User, LucideIcon } from 'lucide-react';
+import { AlertTriangle, Heart, Activity, Brain, Shield, User, LucideIcon } from 'lucide-react';
 
 export interface EmergencyScenario {
   id: string;

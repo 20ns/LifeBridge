@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { signToTranslation, batchSignProcessing } from '../services/awsService';
 
 interface SignData {
