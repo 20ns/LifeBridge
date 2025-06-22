@@ -152,11 +152,10 @@ export default function LoginPage({ initialMode }: LoginPageProps) {
             </Link>
             <h2 className="login-title">
               {isSignUp ? 'Create Account' : 'Welcome Back'}
-            </h2>
-            <p className="login-subtitle">
+            </h2>            <p className="login-subtitle">
               {isSignUp 
-                ? 'Join our medical translation platform'
-                : 'Sign in to access medical translation services'
+                ? 'Join our translation platform'
+                : 'Sign in to access translation services'
               }
             </p>
           </div>
@@ -390,15 +389,8 @@ export default function LoginPage({ initialMode }: LoginPageProps) {
                 </div>
               )}
             </div>
-          )}
-
-          {/* Footer */}
+          )}          {/* Footer */}
           <div className="login-footer">
-            <p className="footer-text">
-              🏥 Medical-grade translation platform
-              <br />
-              🔒 HIPAA compliant • 🌍 50+ languages • ⚡ Real-time processing
-            </p>
             {!isSignUp && (
               <p className="footer-demo-note">
                 This is a demo system. In production, integrate with your hospital's authentication system.
