@@ -19,5 +19,26 @@ export class OfflineService {
     // @ts-ignore
     return (await import('./offlineService.core')).offlineService.cacheTranslation(...args);
   }
+  async getEmergencyPhrases(...args: any[]) {
+    // @ts-ignore
+    return (await import('./offlineService.core')).offlineService.getEmergencyPhrases(...args);
+  }
+  async getCachedTranslation(...args: any[]) {
+    // @ts-ignore
+    return (await import('./offlineService.core')).offlineService.getCachedTranslation(...args);
+  }
+  async checkConnectivity(...args: any[]) {
+    // @ts-ignore
+    return (await import('./offlineService.core')).offlineService.checkConnectivity(...args);
+  }
   emergencyPhrases = {};
-} 
+}
+
+export const getEmergencyPhrases = (...args: any[]) =>
+  import('./offlineService.core').then((m: any) => m.getEmergencyPhrases(...args));
+
+export const getCachedTranslation = (...args: any[]) =>
+  import('./offlineService.core').then((m: any) => m.getCachedTranslation(...args));
+
+export const checkConnectivity = (...args: any[]) =>
+  import('./offlineService.core').then((m: any) => m.checkConnectivity(...args)); 
