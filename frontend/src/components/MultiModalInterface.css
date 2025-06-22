@@ -2,12 +2,11 @@
 .multi-modal-interface {
   position: relative;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
   transition: all 0.3s ease;
 }
 
@@ -115,13 +114,7 @@
 
 /* Header */
 .interface-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 30px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  display: none;
 }
 
 .header-left, .header-right {
@@ -256,12 +249,7 @@
 
 /* Mode selector */
 .mode-selector {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  padding: 20px 30px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  display: none;
 }
 
 .mode-selector.emergency-layout {
@@ -358,10 +346,7 @@
 
 /* Mode indicators */
 .mode-indicators {
-  padding: 0 30px;
-  display: flex;
-  justify-content: center;
-  gap: 20px;
+  display: none;
 }
 
 .active-indicator {
@@ -422,19 +407,19 @@
 
 /* Interface content */
 .interface-content {
-  padding: 30px;
+  padding: 0;
   min-height: 400px;
-  background: white;
-  margin: 20px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .interface-content.emergency-layout {
-  margin: 30px;
-  padding: 40px;
-  border: 3px solid #ff4757;
-  box-shadow: 0 0 30px rgba(255, 71, 87, 0.3);
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
 }
 
 /* Performance panel */
@@ -714,10 +699,9 @@
     padding: 12px 20px;
     min-width: 80px;
   }
-  
-  .interface-content {
-    margin: 15px;
-    padding: 20px;
+    .interface-content {
+    margin: 0;
+    padding: 0;
   }
   
   .performance-panel {
@@ -751,9 +735,8 @@
     width: 20px;
     height: 20px;
   }
-  
-  .interface-content {
-    margin: 10px;
-    padding: 15px;
+    .interface-content {
+    margin: 0;
+    padding: 0;
   }
 }
