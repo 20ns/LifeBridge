@@ -40,6 +40,13 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   const [translatedText, setTranslatedText] = useState('');
   const signLanguageInterfaceRef = useRef<SignLanguageInterfaceHandle>(null);
 
+  /**
+   * Keeps track of the last time we entered OR exited emergency mode.
+   * This lets us ignore repeated gesture-triggered emergency events that can
+   * happen while the user is still lowering their hand ("rubber-band" effect).
+   */
+  const lastEmergencyTriggerRef = useRef<number>(0);
+
   /* ------------------------------------------------------------------ */
   /* hooks                                                              */
   /* ------------------------------------------------------------------ */
@@ -51,13 +58,23 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   /* emergency mode handler                                             */
   /* ------------------------------------------------------------------ */
   const handleEmergencyToggle = useCallback(() => {
+    // Record the moment we toggled emergency state so we can debounce
+    lastEmergencyTriggerRef.current = Date.now();
+
     setIsTransitioning(true);
+
+    // Stop sign detection immediately when switching INTO emergency mode
+    // to make sure no lingering frames create duplicate triggers.
+    if (!isEmergencyMode) {
+      signLanguageInterfaceRef.current?.triggerStopDetection?.();
+    }
+
     setTimeout(() => {
       setIsEmergencyMode(prev => !prev);
       setActiveMode(prev => (prev === 'emergency' ? 'text' : 'emergency'));
       setIsTransitioning(false);
     }, 300);
-  }, []);
+  }, [isEmergencyMode]);
 
   /* ------------------------------------------------------------------ */
   /* mode switching                                                     */
@@ -77,6 +94,10 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   /* sign callbacks                                                     */
   /* ------------------------------------------------------------------ */
   const handleSignEmergencyDetected = useCallback(() => {
+    // Ignore if we have recently toggled emergency (within 2 seconds)
+    const now = Date.now();
+    if (now - lastEmergencyTriggerRef.current < 2000) return;
+
     if (!isEmergencyMode) handleEmergencyToggle();
   }, [isEmergencyMode, handleEmergencyToggle]);
 
