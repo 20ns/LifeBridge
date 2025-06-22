@@ -18,6 +18,7 @@ provider:
     AUDIT_LOGS_TABLE: lifebridge-audit-logs-${self:provider.stage}
     REVIEW_REQUESTS_TABLE: lifebridge-review-requests-${self:provider.stage}
     IMPACT_METRICS_TABLE: lifebridge-impact-metrics-${self:provider.stage}
+    TRANSLATE_CACHE_TABLE: lifebridge-translate-cache-${self:provider.stage}
     KMS_KEY_ID: alias/aws/dynamodb
     REVIEW_ALERTS_TOPIC_ARN: !Ref ReviewAlertsSnsTopic
     AUDIT_LOG_GROUP: /aws/lifebridge/audit-${self:provider.stage}
@@ -58,6 +59,7 @@ provider:
         - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-review-requests-${self:provider.stage}
         - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-impact-metrics-${self:provider.stage}
         - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-users-${self:provider.stage}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-translate-cache-${self:provider.stage}
         - arn:aws:dynamodb:${self:provider.region}:*:index/*
 
     # KMS
@@ -353,6 +355,27 @@ resources:
         Tags:
           - Key: Purpose
             Value: Medical-Impact-Analytics
+          - Key: Environment
+            Value: ${self:provider.stage}
+
+    # Translation cache table
+    TranslateCacheTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: lifebridge-translate-cache-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+        Tags:
+          - Key: Purpose
+            Value: Translation-Cache
           - Key: Environment
             Value: ${self:provider.stage}
 
