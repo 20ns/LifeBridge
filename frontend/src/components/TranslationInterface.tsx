@@ -207,27 +207,26 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     }, 1500); // Increased debounce time
 
     return () => clearTimeout(timer);
-  }, [inputText, sourceLanguage, targetLanguage, realTimeMode, sendTypingIndicator]);
-  return (
+  }, [inputText, sourceLanguage, targetLanguage, realTimeMode, sendTypingIndicator]);  return (
     <div className="translation-interface">
-      <div className="translation-card">
-        {/* Controls Section */}
-        <div className="controls-section">
-          <div className="context-selector">
-            <label htmlFor="context-select">Medical Context:</label>
-            <select 
-              id="context-select"
-              value={context} 
-              onChange={(e) => setContext(e.target.value as any)}
-              className="context-select"
-            >
-              <option value="general">🏥 General Medical</option>
-              <option value="emergency">🚨 Emergency/Critical</option>
-              <option value="consultation">👨‍⚕️ Patient Consultation</option>
-              <option value="medication">💊 Medication/Dosage</option>
-            </select>
-          </div>
-          
+      {/* Top Controls Bar - Medical Context and Settings */}
+      <div className="top-controls-bar">
+        <div className="context-selector">
+          <label htmlFor="context-select">Medical Context:</label>
+          <select 
+            id="context-select"
+            value={context} 
+            onChange={(e) => setContext(e.target.value as any)}
+            className="context-select"
+          >
+            <option value="general">🏥 General Medical</option>
+            <option value="emergency">🚨 Emergency/Critical</option>
+            <option value="consultation">👨‍⚕️ Patient Consultation</option>
+            <option value="medication">💊 Medication/Dosage</option>
+          </select>
+        </div>
+        
+        <div className="top-controls-actions">
           <div className="realtime-toggle">
             <button
               onClick={() => setRealTimeMode(!realTimeMode)}
@@ -248,10 +247,23 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             Emergency Workflow
           </button>
         </div>
+      </div>
 
-        {/* Emergency Scenario Workflow */}
+      {/* Speech Recognition Instructions - Positioned outside translation area */}
+      <div className="speech-instructions">
+        <div className="instructions-header">
+          <h4>🎤 Medical Speech Recognition Instructions:</h4>
+        </div>
+        <div className="instructions-content">
+          <span>• Speak medical terms slowly and clearly</span>
+          <span>• Spell out medication names if not recognized</span>
+          <span>• Use full phrases: "blood pressure is 120 over 80"</span>
+        </div>
+      </div>
+
+      <div className="translation-card">{/* Emergency Scenario Workflow */}
         {showEmergencyWorkflow && (
-          <div style={{ padding: '16px 24px', background: '#fef7e0', borderBottom: '1px solid #f9ab00' }}>
+          <div className="emergency-workflow-section">
             <EmergencyScenarioWorkflow
               sourceLanguage={sourceLanguage}
               targetLanguage={targetLanguage}
@@ -266,8 +278,8 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               <h3>Source Text</h3>
             </div>
 
-            {/* Enhanced Speech Interface */}
-            <div className="speech-section" style={{ marginBottom: '16px' }}>
+            {/* Enhanced Speech Interface - Simplified */}
+            <div className="speech-section">
               <SpeechInterface
                 language={sourceLanguage}
                 onSpeechToText={handleSpeechToText}
@@ -275,7 +287,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
                 medicalContext={context}
                 realTimeMode={realTimeMode}
                 voiceActivityDetection={true}
-                className="mb-4"
+                className="speech-interface-compact"
               />
             </div>
 
