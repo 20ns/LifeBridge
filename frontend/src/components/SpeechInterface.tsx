@@ -27,12 +27,12 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
   voiceActivityDetection = true,
   sourceLanguage = 'en',
   targetLanguage = 'es'
-}) => {
-  const [isSpeaking, setIsSpeaking] = useState(false);
+}) => {  const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [recognizedText, setRecognizedText] = useState<string>('');
   const [translatedText, setTranslatedText] = useState<string>('');
-  const [isTranslating, setIsTranslating] = useState(false);  // Handle transcript from speech recognition and auto-translate
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [ttsAudioLevel, setTtsAudioLevel] = useState<number>(0);// Handle transcript from speech recognition and auto-translate
   const handleTranscriptReceived = async (transcript: string) => {
     setRecognizedText(transcript);
     onSpeechToText(transcript);
@@ -91,19 +91,23 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
       setSpeechError(null);
       startRecording();
     }
-  };
-  const handleTextToSpeech = async (textToSpeak?: string) => {
+  };  const handleTextToSpeech = async (textToSpeak?: string) => {
     const textForSpeech = textToSpeak || translatedText;
     if (!textForSpeech || isSpeaking) return;
 
     try {
       setIsSpeaking(true);
       setSpeechError(null);
-      await speakText(textForSpeech, targetLanguage);
+      setTtsAudioLevel(0);
+      
+      await speakText(textForSpeech, targetLanguage, (level) => {
+        setTtsAudioLevel(level);
+      });
     } catch (error) {
       setSpeechError(`Speech: ${error instanceof Error ? error.message : 'Failed to speak text'}`);
     } finally {
       setIsSpeaking(false);
+      setTtsAudioLevel(0);
     }
   };
 
@@ -166,20 +170,21 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
                       {isVoiceDetected ? 'Voice detected' : 'Waiting for voice...'}
                     </span>
                   </div>
-                )}
-                
-                {audioLevel !== undefined && (
+                )}                {((audioLevel !== undefined && audioLevel > 0) || (isSpeaking && ttsAudioLevel > 0)) && (
                   <div className="audio-level-display">
                     <Volume1 className="w-4 h-4 text-blue-600" />
                     <div className="audio-level-bar">
                       <div 
                         className="audio-level-fill" 
                         style={{ 
-                          width: `${Math.min(100, audioLevel * 100)}%`,
-                          backgroundColor: audioLevel > 0.5 ? '#10b981' : audioLevel > 0.2 ? '#f59e0b' : '#ef4444'
+                          width: `${Math.min(100, (isSpeaking ? ttsAudioLevel : audioLevel || 0) * 100)}%`,
+                          backgroundColor: (isSpeaking ? ttsAudioLevel : audioLevel || 0) > 0.5 ? '#10b981' : (isSpeaking ? ttsAudioLevel : audioLevel || 0) > 0.2 ? '#f59e0b' : '#ef4444'
                         }}
                       />
                     </div>
+                    <span className="text-xs text-gray-500">
+                      {isSpeaking ? 'Output' : 'Input'}: {Math.round((isSpeaking ? ttsAudioLevel : audioLevel || 0) * 100)}%
+                    </span>
                   </div>
                 )}
               </div>
