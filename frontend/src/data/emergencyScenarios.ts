@@ -1,13 +1,13 @@
 // Comprehensive Emergency Scenarios Data
 // Medical scenarios for LifeBridge translation app
 
-import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Brain, Zap, Shield, User } from 'lucide-react';
+import { AlertTriangle, Heart, Thermometer, Phone, Clock, Activity, Brain, Zap, Shield, User, LucideIcon } from 'lucide-react';
 
 export interface EmergencyScenario {
   id: string;
   category: 'cardiac' | 'respiratory' | 'neurological' | 'trauma' | 'mental-health' | 'allergic-reaction';
   severity: 'critical' | 'urgent' | 'moderate';
-  icon: React.ReactNode;
+  icon: LucideIcon;
   title: string;
   description: string;
   symptoms: string[];
@@ -33,7 +33,7 @@ export const EMERGENCY_SCENARIOS: EmergencyScenario[] = [
     id: 'heart-attack',
     category: 'cardiac',
     severity: 'critical',
-    icon: <Heart className="w-6 h-6 text-red-500" />,
+    icon: Heart,
     title: 'Heart Attack Scenario',
     description: 'Acute myocardial infarction with severe chest pain and potential cardiac arrest',
     symptoms: [
@@ -134,7 +134,7 @@ export const EMERGENCY_SCENARIOS: EmergencyScenario[] = [
     id: 'stroke-symptoms',
     category: 'neurological',
     severity: 'critical',
-    icon: <Brain className="w-6 h-6 text-purple-500" />,
+    icon: Brain,
     title: 'Stroke Emergency',
     description: 'Acute cerebrovascular accident with neurological deficits',
     symptoms: [
@@ -226,7 +226,7 @@ export const EMERGENCY_SCENARIOS: EmergencyScenario[] = [
     id: 'allergic-reaction',
     category: 'allergic-reaction',
     severity: 'critical',
-    icon: <Shield className="w-6 h-6 text-orange-500" />,
+    icon: Shield,
     title: 'Severe Allergic Reaction/Anaphylaxis',
     description: 'Life-threatening allergic reaction with potential for airway compromise',
     symptoms: [
@@ -318,7 +318,7 @@ export const EMERGENCY_SCENARIOS: EmergencyScenario[] = [
     id: 'accident-trauma',
     category: 'trauma',
     severity: 'critical',
-    icon: <AlertTriangle className="w-6 h-6 text-red-600" />,
+    icon: AlertTriangle,
     title: 'Accident Trauma Emergency',
     description: 'Major trauma from accident with potential multiple injuries',
     symptoms: [
@@ -410,7 +410,7 @@ export const EMERGENCY_SCENARIOS: EmergencyScenario[] = [
     id: 'mental-health-crisis',
     category: 'mental-health',
     severity: 'urgent',
-    icon: <User className="w-6 h-6 text-blue-500" />,
+    icon: User,
     title: 'Mental Health Crisis',
     description: 'Acute psychological emergency with risk of self-harm or violence',
     symptoms: [
@@ -502,7 +502,7 @@ export const EMERGENCY_SCENARIOS: EmergencyScenario[] = [
     id: 'respiratory-emergency',
     category: 'respiratory',
     severity: 'critical',
-    icon: <Activity className="w-6 h-6 text-blue-500" />,
+    icon: Activity,
     title: 'Severe Respiratory Distress',
     description: 'Life-threatening breathing emergency requiring immediate intervention',
     symptoms: [
