@@ -1,0 +1,15 @@
+{
+  "test_info": {
+    "duration_seconds": 57.53761649131775,
+    "frames_processed": 810,
+    "average_fps": 14.077746861867775,
+    "model_loaded": true
+  },
+  "performance": {
+    "avg_processing_time_ms": 56.48403827159974,
+    "min_processing_time_ms": 21.12940000006347,
+    "max_processing_time_ms": 155.0240000001395
+  },
+  "detections": [],
+  "gesture_history": []
+}
