@@ -67,9 +67,13 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     cacheHitRate: 85,
     offlineMode: false
   });  const [isListening, setIsListening] = useState(false);
-  const [showPerformancePanel, setShowPerformancePanel] = useState(false);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [notifications, setNotifications] = useState<string[]>([]);
+  const [showPerformancePanel, setShowPerformancePanel] = useState(false);  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [currentNotification, setCurrentNotification] = useState<{
+    id: number;
+    message: string;
+    isVisible: boolean;
+    isLeaving: boolean;
+  } | null>(null);
   const [translatedText, setTranslatedText] = useState('');
 
   // Caching mechanism
@@ -173,18 +177,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         // When exiting emergency mode, smoothly transition back to text mode (home page)
         setActiveMode('text');
       }
-      
-      // Add emergency notification
+        // Add emergency notification
       if (enabled) {
-        setNotifications(prev => [...prev.slice(-4), '🚨 Emergency mode activated - Priority processing enabled']);
+        addNotification('🚨 Emergency mode activated - Priority processing enabled');
       } else {
-        setNotifications(prev => [...prev.slice(-4), '✅ Emergency mode deactivated - Returned to normal interface']);
+        addNotification('✅ Emergency mode deactivated - Returned to normal interface');
       }
-      
-      // Auto-remove notification after 5 seconds
-      setTimeout(() => {
-        setNotifications(prev => prev.slice(1));
-      }, 5000);
       
       // Reset transition state
       setTimeout(() => setIsTransitioning(false), 300);
@@ -202,14 +200,53 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       }
     }
   }, [isEmergencyMode, handleEmergencyMode]);
-
-  // Notification system
+  // Notification system with seamless transitions
   const addNotification = useCallback((message: string) => {
-    setNotifications(prev => [...prev.slice(-4), message]);
+    const newNotification = {
+      id: Date.now() + Math.random(),
+      message,
+      isVisible: false,
+      isLeaving: false
+    };
+
+    // If there's a current notification, start its fade-out transition
+    if (currentNotification) {
+      setCurrentNotification(prev => prev ? { ...prev, isLeaving: true } : null);
+      
+      // After fade-out completes, show the new notification
+      setTimeout(() => {
+        setCurrentNotification({ ...newNotification, isVisible: true });
+      }, 300); // Wait for fade-out animation
+    } else {
+      // No current notification, show new one immediately
+      setCurrentNotification(newNotification);
+      
+      // Trigger fade-in after a brief delay
+      setTimeout(() => {
+        setCurrentNotification(prev => prev ? { ...prev, isVisible: true } : null);
+      }, 50);
+    }
+
+    // Auto-remove notification after 5 seconds
     setTimeout(() => {
-      setNotifications(prev => prev.slice(1));
+      setCurrentNotification(prev => {
+        if (prev && prev.id === newNotification.id) {
+          return { ...prev, isLeaving: true };
+        }
+        return prev;
+      });
+      
+      // Completely remove after fade-out
+      setTimeout(() => {
+        setCurrentNotification(prev => {
+          if (prev && prev.id === newNotification.id) {
+            return null;
+          }
+          return prev;
+        });
+      }, 300);
     }, 5000);
-  }, []);
+  }, [currentNotification]);
 
   // Enhanced mode switching with visual feedback
   const handleModeSwitch = useCallback((mode: CommunicationMode) => {
@@ -387,17 +424,14 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
             <AlertTriangle />
           </button>
         </div>
-      </div>
-
-      {/* Notifications */}
-      {notifications.length > 0 && (
-        <div className="notifications">
-          {notifications.map((notification, index) => (
-            <div key={index} className="notification">
-              {notification}
-            </div>
-          ))}
-        </div>      )}
+      </div>      {/* Seamless Single Notification */}
+      {currentNotification && (
+        <div 
+          className={`single-notification ${currentNotification.isVisible ? 'visible' : ''} ${currentNotification.isLeaving ? 'leaving' : ''}`}
+        >
+          {currentNotification.message}
+        </div>
+      )}
 
       {/* Mode selection tabs */}
       <div className={`mode-selector ${isEmergencyMode ? 'emergency-layout' : ''}`}>
