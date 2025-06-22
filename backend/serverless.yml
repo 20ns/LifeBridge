@@ -2,6 +2,28 @@
 service: lifebridge-backend
 frameworkVersion: '3'
 
+# Packaging configuration to reduce file count and avoid EMFILE errors
+package:
+  patterns:
+    - '!node_modules/**/*.d.ts'
+    - '!node_modules/**/*.md'
+    - '!node_modules/**/*.txt'
+    - '!node_modules/**/test/**'
+    - '!node_modules/**/tests/**'
+    - '!node_modules/**/__tests__/**'
+    - '!node_modules/**/spec/**'
+    - '!node_modules/**/docs/**'
+    - '!node_modules/**/examples/**'
+    - '!node_modules/**/coverage/**'
+    - '!node_modules/**/.nyc_output/**'
+    - '!node_modules/**/dist-types/**'
+    - '!node_modules/**/dist-es/**'
+    - '!src/**'
+    - '!tsconfig.json'
+    - '!test-*.js'
+    - '!test-*.ts'
+    - 'dist/**'
+
 provider:
   name: aws
   runtime: nodejs20.x
