@@ -391,13 +391,14 @@ quality standards and HIPAA compliance.
       throw error;
     }
   }
-
   // Store medical outcome in DynamoDB
   private async storeMedicalOutcome(outcome: MedicalOutcome): Promise<void> {
+    const metricId = `outcome_${outcome.incidentId}_${Date.now()}`;
+    
     const command = new PutItemCommand({
-      TableName: this.metricsTableName,      Item: {
-        pk: { S: 'OUTCOME' },
-        sk: { S: `${outcome.timestamp}#${outcome.incidentId}` },
+      TableName: this.metricsTableName,
+      Item: {
+        metricId: { S: metricId },
         type: { S: 'medical_outcome' },
         patientId: { S: outcome.patientId },
         incidentId: { S: outcome.incidentId },
@@ -415,14 +416,14 @@ quality standards and HIPAA compliance.
 
     await this.dynamoClient.send(command);
   }
-
   // Store comprehension score
   private async storeComprehensionScore(score: ComprehensionScore): Promise<void> {
+    const metricId = `comprehension_${score.sessionId}_${Date.now()}`;
+    
     const command = new PutItemCommand({
       TableName: this.metricsTableName,
       Item: {
-        pk: { S: 'COMPREHENSION' },
-        sk: { S: `${score.timestamp}#${score.sessionId}` },
+        metricId: { S: metricId },
         type: { S: 'comprehension_score' },
         sessionId: { S: score.sessionId },
         sourceLanguage: { S: score.sourceLanguage },
@@ -443,11 +444,12 @@ quality standards and HIPAA compliance.
 
   // Store usage metrics
   private async storeUsageMetrics(metrics: UsageMetrics): Promise<void> {
+    const metricId = `usage_${metrics.sessionId}_${Date.now()}`;
+    
     const command = new PutItemCommand({
       TableName: this.metricsTableName,
       Item: {
-        pk: { S: 'USAGE' },
-        sk: { S: `${metrics.timestamp}#${metrics.sessionId}` },
+        metricId: { S: metricId },
         type: { S: 'usage_metrics' },
         sessionId: { S: metrics.sessionId },
         department: { S: metrics.department },
@@ -458,7 +460,8 @@ quality standards and HIPAA compliance.
         errorCount: { N: metrics.errorCount.toString() },
         offlineUsage: { N: metrics.offlineUsage.toString() },
         cacheHitRate: { N: metrics.cacheHitRate.toString() },
-        userSatisfactionScore: { N: metrics.userSatisfactionScore.toString() },        duration: { N: metrics.duration.toString() },
+        userSatisfactionScore: { N: metrics.userSatisfactionScore.toString() },
+        duration: { N: metrics.duration.toString() },
         timestamp: { S: metrics.timestamp },
         ...(metrics.hospitalId && { hospitalId: { S: metrics.hospitalId } })
       }
@@ -466,14 +469,14 @@ quality standards and HIPAA compliance.
 
     await this.dynamoClient.send(command);
   }
-
   // Store cost savings analysis
   private async storeCostSavings(savings: CostSavings): Promise<void> {
+    const metricId = `cost_savings_${savings.calculationId}_${Date.now()}`;
+    
     const command = new PutItemCommand({
       TableName: this.metricsTableName,
       Item: {
-        pk: { S: 'COST_SAVINGS' },
-        sk: { S: `${savings.timestamp}#${savings.calculationId}` },
+        metricId: { S: metricId },
         type: { S: 'cost_savings' },
         calculationId: { S: savings.calculationId },
         period: { S: savings.period },
@@ -488,14 +491,14 @@ quality standards and HIPAA compliance.
 
     await this.dynamoClient.send(command);
   }
-
   // Store pilot study results
   private async storePilotStudy(study: PilotStudyMetrics): Promise<void> {
+    const metricId = `pilot_study_${study.studyId}_${Date.now()}`;
+    
     const command = new PutItemCommand({
       TableName: this.metricsTableName,
       Item: {
-        pk: { S: 'PILOT_STUDY' },
-        sk: { S: `${study.timestamp}#${study.studyId}` },
+        metricId: { S: metricId },
         type: { S: 'pilot_study' },
         studyId: { S: study.studyId },
         hospitalId: { S: study.hospitalId },

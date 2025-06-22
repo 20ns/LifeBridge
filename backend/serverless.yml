@@ -23,6 +23,7 @@ package:
     - '!test-*.js'
     - '!test-*.ts'
     - 'dist/**'
+    - '../prompts/**'
 
 provider:
   name: aws
@@ -45,12 +46,17 @@ provider:
     REVIEW_ALERTS_TOPIC_ARN: !Ref ReviewAlertsSnsTopic
     AUDIT_LOG_GROUP: /aws/lifebridge/audit-${self:provider.stage}
     POWERTOOLS_PARAMETERS_MAX_AGE: "43200"    # cut Secrets Manager calls
-
   iamRoleStatements:
     - Effect: Allow
       Action:
         - bedrock:InvokeModel
         - bedrock:ListFoundationModels
+      Resource: '*'
+
+    - Effect: Allow
+      Action:
+        - translate:TranslateText
+        - translate:DetectDominantLanguage
       Resource: '*'
 
     - Effect: Allow
@@ -63,6 +69,22 @@ provider:
         - logs:CreateLogGroup
         - logs:CreateLogStream
         - logs:PutLogEvents
+        - logs:DescribeLogStreams
+      Resource: '*'
+
+    - Effect: Allow
+      Action:
+        - cloudwatch:PutMetricData
+      Resource: '*'
+
+    - Effect: Allow
+      Action:
+        - kms:Encrypt
+        - kms:Decrypt
+        - kms:ReEncrypt*
+        - kms:GenerateDataKey*
+        - kms:CreateGrant
+        - kms:DescribeKey
       Resource: '*'
 
     - Effect: Allow
