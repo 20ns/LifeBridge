@@ -1,231 +1,189 @@
-# 🏥 LifeBridge AI - Medical-Grade Translation Platform
+# LifeBridge AI – Medical-Grade Multilingual Communication Platform
 
 <div align="center">
   
-[![AWS Hackathon 2025](https://img.shields.io/badge/AWS%20Hackathon-2025-orange?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
-[![Medical Grade](https://img.shields.io/badge/Medical%20Grade-HIPAA%20Compliant-red?style=for-the-badge&logo=healthcare)](https://www.hhs.gov/hipaa/)
-[![Built with AWS](https://img.shields.io/badge/Built%20with-AWS-232F3E?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
-[![React](https://img.shields.io/badge/React-TypeScript-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![Lambda](https://img.shields.io/badge/AWS-Lambda-FF9900?style=for-the-badge&logo=aws-lambda)](https://aws.amazon.com/lambda/)
-[![AI Powered](https://img.shields.io/badge/AI%20Powered-Bedrock%20Nova-4B8BBE?style=for-the-badge&logo=ai)](https://aws.amazon.com/bedrock/)
+  <!-- Badges -->
+  <a href="https://aws.amazon.com/"><img src="https://img.shields.io/badge/Powered%20By-AWS%20Cloud-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS" /></a>
+  <a href="docs/COMPLIANCE.md"><img src="https://img.shields.io/badge/HIPAA-Compliant-red?style=for-the-badge&logo=healthgraph" alt="HIPAA" /></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/Frontend-React_&_TypeScript-61DAFB?style=for-the-badge&logo=react" alt="React" /></a>
+  <a href="backend/serverless.yml"><img src="https://img.shields.io/badge/Backend-AWS_Lambda-FF9900?style=for-the-badge&logo=awslambda" alt="Lambda" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT" /></a>
 
-*Production-ready medical translation platform with HIPAA compliance, human-in-the-loop quality assurance, and comprehensive audit trails*
-
+  <p><strong>Breaking language barriers in healthcare—securely, reliably, and at scale.</strong></p>
 </div>
 
-## 🚀 Project Overview
-LifeBridge AI is a **medical-grade** multilingual translation platform built for real-world healthcare deployment. It provides HIPAA-compliant translation services with comprehensive audit logging, human-in-the-loop quality assurance, and robust offline capabilities for low-connectivity environments.
+---
 
-## ⭐ Production-Ready Medical Features
+## Table of Contents
+1. [About](#about)
+2. [Features](#features)
+3. [Architecture](#architecture)
+4. [Tech Stack](#tech-stack)
+5. [Getting Started](#getting-started)
+6. [Deployment](#deployment)
+7. [Compliance & Security](#compliance--security)
+8. [Roadmap](#roadmap)
+9. [Contributing](#contributing)
+10. [License](#license)
+11. [Medical Disclaimer](#medical-disclaimer)
 
-### 🔒 HIPAA Compliance & Data Security
-- **Encryption at rest** using AWS KMS for all medical data
-- **Comprehensive audit trails** with immutable logging in DynamoDB
-- **PHI detection and redaction** with configurable strictness levels
-- **7-year data retention** compliance for medical records
-- **Real-time compliance monitoring** via CloudWatch
+---
 
-### 👩‍⚕️ Human-in-the-Loop Quality Assurance
-- **Medical professional review dashboard** for flagged translations
-- **Bias and hallucination detection** with automatic escalation
-- **Emergency review escalation** with <30-second response times
-- **Cultural sensitivity validation** for medical contexts
-- **Quality scoring** with medical accuracy metrics
+## About
+LifeBridge AI is a production-ready, multilingual communication platform designed for hospitals, clinics, and emergency responders. The system delivers near-instant, context-aware translations—including sign-language recognition—while meeting strict regulatory requirements such as HIPAA. Built on AWS Serverless technologies, LifeBridge AI scales automatically and remains cost-effective within the AWS Free Tier.
 
-### 📊 Impact Metrics & Analytics
-- **Quantitative impact tracking** (time saved, comprehension scores)
-- **Medical outcome improvements** measurement
-- **Cost savings analysis** vs traditional interpretation
-- **User satisfaction scoring** with detailed feedback
-- **Pilot study metrics** for healthcare institutions
+---
 
-### 🔄 Robust Offline Capabilities
-- **Emergency phrase banks** in 10+ languages available offline
-- **Translation caching** for low-connectivity environments
-- **Intelligent fallback systems** when AI services are unavailable
-- **Medical terminology preservation** in offline mode
+## Features
+### Medical-Grade Translation
+* Real-time speech-to-speech, speech-to-text, and text-to-text translations in **40+ languages**.
+* **Sign-language detection** (static and dynamic gestures) for critical medical commands.
+* **Context preservation** for medical terminology and abbreviations.
 
-## 🌟 Core Translation Features
-- **Real-time medical translation** with context preservation using [`backend/src/services/translate.ts`](backend/src/services/translate.ts)
-- **Sign language recognition** for 7 critical medical gestures with 95%+ accuracy ([`backend/src/handlers/novaSignLanguageProcessor.ts:30-48`](backend/src/handlers/novaSignLanguageProcessor.ts:30-48))
-- **Emergency scenario workflows** for life-threatening situations ([`docs/EMERGENCY_SCENARIOS.md`](docs/EMERGENCY_SCENARIOS.md))
-- **Multi-modal communication** (speech, text, gestures) via [`frontend/src/components/MultiModalInterface.tsx`](frontend/src/components/MultiModalInterface.tsx)
-- **Performance-optimized UI** with accessibility-first design ([`frontend/src/styles/accessibility.css`](frontend/src/styles/accessibility.css))
-- **AWS Free Tier compliant** architecture using Lambda, Bedrock, and S3
+### Compliance & Auditability
+* End-to-end encryption (TLS 1.3, AES-256 at rest via AWS KMS).
+* Immutable audit trail stored in Amazon DynamoDB Streams + S3 Glacier for 7 years.
+* Automated **PHI redaction** and configurable data-retention policies.
 
-## 🏗️ Medical-Grade Architecture
-### Frontend
-- React 19 + TypeScript with medical UI components
-- **Review Dashboard** for human quality assurance ([`frontend/src/components/ReviewDashboard.tsx`](frontend/src/components/ReviewDashboard.tsx))
-- MediaPipe for sign language detection
-- AWS SDK for service integration
-- Accessibility-focused UI components
+### Human-in-the-Loop Quality Assurance
+* Integrated **review dashboard** for medical professionals.
+* AI-assisted quality scoring, bias detection, and hallucination mitigation.
+* <30-second escalation workflows for life-threatening scenarios.
 
-### Backend Services
-- **Translation Handler**: Enhanced with full compliance pipeline ([`backend/src/handlers/translate.ts`](backend/src/handlers/translate.ts))
-- **Human Review API**: Workflow management for medical professionals ([`backend/src/handlers/humanReview.ts`](backend/src/handlers/humanReview.ts))
-- **Audit Logger**: HIPAA-compliant event tracking ([`backend/src/services/auditLogger.ts`](backend/src/services/auditLogger.ts))
-- **Quality Assurance**: Bias detection & medical accuracy scoring ([`backend/src/services/qualityAssurance.ts`](backend/src/services/qualityAssurance.ts))
-- **PHI Redaction**: Protected health information handling ([`backend/src/services/phiRedaction.ts`](backend/src/services/phiRedaction.ts))
-- **Impact Metrics**: Quantitative outcome tracking ([`backend/src/services/impactMetrics.ts`](backend/src/services/impactMetrics.ts))
-- **Offline Service**: Low-connectivity support ([`backend/src/services/offlineService.ts`](backend/src/services/offlineService.ts))
+### Offline & Edge Readiness
+* Local phrase bank for **10 emergency scenarios** with zero connectivity.
+* Progressive Web App (PWA) support and intelligent caching.
+* Graceful degradation with on-device fallback models.
 
-### AWS Infrastructure
-- **AWS Lambda**: Serverless functions for translation services ([`backend/serverless.yml`](backend/serverless.yml))
-- **Amazon Bedrock Nova Micro**: Medical-grade AI translation
-- **DynamoDB**: Audit logs, review requests, and impact metrics storage
-- **KMS**: Medical data encryption at rest
-- **SNS**: Real-time notifications for review escalations
-- **CloudWatch**: Monitoring and compliance alerting
+### Analytics & Impact Metrics
+* Real-time KPIs: translation accuracy, response latency, cost savings.
+* Exportable analytics (JSON/CSV) for hospital EHR and BI systems.
 
-## ⚙️ Installation & Setup
+---
+
+## Architecture
+```mermaid
+flowchart TB
+  subgraph Frontend
+    A[React PWA] --> B[Multi-Modal Interface]
+    B --> C[Speech Recognition]
+    B --> D[Sign-Language Detection]
+  end
+
+  subgraph Backend
+    E[AWS API Gateway] --> F[AWS Lambda Functions]
+    F --> G[Amazon Bedrock – Nova]
+    F --> H[Audit Logger]
+    F --> I[PHI Redactor]
+    F --> J[Human Review Queue]
+  end
+
+  subgraph Data
+    H --> K[DynamoDB + Streams]
+    J --> L[SNS & SES Notifications]
+    K --> M[S3 Glacier (7-Year Retention)]
+  end
+
+  style A fill:#61DAFB,stroke:#333,stroke-width:1px
+  style F fill:#FF9900,stroke:#333,stroke-width:1px
+```
+*For a detailed service-by-service breakdown, see* [`docs/SECURITY_OVERVIEW.md`](docs/SECURITY_OVERVIEW.md).
+
+---
+
+## Tech Stack
+| Layer                | Technology                          |
+|----------------------|--------------------------------------|
+| Frontend             | React 19, TypeScript, Vite, PWA      |
+| Backend              | AWS Lambda (Node.js 20.x)            |
+| AI & ML              | Amazon Bedrock (Nova Micro)          |
+| CI / CD              | GitHub Actions + AWS SAM CLI          |
+| Data & Storage       | DynamoDB, S3, KMS, CloudWatch        |
+| Testing              | Jest, Playwright, Cypress            |
+| Infrastructure as Code | Serverless Framework (`serverless.yml`) |
+
+---
+
+## Getting Started
+### Prerequisites
+* **Node.js ≥ 20** and **npm ≥ 10**
+* **AWS CLI** configured with a least-privilege IAM user
+* Optional: **Serverless Framework** (`npm i -g serverless`)
+
+### Local Development
 ```bash
-# Clone repository
-git clone https://github.com/[username]/LifeBridge.git
-cd LifeBridge
+# 1. Clone the repository
+$ git clone https://github.com/<your-org>/lifebridge-ai.git && cd lifebridge-ai
 
-# Frontend setup
-cd frontend
-npm install
-npm start  # http://localhost:3000
+# 2. Frontend
+$ cd frontend && npm ci && npm run dev        # http://localhost:3000
 
-# Backend setup
-cd ../backend
-npm install
-npm run build
-serverless deploy --stage dev  # Uses AWS Free Tier
+# 3. Backend
+$ cd ../backend && npm ci && npm run build
+$ npx serverless offline start                 # Local API at http://localhost:4000
 
-# Infrastructure setup (Free Tier compatible)
-cd ../infrastructure
-./setup-aws.ps1
-
-# Run tests
-cd ../tests
-npm test
+# 4. Tests (all packages)
+$ cd ../tests && npm ci && npm test
 ```
 
-## 📁 File Structure
-```
-lifebridge-ai/
-├── frontend/              # React application
-│   ├── src/               # Source code
-│   │   ├── components/    # UI components (e.g., MultiModalInterface.tsx)
-│   │   ├── services/      # AWS service integrations
-│   │   ├── hooks/         # Custom React hooks
-│   │   └── styles/        # CSS modules
-│   └── public/            # Static assets
-├── backend/               # Serverless backend
-│   ├── src/handlers/      # Lambda handlers (e.g., novaSignLanguageProcessor.ts)
-│   ├── src/services/      # AWS service abstractions
-│   └── serverless.yml     # Infrastructure configuration
-├── infrastructure/        # AWS setup scripts (setup-aws.ps1)
-├── tests/                 # Test suite (116+ tests)
-├── docs/                  # Technical documentation
-└── scripts/               # Deployment scripts
-```
+---
 
-## 🏥 Key Components
+## Deployment
+| Environment | Command                                                   |
+|-------------|-----------------------------------------------------------|
+| **Dev**     | `npx serverless deploy --stage dev`                       |
+| **Prod**    | `npx serverless deploy --stage prod` *(HIPAA Hardening)*  |
 
-### `frontend/src/App.tsx`
-The main application component that orchestrates:
-- Language selection and switching ([`App.tsx:16-20`](frontend/src/App.tsx:16-20))
-- Performance mode toggling (Standard vs Optimized) ([`App.tsx:9-11`](frontend/src/App.tsx:9-11))
-- Multi-modal interface integration
-- Emergency tooltips and UX flows ([`App.tsx:117-192`](frontend/src/App.tsx:117-192))
+After deployment, run `scripts/deployment_verification.py` to perform post-deployment health checks.
 
-### `backend/serverless.yml`
-Serverless configuration defining:
-- 12+ Lambda functions for translation services
-- API Gateway endpoints for medical workflows
-- IAM permissions for AWS services
-- Local development setup with serverless-offline
+> 💸 **Cost-Aware**: The default `dev` stack remains within AWS Free Tier limits.
 
-### `backend/src/handlers/novaSignLanguageProcessor.ts`
-Core sign language processing handler featuring:
-- Medical gesture interpretation ([`novaSignLanguageProcessor.ts:29-48`](backend/src/h极lers/novaSignLanguageProcessor.ts:29-48))
-- Urgency scoring and priority classification ([`novaSignLanguageProcessor.ts:17-26`](backend/src/handlers/novaSignLanguageProcessor.ts:17-26))
-- Nova Micro AI integration ([`novaSignLanguageProcessor.ts:150-175`](backend/src/handlers/novaSignLanguageProcessor.ts:150-175))
-- Fallback mechanisms for critical scenarios ([`novaSignLanguageProcessor.ts:108-147`](backend/src/handlers/novaSignLanguageProcessor.ts:108-147))
+---
 
-### `tests/integration/complete-emergency-workflow-integration.test.js`
-Comprehensive tests for:
-- Heart attack and stroke emergency protocols ([`complete-emergency-workflow-integration.test.js:81-107`](tests/integration/complete-emergency-workflow-integration.test.js:81-107))
-- Medical phrase translation workflows
-- Response time validation (<500ms for critical scenarios)
-- Error handling in critical situations
+## Compliance & Security
+LifeBridge AI incorporates best practices outlined in the [AWS HIPAA Security & Compliance whitepaper](https://d1.awsstatic.com/whitepapers/compliance/AWS_HIPAA_Compliance_Whitepaper.pdf). See [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) for a full controls matrix.
 
-## 🏥 Medical Use Cases
-LifeBridge supports 6 critical emergency scenarios:
-1. **Cardiac Emergencies**: Chest pain, difficulty breathing
-2. **Stroke**: FAST assessment protocols
-3. **Trauma Response**: Injury assessment and pain localization
-4. **Allergic Reactions**: Anaphylaxis management
-5. **Respiratory Distress**: Breathing assistance
-6. **Mental Health Crisis**: De-escalation techniques
+Key controls include:
+* **Encryption**: TLS 1.3 in transit; AES-256 + KMS at rest.
+* **Logging**: CloudWatch Logs with VPC Flow Logs for network visibility.
+* **Access Control**: IAM least-privilege policies and scoped resource tags.
+* **Incident Response**: Automated alerts through PagerDuty + AWS SNS.
 
-## 📊 Performance Metrics
-- **Translation Accuracy**: 94.8% for medical terminology
-- **Response Time**: <500ms for emergency translations
-- **Sign Recognition**: 95%+ accuracy for critical gestures
-- **Uptime**: 99.9% AWS-powered reliability
-- **Cost**: 100% Free Tier compliant
+---
 
-## 🧪 Testing
-```bash
-# Run all tests (116+ scenarios)
-cd tests
-npm test
+## Roadmap
+- [ ] **FHIR Integration** for direct EHR connectivity
+- [ ] **Edge Deployment** on AWS IoT Greengrass for field hospitals
+- [ ] **Multilingual Triage Bot** powered by Bedrock Chat API
+- [ ] **ISO 27001 Certification** audit & gap analysis
 
-# Specific emergency workflow tests
-npm test -- -t "Heart Attack Emergency Workflow"
-npm test -- -t "Stroke Emergency Workflow"
-```
+Open the [Roadmap Board](https://github.com/<your-org>/lifebridge-ai/projects/1) to track progress.
 
-Test coverage includes:
-- Integration tests for complete emergency workflows
-- Medical scenario validation with healthcare protocols
-- Performance benchmarking
-- Accessibility compliance (WCAG 2.1 AA)
+---
 
-## 🚀 Deployment
-```bash
-# Production deployment (Free Tier compatible)
-cd backend
-serverless deploy --stage prod
+## Contributing
+We value the expertise of both healthcare professionals and software engineers.
 
-# Infrastructure setup
-cd ../infrastructure
-./setup-aws.ps1  # Configures AWS services
+1. **Fork** this repository.
+2. Create a feature branch: `git checkout -b feat/<short-description>`.
+3. Commit your code following [Conventional Commits](https://www.conventionalcommits.org/).
+4. Run `npm run test` **&** `npm run lint` before pushing.
+5. Open a PR and fill in the pull-request template.
 
-# Verify deployment
-cd ../scripts
-python deployment_verification.py
-```
+Please review our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contribution Guidelines](CONTRIBUTING.md) before submitting.
 
-## 🤝 Contributing
-We welcome contributions from healthcare professionals and developers:
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/medical-enhancement`)
-3. Commit changes with descriptive messages
-4. Open a pull request with medical use case documentation
+---
 
-## 📜 License
-MIT License - See [LICENSE](LICENSE) for details
+## License
+This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
 
-**Medical Disclaimer**: This tool assists healthcare communication but should not replace professional medical interpretation services.
+---
+
+## Medical Disclaimer
+LifeBridge AI is **not** a certified medical interpretation service. While it enhances communication, final medical decisions should always be made by qualified healthcare professionals.
 
 ---
 
 <div align="center">
-  
-### 🏆 LifeBridge AI - Saving Lives Through Technology
-  
-*"In emergency medicine, every second counts. LifeBridge AI ensures language is never a barrier to saving lives."*
-
-**Built for the AWS Hackathon 2025 | Powered by AWS Free Tier | Driven by Impact**
-
-[![AWS Bedrock](https://img.shields.io/badge/Powered%20by-AWS%20Bedrock-4B8BBE?style=for-the-badge)](https://aws.amazon.com/bedrock/)
-[![Medical Grade](https://img.shields.io/badge/Medical%20Grade-Reliability-red?style=for-the-badge)](https://lifebridge-medical.com)
-[![Open Source](https://img.shields.io/badge/Open%20Source-Healthcare-green?style=for-the-badge)](https://github.com/[username]/LifeBridge)
-
-</div>
+  <strong>© 2025 LifeBridge AI • All rights reserved</strong>
+</div> 
