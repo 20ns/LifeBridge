@@ -576,16 +576,20 @@
   box-shadow: 0 16px 40px rgba(220, 38, 38, 0.4);
 }
 
-.emergency-pulse {
-  animation: emergency-call-pulse 1.5s ease-in-out infinite;
+.emergency-pulse { /* This class is specifically for the call button glow */
+  animation: emergency-call-pulse 1.5s ease-in-out infinite !important; /* Ensure this animation takes precedence */
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important; /* Ensure red background */
+  color: white !important; /* Ensure white text */
 }
 
 @keyframes emergency-call-pulse {
   0%, 100% { 
     box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3), 0 0 0 0 rgba(220, 38, 38, 0.7);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   }
   50% { 
     box-shadow: 0 16px 40px rgba(220, 38, 38, 0.4), 0 0 0 20px rgba(220, 38, 38, 0);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   }
 }
 
@@ -687,33 +691,70 @@
   align-items: center;
   gap: 12px;
   padding: 20px 40px;
-  background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
-  color: white;
-  border: none;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important; /* Strong red gradient */
+  color: white !important; /* Ensure text is white */
+  border: none !important; /* Ensure no border from other classes */
   border-radius: 50px;
   font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+  text-decoration: none !important; /* Ensure no text decoration */
   text-transform: uppercase;
   letter-spacing: 1px;
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.3) !important;
 }
 
 .emergency-contact-button.large {
   padding: 30px 60px;
   font-size: 1.5rem;
   gap: 15px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: white !important;
 }
 
 .emergency-contact-button:hover {
-  background: linear-gradient(135deg, #ff3838 0%, #ff2828 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; /* Lighter red on hover */
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(255, 71, 87, 0.5);
+  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.4) !important;
+  color: white !important; /* Ensure text stays white on hover */
 }
 
 .emergency-contact-button:active {
   transform: translateY(-1px);
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important; /* Darker red on active */
+  color: white !important;
+}
+
+/* Emergency Mode Override - Ensure Call 911 button stays red even in emergency mode */
+/* Higher specificity selectors to override global emergency mode rules */
+.emergency-mode .emergency-contact-button.emergency-btn-critical,
+.emergency-mode button.emergency-contact-button.emergency-btn-critical,
+.emergency-mode .emergency-contact .emergency-contact-button {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: white !important;
+  border: none !important;
+  text-shadow: none !important;
+}
+
+.emergency-mode .emergency-contact-button.emergency-btn-critical:hover,
+.emergency-mode button.emergency-contact-button.emergency-btn-critical:hover,
+.emergency-mode .emergency-contact .emergency-contact-button:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  border: none !important;
+  text-shadow: none !important;
+  transform: translateY(-3px) !important;
+}
+
+.emergency-mode .emergency-contact-button.emergency-btn-critical:active,
+.emergency-mode button.emergency-contact-button.emergency-btn-critical:active,
+.emergency-mode .emergency-contact .emergency-contact-button:active {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
+  color: white !important;
+  border: none !important;
+  text-shadow: none !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Accessibility improvements */
