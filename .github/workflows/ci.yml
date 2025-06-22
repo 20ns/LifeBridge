@@ -29,6 +29,10 @@ jobs:
           else
             npm install
           fi
+          # For tests, also install backend dependencies since tests import backend services
+          if [ "${{ matrix.project }}" = "tests" ]; then
+            cd ../backend && npm install
+          fi
       - name: Type check (ts)
         run: npm run type-check --if-present
       - name: Lint
@@ -49,4 +53,4 @@ jobs:
           path: |
             frontend/coverage/
             backend/coverage/
-          if-no-files-found: ignore 
+          if-no-files-found: ignore
