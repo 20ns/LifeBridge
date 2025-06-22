@@ -327,22 +327,19 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
                     <div className="phrase-english">
                       {phrase.english}
                     </div>
-                    
-                    <div className="phrase-translated">
-                      {phrase.translated || phrase.text}
+                      <div className="phrase-translated">
+                      {phrase.translated || phrase.english}
                     </div>
                   </div>
 
-                  <div className="phrase-actions">
-                    <button
-                      onClick={() => handleCopy(phrase.id, phrase.translated || phrase.text)}
+                  <div className="phrase-actions">                    <button
+                      onClick={() => handleCopy(phrase.id, phrase.translated || phrase.english)}
                       className="action-button"
                       title="Copy translation"
                     >
                       {copiedPhrase === phrase.id ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
-                    <button
-                      onClick={() => handleSpeak(phrase.translated || phrase.text)}
+                    </button>                    <button
+                      onClick={() => handleSpeak(phrase.translated || phrase.english)}
                       className="action-button"
                       title="Speak translation"
                     >

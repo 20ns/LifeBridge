@@ -28,7 +28,7 @@ interface SignToTextMapping {
 }
 
 // Nova Micro Sign Language API endpoint
-const NOVA_SIGN_API_ENDPOINT = 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod/nova-sign-language';
+const NOVA_SIGN_API_ENDPOINT = 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod/sign-language-process';
 
 // Medical sign language to text mappings for emergency scenarios
 const medicalSignMappings: SignToTextMapping = {
