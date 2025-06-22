@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node run-tests.js",
     "test:unit": "node run-tests.js unit",
-    "test:services": "node run-tests.js services", 
+    "test:services": "node run-tests.js services",
     "test:integration": "node run-tests.js integration",
     "test:bedrock": "node run-tests.js unit bedrock-nova-micro",
     "test:medical": "node run-tests.js services medical-context",
@@ -14,11 +14,11 @@
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.7.0"
   },
   "keywords": [
     "medical",
-    "translation", 
+    "translation",
     "aws",
     "bedrock",
     "healthcare",

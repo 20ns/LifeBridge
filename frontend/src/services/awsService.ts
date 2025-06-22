@@ -1,7 +1,8 @@
 
 // Backend API Configuration
 // Use local backend for development, deployed URL for production
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
+const isProduction = typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
+const API_BASE_URL = isProduction
   ? 'https://5wubqhune7.execute-api.eu-north-1.amazonaws.com/dev'
   : 'http://localhost:3001/dev';
 
@@ -114,8 +115,7 @@ export const speakText = async (text: string, language: string): Promise<void> =
       },
       body: JSON.stringify({ 
         text, 
-        language,
-        outputFormat: 'mp3'
+        language
       })
     });
 
@@ -125,16 +125,25 @@ export const speakText = async (text: string, language: string): Promise<void> =
 
     const data = await response.json();
     
-    if (data.audioUrl) {
-      // Play audio from AWS Polly
-      const audio = new Audio(data.audioUrl);
+    if (data.audioBase64) {
+      // Create audio from base64 data
+      const audioBlob = base64ToBlob(data.audioBase64, 'audio/mpeg');
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
       return new Promise((resolve, reject) => {
-        audio.onended = () => resolve();
-        audio.onerror = () => reject(new Error('Audio playback failed'));
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl); // Clean up
+          resolve();
+        };
+        audio.onerror = () => {
+          URL.revokeObjectURL(audioUrl); // Clean up
+          reject(new Error('Audio playback failed'));
+        };
         audio.play().catch(reject);
       });
     } else {
-      throw new Error('No audio URL returned from backend');
+      throw new Error('No audio data returned from backend');
     }
     
   } catch (error) {
@@ -185,4 +194,101 @@ export const getEmergencyPhrases = async (language?: string): Promise<any[]> => 
     console.error('Error fetching emergency phrases:', error);
     return [];
   }
+};
+
+// Speech recognition using AWS Transcribe
+export const transcribeAudio = async (audioBlob: Blob, language: string): Promise<string> => {
+  try {
+    // Convert blob to base64
+    const audioData = await blobToBase64(audioBlob);
+    
+    // Start transcription job
+    const response = await fetch(`${API_BASE_URL}/speech-to-text`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        audioData: audioData.split(',')[1], // Remove data URL prefix
+        language
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to start transcription');
+    }
+
+    const startData = await response.json();
+    const jobId = startData.jobId;
+
+    // Poll for completion (in production, consider WebSocket for real-time updates)
+    return await pollTranscriptionResult(jobId);
+    
+  } catch (error) {
+    console.error('Speech transcription error:', error);
+    throw new Error(`Speech recognition failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Poll transcription job status
+const pollTranscriptionResult = async (jobId: string, maxAttempts: number = 30): Promise<string> => {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/speech-to-text`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check transcription status');
+      }
+
+      const data = await response.json();
+      
+      if (data.status === 'COMPLETED') {
+        return data.transcript || '';
+      }
+      
+      if (data.status === 'FAILED') {
+        throw new Error('Transcription job failed');
+      }
+
+      // Wait 2 seconds before next poll
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+    } catch (error) {
+      console.error(`Polling attempt ${attempt + 1} failed:`, error);
+      if (attempt === maxAttempts - 1) {
+        throw error;
+      }
+    }
+  }
+  
+  throw new Error('Transcription timeout - job took too long to complete');
+};
+
+// Helper function to convert blob to base64
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
+// Helper function to convert base64 to blob
+const base64ToBlob = (base64: string, contentType: string): Blob => {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: contentType });
 };
