@@ -1,5 +1,10 @@
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+  InvokeModelWithResponseStreamCommand,
+} from '@aws-sdk/client-bedrock-runtime';
 import { AWS_REGION, BEDROCK_MODEL_ID } from '../config';
+import { loadPrompt } from './promptLoader';
 
 // Create client with region from config
 const client = new BedrockRuntimeClient({ region: AWS_REGION });
@@ -88,16 +93,10 @@ export const translateText = async (
   context?: 'emergency' | 'consultation' | 'medication' | 'general'
 ): Promise<TranslationResult> => {
   try {
-    // Enhanced medical context prompts
-    const contextPrompts = {
-      emergency: `You are a critical care medical translator. This is an EMERGENCY translation. Translate with maximum accuracy and urgency. Medical errors could be life-threatening.`,
-      consultation: `You are a clinical medical translator. This is for patient consultation. Ensure precise medical terminology and maintain professional tone.`,
-      medication: `You are a pharmaceutical translator. This involves medication instructions. Be extremely precise with dosages, timing, and medical terms.`,
-      general: `You are a professional medical translator. Ensure medical accuracy and clarity.`
-    };
-
-    const selectedContext = context || 'general';
-    const contextPrompt = contextPrompts[selectedContext];
+    const translationPrompts = loadPrompt<Record<string, string>>('translation');
+    const selectedContext = (context as keyof typeof translationPrompts) || 'general';
+    const contextPrompt =
+      translationPrompts[selectedContext] || translationPrompts['general'];
 
     const prompt = `${contextPrompt}
 
@@ -132,20 +131,52 @@ Translation:`;
       })
     };
 
-    const command = new InvokeModelCommand(request);
-    const response = await client.send(command);
-    
-    if (!response.body) {
-      throw new Error('No response body received from Bedrock');
-    }
-
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    
     let translatedText = '';
-    if (responseBody.output && responseBody.output.message && responseBody.output.message.content && responseBody.output.message.content[0]) {
-      translatedText = responseBody.output.message.content[0].text.trim();
+
+    if (process.env.ENABLE_BEDROCK_STREAM === 'true') {
+      const streamCommand = new InvokeModelWithResponseStreamCommand(request as any);
+      const streamResp = await client.send(streamCommand);
+      if (!streamResp.body) {
+        throw new Error('No stream body received from Bedrock');
+      }
+
+      const decoder = new TextDecoder();
+      for await (const event of streamResp.body) {
+        if ((event as any).chunk?.bytes) {
+          translatedText += decoder.decode((event as any).chunk.bytes);
+        }
+      }
+      // The stream may include JSON envelope; attempt to parse if so
+      try {
+        const parsed = JSON.parse(translatedText);
+        if (
+          parsed.output?.message?.content &&
+          parsed.output.message.content[0]?.text
+        ) {
+          translatedText = parsed.output.message.content[0].text.trim();
+        }
+      } catch (_) {
+        // ignore parse errors assume raw text
+      }
     } else {
-      throw new Error('Unexpected response format from Nova Micro model');
+      const command = new InvokeModelCommand(request);
+      const response = await client.send(command);
+
+      if (!response.body) {
+        throw new Error('No response body received from Bedrock');
+      }
+
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+      if (
+        responseBody.output &&
+        responseBody.output.message &&
+        responseBody.output.message.content &&
+        responseBody.output.message.content[0]
+      ) {
+        translatedText = responseBody.output.message.content[0].text.trim();
+      } else {
+        throw new Error('Unexpected response format from Nova Micro model');
+      }
     }
 
     if (translatedText.toLowerCase().startsWith('translation:')) {

@@ -2,6 +2,7 @@ import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { userService } from '../services/userService';
+import { getJwtSecret } from '../config';
 
 const createResponse = (statusCode: number, body: any): APIGatewayProxyResultV2 => ({
   statusCode,
@@ -12,7 +13,7 @@ const createResponse = (statusCode: number, body: any): APIGatewayProxyResultV2 
   body: JSON.stringify(body),
 });
 
-const JWT_SECRET = process.env.JWT_SECRET || 'change_this_dev_secret';
+// JWT secret is fetched lazily via Powertools Parameters cache
 const JWT_EXPIRES_IN = '24h';
 
 /* ------------------------------------------------------------------ */
@@ -39,9 +40,10 @@ export const register = async (
     const newUser = await userService.createUser({ email, password, name, role, department });
 
     // Generate token
+    const secret = await getJwtSecret();
     const token = jwt.sign(
       { id: newUser.id, email: newUser.email, role: newUser.role, name: newUser.name },
-      JWT_SECRET,
+      secret,
       { expiresIn: JWT_EXPIRES_IN }
     );
 
@@ -80,9 +82,10 @@ export const login = async (
 
     await userService.updateLastLogin(email);
 
+    const secret = await getJwtSecret();
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, name: user.name },
-      JWT_SECRET,
+      secret,
       { expiresIn: JWT_EXPIRES_IN }
     );
 
