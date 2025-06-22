@@ -25,7 +25,7 @@ interface SignToTextMapping {
 }
 
 // ML Gesture Recognition API endpoint
-const ML_GESTURE_API_ENDPOINT = 'https://9t2to2akvf.execute-api.eu-north-1.amazonaws.com/dev/gesture-recognition-ml';
+const ML_GESTURE_API_ENDPOINT = 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod/gesture-recognition-ml';
 
 // Medical sign language to text mappings for emergency scenarios
 const medicalSignMappings: SignToTextMapping = {
