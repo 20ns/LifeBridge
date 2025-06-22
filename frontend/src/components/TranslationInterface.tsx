@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle, Mic, Activity } from 'lucide-react';
+import { Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle, Mic, Activity, Info } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
 import { usePerformanceMonitor } from '../utils/performanceMonitor';
@@ -70,7 +70,33 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     sourceLanguage,
     targetLanguage,
     context
-  });  // Handle input changes with optional real-time translation
+  });
+  // Medical info tooltip state and ref
+  const [showMedicalContextTooltip, setShowMedicalContextTooltip] = useState(false);
+  const [medicalTooltipPosition, setMedicalTooltipPosition] = useState({ top: 0, left: 0 });
+  const medicalInfoButtonRef = useRef<HTMLButtonElement>(null);
+  const medicalTooltipRef = useRef<HTMLDivElement>(null);
+
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        medicalTooltipRef.current &&
+        !medicalTooltipRef.current.contains(event.target as Node) &&
+        medicalInfoButtonRef.current &&
+        !medicalInfoButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowMedicalContextTooltip(false);
+      }
+    };
+
+    if (showMedicalContextTooltip) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMedicalContextTooltip]);
+
+  // Handle input changes with optional real-time translation
   const handleInputChange = (value: string) => {
     setInputText(value);
     
@@ -244,8 +270,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   }, [medicalContext]);
 
   return (
-    <div className="interface-container translation-interface">
-      {/* Top Controls Bar - Medical Context and Settings */}
+    <div className="interface-container translation-interface">      {/* Top Controls Bar - Medical Context and Settings */}
       <div className="top-controls-bar">
         <div className="context-selector">
           <label htmlFor="context-select">Medical Context:</label>
@@ -260,6 +285,63 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             <option value="consultation">👨‍⚕️ Patient Consultation</option>
             <option value="medication">💊 Medication/Dosage</option>
           </select>
+          
+          <button 
+            ref={medicalInfoButtonRef}
+            className="medical-info-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              
+              // Calculate tooltip position relative to button and screen
+              if (medicalInfoButtonRef.current) {
+                const buttonRect = medicalInfoButtonRef.current.getBoundingClientRect();
+                const tooltipWidth = 400;
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                
+                // Calculate horizontal position (prefer left side, but adjust if too close to screen edge)
+                let leftPosition = buttonRect.left + buttonRect.width / 2 - tooltipWidth / 2;
+                if (leftPosition < 10) {
+                  leftPosition = 10; // 10px margin from left edge
+                } else if (leftPosition + tooltipWidth > screenWidth - 10) {
+                  leftPosition = screenWidth - tooltipWidth - 10; // 10px margin from right edge
+                }
+                
+                // Calculate vertical position (below button with margin)
+                let topPosition = buttonRect.bottom + 12;
+                
+                // If tooltip would go below screen, position it above the button
+                const tooltipHeight = 500; // estimated height
+                if (topPosition + tooltipHeight > screenHeight - 20) {
+                  topPosition = buttonRect.top - tooltipHeight - 12;
+                }
+                
+                const newPosition = {
+                  top: topPosition,
+                  left: leftPosition
+                };
+                setMedicalTooltipPosition(newPosition);
+              }
+              
+              setShowMedicalContextTooltip(prevState => !prevState);
+            }}
+            title="Medical Context Information"
+            style={{
+              marginLeft: '8px',
+              padding: '6px',
+              background: 'transparent',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+              color: '#6b7280'
+            }}
+          >
+            <Activity size={16} />
+          </button>
         </div>
         
         <div className="top-controls-actions">
@@ -500,8 +582,122 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             context={context}
             symptoms={detectedSymptoms || undefined}
             patientAge={patientAge}
-            vitalSigns={Object.keys(vitalSigns).length > 0 ? vitalSigns : undefined}
-          />        </div>      )}
+            vitalSigns={Object.keys(vitalSigns).length > 0 ? vitalSigns : undefined}          />        </div>      )}
+
+      {/* Medical Context Tooltip */}
+      {showMedicalContextTooltip && (
+        <div
+          className="medical-context-tooltip"
+          ref={medicalTooltipRef}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'fixed',
+            top: `${medicalTooltipPosition.top}px`,
+            left: `${medicalTooltipPosition.left}px`,
+            zIndex: 999999,
+            width: '400px',
+            maxWidth: '90vw',
+            background: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #e2e8f0'
+          }}
+        >
+          {/* Arrow pointing to the medical info button */}
+          <div 
+            style={{
+              position: 'absolute',
+              top: '-8px',
+              left: medicalInfoButtonRef.current ? 
+                `${Math.max(20, Math.min(380, 
+                  (medicalInfoButtonRef.current.getBoundingClientRect().left + medicalInfoButtonRef.current.getBoundingClientRect().width / 2) - 
+                  medicalTooltipPosition.left
+                ))}px` : '50%',
+              transform: 'translateX(-50%)',
+              width: '0',
+              height: '0',
+              borderLeft: '8px solid transparent',
+              borderRight: '8px solid transparent',
+              borderBottom: '8px solid white',
+              filter: 'drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1))'
+            }}
+          />
+          
+          <div className="tooltip-header">
+            <h4>Medical Context Types</h4>
+            <button
+              className="tooltip-close"
+              onClick={() => setShowMedicalContextTooltip(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '18px',
+                cursor: 'pointer',
+                padding: '4px',
+                color: '#6b7280'
+              }}
+            >
+              ×
+            </button>
+          </div>
+          
+          <div className="tooltip-content" style={{ padding: '16px' }}>
+            <div className="medical-context-explanation">
+              <div className="context-item" style={{ marginBottom: '16px' }}>
+                <div className="context-title" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ marginRight: '8px', fontSize: '18px' }}>🚨</span>
+                  <strong style={{ color: '#dc2626' }}>Emergency</strong>
+                </div>
+                <p style={{ margin: '0', fontSize: '14px', color: '#4b5563', lineHeight: '1.4' }}>
+                  Critical care situations requiring immediate attention. Uses priority processing with fastest AI responses for life-threatening scenarios.
+                </p>
+              </div>
+              
+              <div className="context-item" style={{ marginBottom: '16px' }}>
+                <div className="context-title" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ marginRight: '8px', fontSize: '18px' }}>🩺</span>
+                  <strong style={{ color: '#059669' }}>Consultation</strong>
+                </div>
+                <p style={{ margin: '0', fontSize: '14px', color: '#4b5563', lineHeight: '1.4' }}>
+                  Patient examination and diagnosis discussions. Optimized for precise medical terminology and professional communication.
+                </p>
+              </div>
+              
+              <div className="context-item" style={{ marginBottom: '16px' }}>
+                <div className="context-title" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ marginRight: '8px', fontSize: '18px' }}>💊</span>
+                  <strong style={{ color: '#7c3aed' }}>Medication</strong>
+                </div>
+                <p style={{ margin: '0', fontSize: '14px', color: '#4b5563', lineHeight: '1.4' }}>
+                  Prescription instructions and drug-related information. Enhanced accuracy for dosages, drug names, and safety warnings.
+                </p>
+              </div>
+              
+              <div className="context-item" style={{ marginBottom: '16px' }}>
+                <div className="context-title" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ marginRight: '8px', fontSize: '18px' }}>👥</span>
+                  <strong style={{ color: '#0f766e' }}>General</strong>
+                </div>
+                <p style={{ margin: '0', fontSize: '14px', color: '#4b5563', lineHeight: '1.4' }}>
+                  General medical communication and information. Balanced processing for routine healthcare conversations.
+                </p>
+              </div>
+            </div>
+            
+            <div className="context-note" style={{ 
+              marginTop: '16px', 
+              padding: '12px', 
+              backgroundColor: '#f8fafc', 
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <p style={{ margin: '0', fontSize: '13px', color: '#374151' }}>
+                <strong>How it works:</strong> LifeBridge automatically detects medical context from your text and applies the appropriate translation strategy for maximum accuracy and safety.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
