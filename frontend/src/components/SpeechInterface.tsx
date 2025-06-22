@@ -202,20 +202,7 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
               )}
             </ul>
             
-            {/* Debug Info */}
-            <div className="debug-info" style={{ 
-              marginTop: '12px', 
-              padding: '8px', 
-              background: '#f8fafc', 
-              border: '1px solid #e2e8f0', 
-              borderRadius: '4px',
-              fontSize: '12px',
-              color: '#64748b'
-            }}>
-              <strong>Debug:</strong> Using {isSpeechSupported ? 'Browser' : 'AWS'} Speech Recognition
-              <br />
-              Language: {sourceLanguage} → {targetLanguage}
-            </div>
+            {/* Debug Info removed for production clean UI */}
           </div>
         </div>
 
