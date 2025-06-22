@@ -17,7 +17,7 @@ const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'eu-north-1',
 });
 
-// Language code mappings for Transcribe
+// Enhanced language code mappings for medical Transcribe
 const transcribeLanguageMap: { [key: string]: LanguageCode } = {
   'en': LanguageCode.EN_US,
   'es': LanguageCode.ES_ES,
@@ -30,11 +30,53 @@ const transcribeLanguageMap: { [key: string]: LanguageCode } = {
   'zh': LanguageCode.ZH_CN
 };
 
+// Medical context-specific settings for enhanced accuracy
+const getMedicalTranscribeSettings = (context?: string) => {
+  const baseSettings = {
+    ShowSpeakerLabels: true,
+    MaxSpeakerLabels: 2, // Doctor-patient conversation
+    ShowAlternatives: true,
+    MaxAlternatives: 3
+  };
+
+  switch (context) {
+    case 'emergency':
+      return {
+        ...baseSettings,
+        ChannelIdentification: false, // Single channel for emergency
+        VocabularyFilterMethod: 'tag' as const
+      };
+    case 'consultation':
+      return {
+        ...baseSettings,
+        ChannelIdentification: true, // Multi-speaker identification
+        VocabularyFilterMethod: 'tag' as const
+      };
+    case 'medication':
+      return {
+        ...baseSettings,
+        ShowSpeakerLabels: false, // Usually single speaker for medication
+        VocabularyFilterMethod: 'tag' as const
+      };
+    default:
+      return baseSettings;
+  }
+};
+
+// Common medical terms that should be prioritized in transcription
+const getMedicalKeywords = () => [
+  'blood pressure', 'heart rate', 'temperature', 'oxygen saturation',
+  'chest pain', 'shortness of breath', 'difficulty breathing', 'nausea',
+  'headache', 'dizziness', 'fever', 'cough', 'fatigue',
+  'medication', 'dosage', 'prescription', 'allergy', 'allergic reaction',
+  'emergency', 'urgent', 'severe', 'critical', 'stable'
+];
+
 export const handler = async (
   event: APIGatewayProxyEvent,
   context: Context
 ): Promise<APIGatewayProxyResult> => {
-  console.log('Speech-to-text request:', JSON.stringify(event, null, 2));
+  console.log('Enhanced speech-to-text request:', JSON.stringify(event, null, 2));
 
   try {
     // Handle CORS preflight requests
@@ -50,12 +92,14 @@ export const handler = async (
     // Validate request body
     if (!event.body) {
       return createErrorResponse(400, 'Request body is required');
-    }    const validation = validateRequestBody(event.body, []);
+    }
+
+    const validation = validateRequestBody(event.body, []);
     if (!validation.isValid) {
       return createErrorResponse(400, validation.error!);
     }
 
-    const { audioData, language, jobId } = validation.data;
+    const { audioData, language, jobId, medicalContext } = validation.data;
 
     // If jobId is provided, check transcription status
     if (jobId) {
@@ -96,7 +140,10 @@ export const handler = async (
     } catch (uploadError) {
       console.error('S3 upload error:', uploadError);
       return createErrorResponse(500, 'Failed to upload audio to S3. Please check AWS credentials and bucket permissions.');
-    }    // Start transcription job
+    }    // Get enhanced medical transcription settings
+    const medicalSettings = getMedicalTranscribeSettings(medicalContext);
+    
+    // Start enhanced transcription job with medical optimization
     const transcribeCommand = new StartTranscriptionJobCommand({
       TranscriptionJobName: transcriptionJobName,
       LanguageCode: languageCode,
@@ -106,9 +153,11 @@ export const handler = async (
       OutputBucketName: bucketName,
       OutputKey: `transcripts/${transcriptionJobName}.json`,
       Settings: {
-        MaxSpeakerLabels: 2, // For doctor-patient conversation
-        ShowSpeakerLabels: true
-      }
+        ...medicalSettings,
+        VocabularyFilterName: undefined, // Could be enhanced with custom medical vocabulary
+        VocabularyName: undefined        // Future enhancement: custom medical vocabulary
+      },
+      MediaFormat: 'wav'
     });
 
     try {

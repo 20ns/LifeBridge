@@ -1,10 +1,34 @@
-
 // Backend API Configuration
 // Use local backend for development, deployed URL for production
 const isProduction = typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
 const API_BASE_URL = isProduction
   ? 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod'
   : 'http://localhost:3001/dev';
+
+// Utility function to convert base64 to Blob
+const base64ToBlob = (base64: string, mimeType: string): Blob => {
+  const binaryString = window.atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mimeType });
+};
+
+// Utility function to convert Blob to base64
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      // Remove the data URL prefix (e.g., "data:audio/webm;base64,")
+      const base64Data = base64String.split(',')[1];
+      resolve(base64Data);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
 
 // Language mappings for better translation context
 const languageNames: { [key: string]: string } = {
@@ -24,6 +48,66 @@ export interface TranslationResult {
   translatedText: string;
   confidence: number;
   detectedLanguage?: string;
+}
+
+export interface EmergencyProtocol {
+  id: string;
+  category: 'cardiac' | 'respiratory' | 'neurological' | 'trauma' | 'pediatric' | 'obstetric';
+  severity: 'critical' | 'urgent' | 'moderate';
+  title: string;
+  immediateActions: string[];
+  timeframe: string;
+  equipment: string[];
+  contraindications: string[];
+  followup: string[];
+}
+
+export interface TriageSuggestion {
+  priority: 'P1' | 'P2' | 'P3' | 'P4';
+  reasoning: string;
+  timeframe: string;
+  immediateActions: string[];
+  referrals: string[];
+  monitoring: string[];
+  followupRequired: boolean;
+}
+
+export interface ContextualAdvice {
+  culturalConsiderations: string[];
+  criticalTerminology: string[];
+  potentialMisunderstandings: string[];
+  verificationSteps: string[];
+  safetyConsiderations: string[];
+}
+
+export interface EmergencyProtocol {
+  id: string;
+  category: 'cardiac' | 'respiratory' | 'neurological' | 'trauma' | 'pediatric' | 'obstetric';
+  severity: 'critical' | 'urgent' | 'moderate';
+  title: string;
+  immediateActions: string[];
+  timeframe: string;
+  equipment: string[];
+  contraindications: string[];
+  followup: string[];
+}
+
+export interface TriageSuggestion {
+  priority: 'P1' | 'P2' | 'P3' | 'P4';
+  reasoning: string;
+  timeframe: string;
+  immediateActions: string[];
+  referrals: string[];
+  monitoring: string[];
+  followupRequired: boolean;
+}
+
+export interface ContextualAdvice {
+  culturalConsiderations: string[];
+  criticalTerminology: string[];
+  potentialMisunderstandings: string[];
+  verificationSteps: string[];
+  safetyConsiderations: string[];
 }
 
 export const translateText = async (
@@ -196,13 +280,17 @@ export const getEmergencyPhrases = async (language?: string): Promise<any[]> => 
   }
 };
 
-// Speech recognition using AWS Transcribe
-export const transcribeAudio = async (audioBlob: Blob, language: string): Promise<string> => {
+// Enhanced speech recognition using AWS Transcribe with medical context
+export const transcribeAudio = async (
+  audioBlob: Blob, 
+  language: string, 
+  medicalContext?: string
+): Promise<{ transcript: string; confidence: number }> => {
   try {
     // Convert blob to base64
     const audioData = await blobToBase64(audioBlob);
     
-    // Start transcription job
+    // Start transcription job with medical context
     const response = await fetch(`${API_BASE_URL}/speech-to-text`, {
       method: 'POST',
       headers: {
@@ -210,7 +298,8 @@ export const transcribeAudio = async (audioBlob: Blob, language: string): Promis
       },
       body: JSON.stringify({
         audioData: audioData.split(',')[1], // Remove data URL prefix
-        language
+        language,
+        medicalContext
       })
     });
 
@@ -219,9 +308,9 @@ export const transcribeAudio = async (audioBlob: Blob, language: string): Promis
     }
 
     const startData = await response.json();
-    const jobId = startData.jobId;
+    const jobId = startData.data?.jobId || startData.jobId;
 
-    // Poll for completion (in production, consider WebSocket for real-time updates)
+    // Poll for completion with enhanced results
     return await pollTranscriptionResult(jobId);
     
   } catch (error) {
@@ -230,8 +319,8 @@ export const transcribeAudio = async (audioBlob: Blob, language: string): Promis
   }
 };
 
-// Poll transcription job status
-const pollTranscriptionResult = async (jobId: string, maxAttempts: number = 30): Promise<string> => {
+// Enhanced poll transcription job status with medical context
+const pollTranscriptionResult = async (jobId: string, maxAttempts: number = 30): Promise<{ transcript: string; confidence: number }> => {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const response = await fetch(`${API_BASE_URL}/speech-to-text`, {
@@ -248,15 +337,19 @@ const pollTranscriptionResult = async (jobId: string, maxAttempts: number = 30):
 
       const data = await response.json();
       
-      if (data.status === 'COMPLETED') {
-        return data.transcript || '';
+      // Handle the nested response structure
+      const resultData = data.data || data;
+      
+      if (resultData.status === 'COMPLETED') {
+        return {
+          transcript: resultData.transcript || '',
+          confidence: resultData.confidence || 0.8
+        };
       }
       
-      if (data.status === 'FAILED') {
+      if (resultData.status === 'FAILED') {
         throw new Error('Transcription job failed');
-      }
-
-      // Wait 2 seconds before next poll
+      }      // Wait 2 seconds before next poll
       await new Promise(resolve => setTimeout(resolve, 2000));
       
     } catch (error) {
@@ -267,28 +360,103 @@ const pollTranscriptionResult = async (jobId: string, maxAttempts: number = 30):
     }
   }
   
-  throw new Error('Transcription timeout - job took too long to complete');
+  throw new Error('Transcription job timed out');
 };
 
-// Helper function to convert blob to base64
-const blobToBase64 = (blob: Blob): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-};
+// Amazon Q Emergency Protocol Functions
+export const getEmergencyProtocol = async (
+  symptoms: string,
+  patientAge?: number,
+  medicalHistory?: string[],
+  severity?: 'critical' | 'urgent' | 'moderate'
+): Promise<{ recommendations: EmergencyProtocol; source: string; confidence: number }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/emergency-protocol`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        symptoms,
+        patientAge,
+        medicalHistory,
+        severity
+      })
+    });
 
-// Helper function to convert base64 to blob
-const base64ToBlob = (base64: string, contentType: string): Blob => {
-  const byteCharacters = atob(base64);
-  const byteNumbers = new Array(byteCharacters.length);
-  
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
+    if (!response.ok) {
+      throw new Error('Failed to get emergency protocol');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Emergency protocol error:', error);
+    throw error;
   }
-  
-  const byteArray = new Uint8Array(byteNumbers);
-  return new Blob([byteArray], { type: contentType });
+};
+
+export const getTriageSuggestion = async (
+  chiefComplaint: string,
+  vitalSigns?: {
+    heartRate?: number;
+    bloodPressure?: string;
+    temperature?: number;
+    respiratoryRate?: number;
+    oxygenSaturation?: number;
+  },
+  painScale?: number
+): Promise<{ triage: TriageSuggestion; source: string; confidence: number }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/triage-suggestion`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chiefComplaint,
+        vitalSigns,
+        painScale
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get triage suggestion');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Triage suggestion error:', error);
+    throw error;
+  }
+};
+
+export const getContextualAdvice = async (
+  medicalText: string,
+  sourceLanguage: string,
+  targetLanguage: string,
+  context: 'emergency' | 'consultation' | 'medication' | 'general'
+): Promise<{ advice: ContextualAdvice; source: string; confidence: number }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/contextual-advice`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        medicalText,
+        sourceLanguage,
+        targetLanguage,
+        context
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get contextual advice');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Contextual advice error:', error);
+    throw error;
+  }
 };

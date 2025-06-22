@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Volume2, Copy, Check, Wifi, WifiOff } from 'lucide-react';
+import { Send, Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
 import SpeechInterface from './SpeechInterface';
+import EmergencyScenarioWorkflow from './EmergencyScenarioWorkflow';
+import QRecommendations from './QRecommendations';
 
 interface TranslationInterfaceProps {
   sourceLanguage: string;
@@ -16,13 +18,24 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   targetLanguage,
   isListening,
   setIsListening
-}) => {  const [inputText, setInputText] = useState('');
+}) => {
+  const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [confidence, setConfidence] = useState<number | null>(null);
-  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>('general');
-  const [realTimeMode, setRealTimeMode] = useState(true);
+  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>('general');  const [realTimeMode, setRealTimeMode] = useState(true);
+  const [showEmergencyWorkflow, setShowEmergencyWorkflow] = useState(false);
+  const [showQRecommendations, setShowQRecommendations] = useState(true);
+  const [detectedSymptoms, setDetectedSymptoms] = useState<string>('');
+  const [patientAge, setPatientAge] = useState<number | undefined>(undefined);
+  const [vitalSigns, setVitalSigns] = useState<{
+    heartRate?: number;
+    bloodPressure?: string;
+    temperature?: number;
+    respiratoryRate?: number;
+    oxygenSaturation?: number;
+  }>({});
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -64,7 +77,8 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     if (lastTranslation && realTimeMode) {
       setTranslatedText(lastTranslation.translatedText);
       setConfidence(lastTranslation.confidence);
-    }  }, [lastTranslation, realTimeMode]);
+    }
+  }, [lastTranslation, realTimeMode]);
   
   const handleTranslate = useCallback(async (textToTranslate?: string) => {
     const text = textToTranslate || inputText;
@@ -95,6 +109,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       }
     }
   };
+
   const handleSpeak = async () => {
     if (translatedText) {
       try {
@@ -110,14 +125,52 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       }
     }
   };
-  // Handle speech-to-text result
-  const handleSpeechToText = (transcript: string) => {
+  // Handle speech-to-text result with medical context
+  const handleSpeechToText = (transcript: string, detectedContext?: 'emergency' | 'consultation' | 'medication' | 'general') => {
     setInputText(transcript);
+    
+    // Auto-update context if detected from speech
+    if (detectedContext && detectedContext !== 'general') {
+      setContext(detectedContext);
+    }
+    
+    // Extract symptoms and medical indicators from transcript
+    const symptomsDetected = extractSymptomsFromText(transcript);
+    if (symptomsDetected) {
+      setDetectedSymptoms(symptomsDetected);
+    }
+    
     // Auto-translate the speech result
     if (transcript.trim()) {
       handleTranslate(transcript);
     }
-  };  // Auto-translate when input changes (with debounce)
+  };
+
+  // Extract symptoms from medical text using simple pattern matching
+  const extractSymptomsFromText = (text: string): string => {
+    const lowerText = text.toLowerCase();
+    const symptomKeywords = [
+      'chest pain', 'difficulty breathing', 'shortness of breath', 'fever',
+      'nausea', 'vomiting', 'headache', 'dizziness', 'abdominal pain',
+      'back pain', 'fatigue', 'weakness', 'unconscious', 'seizure'
+    ];
+    
+    const foundSymptoms = symptomKeywords.filter(symptom => 
+      lowerText.includes(symptom)
+    );
+    
+    return foundSymptoms.join(', ');
+  };
+
+  // Handle emergency scenario selection
+  const handleEmergencyScenario = (scenario: string) => {
+    setInputText(scenario);
+    setContext('emergency');
+    handleTranslate(scenario);
+    setShowEmergencyWorkflow(false);
+  };
+
+  // Auto-translate when input changes (with debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputText.trim() && inputText.length > 2) {
@@ -131,19 +184,39 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   return (
     <div className="translation-interface">
       <div className="translation-card">
-        <div className="input-section">          <div className="section-header">
+        <div className="input-section">
+          <div className="section-header">
             <h3>Source Text</h3>
-          </div>
-
-          {/* Speech Interface */}
+            {/* Emergency Workflow Toggle */}
+            <button
+              onClick={() => setShowEmergencyWorkflow(!showEmergencyWorkflow)}
+              className={`emergency-workflow-toggle ${showEmergencyWorkflow ? 'active' : ''}`}
+              title="Emergency Scenario Workflow"
+            >
+              <AlertTriangle size={16} />
+              Emergency Workflow
+            </button>
+          </div>          {/* Emergency Scenario Workflow */}
+          {showEmergencyWorkflow && (
+            <EmergencyScenarioWorkflow
+              sourceLanguage={sourceLanguage}
+              targetLanguage={targetLanguage}
+              onPhraseSelect={handleEmergencyScenario}
+            />
+          )}          {/* Enhanced Speech Interface */}
           <div className="speech-section">
             <SpeechInterface
               language={sourceLanguage}
               onSpeechToText={handleSpeechToText}
               textToSpeak={translatedText}
+              medicalContext={context}
+              realTimeMode={realTimeMode}
+              voiceActivityDetection={true}
               className="mb-4"
             />
-          </div>{/* Medical Context Selector */}
+          </div>
+
+          {/* Medical Context Selector */}
           <div className="context-selector">
             <label htmlFor="context-select">Medical Context:</label>
             <select 
@@ -169,14 +242,18 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
                 {realTimeMode ? 'Real-time ON' : 'Real-time OFF'}
               </button>
             </div>
-          </div>          <textarea
+          </div>
+
+          <textarea
             ref={inputRef}
             value={inputText}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder="Enter medical text to translate... (e.g., 'The patient has chest pain')"
             className="text-input"
             rows={4}
-          />            <div className="input-actions">
+          />
+
+          <div className="input-actions">
             <button
               onClick={() => handleTranslate()}
               className="translate-button"
@@ -205,7 +282,8 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
                 <div className="error-indicator">
                   <span>⚠️ {realTimeError}</span>
                 </div>
-              )}            </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -248,11 +326,11 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               </div>
             ) : (
               <p>{translatedText || 'Translation will appear here...'}</p>
-            )}        </div>
-      </div>
-
-      {/* Emergency Quick Actions */}
-      {context === 'emergency' && (
+            )}
+          </div>
+        </div>
+      </div>      {/* Emergency Quick Actions */}
+      {context === 'emergency' && !showEmergencyWorkflow && (
         <div className="emergency-quick-actions">
           <h4>🚨 Emergency Quick Phrases</h4>
           <div className="emergency-buttons">
@@ -269,7 +347,33 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
           </div>
         </div>
       )}
-    </div>
+
+      {/* Q Recommendations */}
+      {showQRecommendations && translatedText && (
+        <div className="q-recommendations-section mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              🤖 AI Medical Recommendations
+            </h3>
+            <button
+              onClick={() => setShowQRecommendations(!showQRecommendations)}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              {showQRecommendations ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          
+          <QRecommendations
+            medicalText={inputText}
+            sourceLanguage={sourceLanguage}
+            targetLanguage={targetLanguage}
+            context={context}
+            symptoms={detectedSymptoms || undefined}
+            patientAge={patientAge}
+            vitalSigns={Object.keys(vitalSigns).length > 0 ? vitalSigns : undefined}
+          />
+        </div>
+      )}
     </div>
   );
 };
