@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { flushOfflineEvents } from '../utils/offlineQueue';
 
 export interface ConnectionQuality {
   status: 'excellent' | 'good' | 'poor' | 'offline';
@@ -39,6 +40,11 @@ export const useConnectionQuality = () => {
       }
 
       setOfflineMode(!navigator.onLine);
+
+      // When connection restored, attempt to flush any queued offline events
+      if (navigator.onLine) {
+        flushOfflineEvents();
+      }
     };
 
     monitorConnection();
