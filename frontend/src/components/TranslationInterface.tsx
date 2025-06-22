@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle, Mic, Activity, Info } from 'lucide-react';
+import { Volume2, Copy, Check, Wifi, WifiOff, Mic, Activity, Info, AlertTriangle } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
 import { usePerformanceMonitor } from '../utils/performanceMonitor';
 import { analyzeMedicalContent, MedicalAnalysis } from '../utils/medicalTerminology';
 import SpeechInterface from './SpeechInterface';
-import EmergencyScenarioWorkflow from './EmergencyScenarioWorkflow';
 import QRecommendations from './QRecommendations';
 import './TranslationInterface.css';
 
@@ -31,11 +30,10 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   const [isTranslating, setIsTranslating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [confidence, setConfidence] = useState<number | null>(null);
-  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>(medicalContext);
-  const [medicalAnalysis, setMedicalAnalysis] = useState<MedicalAnalysis | null>(null);
-  const [showMedicalSuggestions, setShowMedicalSuggestions] = useState(false);const [realTimeMode, setRealTimeMode] = useState(false);
-  const [showEmergencyWorkflow, setShowEmergencyWorkflow] = useState(false);
-  const [showQRecommendations, setShowQRecommendations] = useState(true);  const [detectedSymptoms, setDetectedSymptoms] = useState<string>('');
+  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>(medicalContext);  const [medicalAnalysis, setMedicalAnalysis] = useState<MedicalAnalysis | null>(null);
+  const [showMedicalSuggestions, setShowMedicalSuggestions] = useState(false);
+  const [realTimeMode, setRealTimeMode] = useState(false);
+  const [showQRecommendations, setShowQRecommendations] = useState(true);const [detectedSymptoms, setDetectedSymptoms] = useState<string>('');
   const [patientAge] = useState<number | undefined>(undefined);
   const [vitalSigns] = useState<{
     heartRate?: number;
@@ -220,16 +218,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     const foundSymptoms = symptomKeywords.filter(symptom => 
       lowerText.includes(symptom)
     );
-    
-    return foundSymptoms.join(', ');
-  };
-
-  // Handle emergency scenario selection
-  const handleEmergencyScenario = (scenario: string) => {
-    setInputText(scenario);
-    setContext('emergency');
-    handleTranslate(scenario);
-    setShowEmergencyWorkflow(false);
+      return foundSymptoms.join(', ');
   };
   // Only auto-translate in real-time mode when user explicitly enables it
   useEffect(() => {
@@ -346,20 +335,10 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               onClick={() => setRealTimeMode(!realTimeMode)}
               className={`realtime-button ${realTimeMode ? 'active' : ''}`}
               title={realTimeMode ? 'Disable real-time translation' : 'Enable real-time translation'}
-            >
-              {isConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
+            >              {isConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
               {realTimeMode ? 'Real-time ON' : 'Real-time OFF'}
             </button>
           </div>
-
-          <button
-            onClick={() => setShowEmergencyWorkflow(!showEmergencyWorkflow)}
-            className={`emergency-workflow-toggle ${showEmergencyWorkflow ? 'active' : ''}`}
-            title="Emergency Scenario Workflow"
-          >
-            <AlertTriangle size={16} />
-            Emergency Workflow
-          </button>
         </div>
       </div>
 
@@ -373,18 +352,8 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
           <span>• Spell out medication names if not recognized</span>
           <span>• Use full phrases: "blood pressure is 120 over 80"</span>
         </div>
-      </div>
-
-      <div className="translation-card">{/* Emergency Scenario Workflow */}
-        {showEmergencyWorkflow && (
-          <div className="emergency-workflow-section">
-            <EmergencyScenarioWorkflow
-              sourceLanguage={sourceLanguage}
-              targetLanguage={targetLanguage}
-              onPhraseSelect={handleEmergencyScenario}
-            />
-          </div>
-        )}        {/* Main Translation Layout */}
+      </div>      <div className="translation-card">
+        {/* Main Translation Layout */}
         <div className="translation-layout">
           {/* Input Section */}          <div className="input-section">
             <div className="section-header">
@@ -537,8 +506,8 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             </div>
           </div>
         </div>
-      </div>{/* Emergency Quick Actions */}
-      {context === 'emergency' && !showEmergencyWorkflow && (
+      </div>      {/* Emergency Quick Actions */}
+      {context === 'emergency' && (
         <div className="speech-instructions emergency-quick-actions">
           <h4>🚨 Emergency Quick Phrases</h4>
           <div className="emergency-buttons">
