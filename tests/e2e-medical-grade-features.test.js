@@ -36,6 +36,10 @@ const mockSNSClient = {
     send: jest.fn().mockResolvedValue({})
 };
 
+const mockBedrockRuntimeClient = {
+    send: jest.fn().mockResolvedValue({ body: new Uint8Array(Buffer.from('{"content": [{"text": "Mocked translation"}]}')) })
+};
+
 // Mock AWS SDK v3 modules
 jest.mock('@aws-sdk/client-dynamodb', () => ({
     DynamoDBClient: jest.fn(() => mockDynamoDBClient),
@@ -61,6 +65,11 @@ jest.mock('@aws-sdk/client-cloudwatch', () => ({
 jest.mock('@aws-sdk/client-sns', () => ({
     SNSClient: jest.fn(() => mockSNSClient),
     PublishCommand: jest.fn()
+}));
+
+jest.mock('@aws-sdk/client-bedrock-runtime', () => ({
+    BedrockRuntimeClient: jest.fn(() => mockBedrockRuntimeClient),
+    InvokeModelCommand: jest.fn()
 }));
 
 describe('Medical Grade Features End-to-End Tests', () => {
