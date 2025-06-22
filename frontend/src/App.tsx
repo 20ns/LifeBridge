@@ -79,9 +79,10 @@ function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
                   // Calculate tooltip position relative to button
                   if (infoButtonRef.current) {
                     const buttonRect = infoButtonRef.current.getBoundingClientRect();
+                    const tooltipWidth = 380;
                     const newPosition = {
                       top: buttonRect.bottom + 8, // 8px gap below button
-                      right: window.innerWidth - buttonRect.right // align right edge with button
+                      right: window.innerWidth - (buttonRect.left + buttonRect.width/2 + tooltipWidth/2) // center tooltip under the icon
                     };
                     setTooltipPosition(newPosition);
                   }
@@ -102,9 +103,7 @@ function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
           targetLanguage={targetLanguage}
           onLanguageSwitch={handleLanguageSwitch}
           performanceMode={performanceMode}        />
-      </main>
-
-      {/* Performance Mode Tooltip - Positioned dynamically outside all containers */}
+      </main>      {/* Performance Mode Tooltip - Positioned dynamically outside all containers */}
       {showPerformanceTooltip && (
         <div
           className="performance-tooltip"
@@ -122,6 +121,20 @@ function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
             border: '1px solid #e2e8f0'
           }}
         >
+          {/* Arrow pointing up to the info button */}
+          <div style={{
+            position: 'absolute',
+            top: '-8px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '0',
+            height: '0',
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderBottom: '8px solid white',
+            filter: 'drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1))'
+          }}></div>
+          
           <div className="tooltip-header">
             <h4>Performance Modes</h4>
             <button
