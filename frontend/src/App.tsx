@@ -47,6 +47,12 @@ function AppContent() {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const infoButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Trigger a single fade-in animation on the first render after login
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   useEffect(() => {
     setCurrentView(pathToView(location.pathname));
   }, [location.pathname]);
@@ -81,13 +87,9 @@ function AppContent() {
     }
   }, [showPerformanceTooltip]);
 
-  // Show a seamless splash while we verify authentication
+  // Skip showing an intermediate splash during authentication to keep the interface static
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <img src="/logo.png" alt="LifeBridgeAI" width={48} height={48} className="animate-pulse" />
-      </div>
-    );
+    return null; // Render nothing while auth verifies
   }
 
   // Once loading is complete, if still no user, present login page
@@ -96,7 +98,7 @@ function AppContent() {
   }
 
   return (
-    <div className="App">
+    <div className={`App ${hasMounted ? 'app-fade-in' : ''}`}>
       <header className="app-header" role="banner">
         <div className="header-content">
           <div className="logo-section" style={{cursor:'pointer'}} onClick={() => navigate('/') }>
