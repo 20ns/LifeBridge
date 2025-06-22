@@ -311,7 +311,8 @@ export function sanitizeInput(input: string): string {
 class RateLimiter {
   private attempts: Map<string, { count: number; lastAttempt: number }> = new Map();
   private readonly maxAttempts = 5;
-  private readonly windowMs = 15 * 60 * 1000; // 15 minutes
+  // Reduce or disable the cooldown window (0 ms ⇢ no waiting period). Adjust as needed for production.
+  private readonly windowMs = 0; // originally 15 * 60 * 1000 (15 minutes)
 
   canAttempt(identifier: string): boolean {
     const now = Date.now();
