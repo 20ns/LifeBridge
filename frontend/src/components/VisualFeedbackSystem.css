@@ -12,6 +12,26 @@
   border-color: #ced4da;
 }
 
+/* Audio optimization status indicator */
+.visual-feedback-system.audio-optimized {
+  position: relative;
+  border-left: 3px solid #28a745;
+}
+
+.visual-feedback-system.audio-optimized::before {
+  content: '🔇 Audio Spam Reduced';
+  position: absolute;
+  top: -12px;
+  right: 8px;
+  background: #28a745;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  z-index: 10;
+}
+
 /* Feedback Controls */
 .feedback-controls {
   display: flex;
@@ -37,6 +57,11 @@
   background: #d4edda;
   border-color: #28a745;
   color: #155724;
+}
+
+.audio-toggle.enabled::before {
+  content: '✓ ';
+  font-weight: bold;
 }
 
 .audio-toggle.disabled {
@@ -323,6 +348,19 @@
 
 .feedback-message.info .message-header svg {
   color: #17a2b8;
+}
+
+/* Throttled feedback indicator */
+.feedback-message.throttled {
+  opacity: 0.8;
+  border-left-width: 2px;
+  border-left-style: dashed;
+}
+
+.feedback-message.throttled::after {
+  content: ' (throttled)';
+  font-size: 0.7rem;
+  opacity: 0.6;
 }
 
 /* Visual Cues */

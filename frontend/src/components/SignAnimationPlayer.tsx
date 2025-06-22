@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { audioManager } from '../utils/audioManager';
 
 interface SignAnimationPlayerProps {
   text: string;
@@ -29,6 +30,7 @@ const SignAnimationPlayer: React.FC<SignAnimationPlayerProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [signSequence, setSignSequence] = useState<SignKeyframe[]>([]);  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [lastAudioFrame, setLastAudioFrame] = useState(-1); // Track last frame that played audio
   const animationRef = useRef<number | null>(null);
   const frameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -170,7 +172,6 @@ const SignAnimationPlayer: React.FC<SignAnimationPlayerProps> = ({
     setIsLoaded(true);
     setCurrentFrame(0);
   }, [text]);
-
   // Auto-play when ready
   useEffect(() => {
     if (autoPlay && isLoaded && signSequence.length > 0) {
@@ -178,17 +179,22 @@ const SignAnimationPlayer: React.FC<SignAnimationPlayerProps> = ({
     }
   }, [autoPlay, isLoaded, signSequence]);
 
+  // Sync audio manager with local audio setting
+  useEffect(() => {
+    audioManager.setAudioEnabled(isAudioEnabled);
+  }, [isAudioEnabled]);
+
   const startAnimation = () => {
     if (signSequence.length === 0) return;
     
     setIsPlaying(true);
     playFrame(0);
   };
-
   const playFrame = (frameIndex: number) => {
     if (frameIndex >= signSequence.length) {
       setIsPlaying(false);
       setCurrentFrame(0);
+      setLastAudioFrame(-1); // Reset audio frame tracking
       if (onAnimationComplete) {
         onAnimationComplete();
       }
@@ -197,14 +203,31 @@ const SignAnimationPlayer: React.FC<SignAnimationPlayerProps> = ({
 
     setCurrentFrame(frameIndex);
     
-    // Play audio description if enabled
-    if (isAudioEnabled) {
-      const utterance = new SpeechSynthesisUtterance(
-        `Sign: ${signSequence[frameIndex].description}`
-      );
-      utterance.rate = playbackSpeed;
-      utterance.volume = 0.5;
-      speechSynthesis.speak(utterance);
+    // Only play audio for significant frames (every 3rd frame or important gestures)
+    // This reduces audio spam while keeping useful feedback
+    const shouldPlayAudio = isAudioEnabled && (
+      frameIndex === 0 || // First frame
+      frameIndex === signSequence.length - 1 || // Last frame
+      frameIndex % 3 === 0 || // Every 3rd frame
+      signSequence[frameIndex].gesture.toLowerCase().includes('emergency') ||
+      frameIndex !== lastAudioFrame // Don't repeat same frame
+    );
+    
+    if (shouldPlayAudio) {
+      setLastAudioFrame(frameIndex);
+      const currentGesture = signSequence[frameIndex];
+      
+      // Use audio manager for controlled speech
+      const priority = currentGesture.gesture.toLowerCase().includes('emergency') ? 'emergency' : 'low';
+      const text = `${currentGesture.gesture}`;
+      
+      audioManager.speakText(text, {
+        volume: 0.3,
+        rate: playbackSpeed * 1.1, // Slightly faster than animation for better sync
+        priority: priority as 'low' | 'emergency'
+      }).catch(error => {
+        console.warn('Failed to play sign audio:', error);
+      });
     }
 
     const frameDuration = signSequence[frameIndex].duration / playbackSpeed;
@@ -213,17 +236,20 @@ const SignAnimationPlayer: React.FC<SignAnimationPlayerProps> = ({
       playFrame(frameIndex + 1);
     }, frameDuration);
   };
-
   const pauseAnimation = () => {
     setIsPlaying(false);
     if (frameTimeoutRef.current) {
       clearTimeout(frameTimeoutRef.current);
     }
+    // Stop any ongoing audio when pausing
+    audioManager.stopAllAudio();
   };
 
   const resetAnimation = () => {
     pauseAnimation();
     setCurrentFrame(0);
+    setLastAudioFrame(-1); // Reset audio tracking
+    audioManager.resetThrottling(); // Reset audio throttling for fresh start
   };
 
   const togglePlayPause = () => {
@@ -257,9 +283,8 @@ const SignAnimationPlayer: React.FC<SignAnimationPlayerProps> = ({
       </div>
     );
   }
-
   return (
-    <div className={`sign-animation-player ${className}`}>
+    <div className={`sign-animation-player ${isAudioEnabled ? 'audio-optimized' : ''} ${className}`}>
       {/* Animation Display */}
       <div className="animation-display">
         <div className="gesture-visualization">
@@ -308,11 +333,17 @@ const SignAnimationPlayer: React.FC<SignAnimationPlayerProps> = ({
         >
           <RotateCcw className="icon" />
           <span>Reset</span>
-        </button>
-
-        <button
-          onClick={() => setIsAudioEnabled(!isAudioEnabled)}
-          className="control-btn audio-toggle"
+        </button>        <button
+          onClick={() => {
+            const newAudioState = !isAudioEnabled;
+            setIsAudioEnabled(newAudioState);
+            audioManager.setAudioEnabled(newAudioState);
+            if (!newAudioState) {
+              audioManager.stopAllAudio();
+            }
+          }}
+          className={`control-btn audio-toggle ${isAudioEnabled ? 'enabled' : ''}`}
+          title={isAudioEnabled ? 'Disable audio feedback' : 'Enable audio feedback'}
         >
           {isAudioEnabled ? <Volume2 className="icon" /> : <VolumeX className="icon" />}
           <span>{isAudioEnabled ? 'Audio On' : 'Audio Off'}</span>
