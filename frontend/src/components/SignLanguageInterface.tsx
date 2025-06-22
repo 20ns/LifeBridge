@@ -153,15 +153,10 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
         <div className="controls">
           <button
             onClick={() => {
-              console.log('[SignLangInterface] "Start/Stop Detection" BUTTON CLICKED.');
-              console.log('[SignLangInterface] typeof startDetection:', typeof startDetection, 'typeof stopDetection:', typeof stopDetection);
-              console.log('[SignLangInterface] Current isActive state before action:', isActive);
               if (isActive) {
                 stopDetection();
-                console.log('[SignLangInterface] Called stopDetection. New isActive should be false.');
               } else {
                 startDetection();
-                console.log('[SignLangInterface] Called startDetection. New isActive should be true.');
               }
             }}
             className={`detection-toggle ${isActive ? 'active' : ''}`}
@@ -181,27 +176,44 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
           </label>
         </div>
       </div>
-      {isActive && (
-        <>
-          {/* This log is fine inside a JS block if not directly returned by JSX */}
-          {/* However, to be safe and explicit, we can use an IIFE returning null */}
-          {(() => { console.log('[SignLangInterface] isActive is true, rendering SignLanguageDetector.'); return null; })()}
-          <SignLanguageDetector
-            onSignDetected={handleSignDetected}
-            isActive={isActive}
-            medicalContext={getMedicalContext()}
-          />
+      
+      <div className="camera-section">
+        {isActive && (
+          <>
             <VisualFeedbackSystem
-            signData={{
-              gesture: feedbackData.currentGesture,
-              confidence: feedbackData.confidence,
-              medicalPriority: isEmergencyDetected() ? 'critical' : 'medium',
-              translationText: currentText
-            }}
-            isActive={isActive}
-          />
-        </>
-      )}
+              signData={{
+                gesture: feedbackData.currentGesture,
+                confidence: feedbackData.confidence,
+                medicalPriority: isEmergencyDetected() ? 'critical' : 'medium',
+                translationText: currentText
+              }}
+              isActive={isActive}
+            />
+            <SignLanguageDetector
+              onSignDetected={handleSignDetected}
+              isActive={isActive}
+              medicalContext={getMedicalContext()}
+            />
+          </>
+        )}
+      </div>
+
+      <div className="speech-instructions usage-tips">
+        <h4>Medical Sign Language Tips:</h4>
+        <ul>
+          <li>🚨 <strong>Emergency:</strong> Make a fist and hold for 2 seconds</li>
+          <li>🆘 <strong>Help:</strong> Raise all fingers and wave</li>
+          <li>😣 <strong>Pain:</strong> Point with two fingers (index + middle)</li>
+          <li>💊 <strong>Medicine:</strong> Thumb + pinky gesture</li>
+          <li>👩‍⚕️ <strong>Doctor:</strong> Point upward with index finger</li>
+          <li>💧 <strong>Water:</strong> Three fingers (thumb + index + middle)</li>
+          <li>✅ <strong>Yes:</strong> Thumbs up</li>
+          <li>❌ <strong>No:</strong> Point downward</li>
+        </ul>
+        <p className="tip-note">
+          💡 <strong>Tip:</strong> Hold gestures steady for 2-3 seconds for better detection
+        </p>
+      </div>
 
       <div className="detection-results">
         {currentText && (
@@ -225,13 +237,12 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
               >
                 {isTranslating ? 'Translating...' : `Translate to ${currentLanguage.toUpperCase()}`}
               </button>
-                <button
+              <button
                 onClick={clearHistory}
                 className="clear-btn"
               >
                 Clear
               </button>
-              
               <button
                 onClick={() => setShowAnimationPlayer(!showAnimationPlayer)}
                 className="animation-toggle-btn"
@@ -286,22 +297,6 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
             </div>
           </div>
         )}
-      </div>
-
-      <div className="speech-instructions usage-tips">
-        <h4>Medical Sign Language Tips:</h4>
-        <ul>
-          <li>🚨 <strong>Emergency:</strong> Make a fist and hold for 2 seconds</li>
-          <li>🆘 <strong>Help:</strong> Raise all fingers and wave</li>
-          <li>😣 <strong>Pain:</strong> Point with two fingers (index + middle)</li>
-          <li>💊 <strong>Medicine:</strong> Thumb + pinky gesture</li>
-          <li>👩‍⚕️ <strong>Doctor:</strong> Point upward with index finger</li>
-          <li>💧 <strong>Water:</strong> Three fingers (thumb + index + middle)</li>
-          <li>✅ <strong>Yes:</strong> Thumbs up</li>
-          <li>❌ <strong>No:</strong> Point downward</li>
-        </ul>
-        <p className="tip-note">
-          💡 <strong>Tip:</strong> Hold gestures steady for 2-3 seconds for better detection        </p>
       </div>
     </div>
   );
