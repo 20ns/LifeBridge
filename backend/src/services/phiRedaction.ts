@@ -32,7 +32,7 @@ export interface RedactionConfig {
   customPatterns: PHIPattern[];
 }
 
-class PHIRedactionService {
+export class PHIRedactionService {
   private phiPatterns: PHIPattern[];
   private config: RedactionConfig;
 
@@ -579,6 +579,38 @@ class PHIRedactionService {
     recommendations.push('Ensure secure deletion of PHI when no longer needed');
 
     return recommendations;
+  }
+
+  /*
+   * Simplified wrapper expected by e2e tests
+   */
+  async redactPHI(text: string): Promise<{ redacted: boolean; redactedText: string; redactedElements: any[] }> {
+    const result = await this.detectAndRedactPHI(text);
+
+    // Map detailed types to simplified ones expected by test suite
+    const typeMap: { [key: string]: string } = {
+      'Social Security Number': 'SSN',
+      'Date of Birth': 'DATE_OF_BIRTH',
+      'Full Date': 'DATE_OF_BIRTH',
+      'Potential Full Name': 'NAME'
+    };
+
+    const simplified = result.detectedPHI.map((item) => ({
+      ...item,
+      type: typeMap[item.type] || item.type
+    }));
+
+    // Deduplicate by type
+    const uniqueByType = Object.values(simplified.reduce((acc: any, curr: any) => {
+      acc[curr.type] = acc[curr.type] || curr;
+      return acc;
+    }, {}));
+
+    return {
+      redacted: uniqueByType.length > 0,
+      redactedText: result.redactedText,
+      redactedElements: uniqueByType
+    };
   }
 }
 
