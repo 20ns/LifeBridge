@@ -295,7 +295,7 @@
   background: var(--neutral-50);
 }
 
-/* Header Controls Layout */
+/* Header Controls Layout - Updated for new navbar structure */
 .controls-group {
   display: flex;
   align-items: center;
@@ -308,13 +308,14 @@
   align-items: center;
 }
 
+/* Legacy styles - keeping for backward compatibility */
 .performance-toggle {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
 }
 
-/* Mode Switcher */
+/* Mode Switcher - Legacy (replaced by new nav-buttons) */
 .mode-switcher {
   display: flex;
   background: var(--neutral-100);
@@ -365,7 +366,7 @@
 
 /* Authentication and Role-Based Access Control Styles */
 
-/* User Info Section */
+/* Legacy User Info Section - replaced by new header-actions */
 .user-info-section {
   display: flex;
   align-items: center;
@@ -388,8 +389,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Logout Button */
-.logout-btn {
+/* Legacy Logout Button - updated styles are in layout.css */
+.logout-btn.legacy {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -404,13 +405,13 @@
   transition: all 0.2s ease;
 }
 
-.logout-btn:hover {
+.logout-btn.legacy:hover {
   background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.3);
   transform: translateY(-1px);
 }
 
-.logout-btn:active {
+.logout-btn.legacy:active {
   transform: translateY(0);
 }
 

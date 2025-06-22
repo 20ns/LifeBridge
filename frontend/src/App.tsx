@@ -96,113 +96,102 @@ function AppContent() {
   if (!user) {
     return <LoginPage />;
   }
-
   return (
     <div className={`App ${hasMounted ? 'app-fade-in' : ''}`}>
       <header className="app-header" role="banner">
         <div className="header-content">
-          <div className="logo-section" style={{cursor:'pointer'}} onClick={() => navigate('/') }>
-            <img 
-              src="/logo.png" 
-              alt="LifeBridgeAI Logo" 
-              className="logo-image"
-              width="40" 
-              height="40"
-            />
-            <h1>LifeBridgeAI</h1>
-          </div>
+          {/* Main header row */}
+          <div className="header-main-row">
+            {/* Left: Logo */}
+            <div className="logo-section" style={{cursor:'pointer'}} onClick={() => navigate('/') }>
+              <img 
+                src="/logo.png" 
+                alt="LifeBridgeAI Logo" 
+                className="logo-image"
+                width="40" 
+                height="40"
+              />
+              <h1>LifeBridgeAI</h1>
+            </div>
 
-          <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
-            <div className="controls-group">              {/* User info and role-based navigation */}
-              <div className="user-info-section">
-                <span className="user-welcome">
-                  Welcome, {user.name.split(' ')[0]} ({user.role})
-                </span>
-              </div>
-
-              <div className="mode-switcher">
+            {/* Center: Main Navigation */}
+            <nav className="main-navigation" role="navigation" aria-label="Main navigation">
+              <div className="nav-buttons">
                 <button
-                  className={`mode-btn ${currentView === 'translation' ? 'active' : ''}`}
+                  className={`nav-btn ${currentView === 'translation' ? 'active' : ''}`}
                   onClick={() => { setCurrentView('translation'); navigate('/'); }}
                   aria-label="Switch to Translation Mode"
                 >
-                  <MessageSquare size={16} aria-hidden="true" />
-                  Translation
+                  <MessageSquare size={18} aria-hidden="true" />
+                  <span>Translation</span>
                 </button>
                 
-                {/* Only show Review Dashboard for authorized users */}
                 {hasReviewAccess && (
                   <button
-                    className={`mode-btn ${currentView === 'review' ? 'active' : ''}`}
+                    className={`nav-btn ${currentView === 'review' ? 'active' : ''}`}
                     onClick={() => { setCurrentView('review'); navigate('/review'); }}
                     aria-label="Switch to Review Dashboard"
                   >
-                    <Users size={16} aria-hidden="true" />
-                    Review Dashboard
+                    <Users size={18} aria-hidden="true" />
+                    <span>Review Dashboard</span>
                   </button>
                 )}
                 
                 <button
-                  className={`mode-btn ${currentView === 'profile' ? 'active' : ''}`}
+                  className={`nav-btn ${currentView === 'profile' ? 'active' : ''}`}
                   onClick={() => { setCurrentView('profile'); navigate('/profile'); }}
                   aria-label="View Profile"
                 >
-                  <User size={16} aria-hidden="true" />
-                  Profile
+                  <User size={18} aria-hidden="true" />
+                  <span>Profile</span>
                 </button>
               </div>
-
+            </nav>            {/* Right: User info and logout */}
+            <div className="header-actions">
               {currentView === 'translation' && (
-                <>
-                  <div className="language-section">
-                    <LanguageSelector
-                      sourceLanguage={sourceLanguage}
-                      targetLanguage={targetLanguage}
-                      onSourceChange={setSourceLanguage}
-                      onTargetChange={setTargetLanguage}
-                    />
-                  </div>
+                <div className="performance-compact">
+                  <button
+                    className={`performance-btn-compact ${performanceMode === 'optimized' ? 'active' : ''}`}
+                    onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
+                    aria-label={`Toggle Performance Mode - Currently ${performanceMode}`}
+                    title={`Performance Mode: ${performanceMode === 'optimized' ? 'Optimized' : 'Standard'}`}
+                  >
+                    <Settings size={14} aria-hidden="true" />
+                    <span>{performanceMode === 'optimized' ? 'Optimized' : 'Standard'}</span>
+                  </button>
 
-                  <div className="performance-toggle">
-                    <button
-                      className={`performance-btn ${performanceMode === 'optimized' ? 'active' : ''}`}
-                      onClick={() => setPerformanceMode(performanceMode === 'optimized' ? 'standard' : 'optimized')}
-                      aria-label={`Toggle Performance Mode - Currently ${performanceMode}`}
-                    >
-                      <Settings size={16} aria-hidden="true" />
-                      <span className="sr-only">Performance Mode: </span>
-                      {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
-                    </button>
-
-                    <button 
-                      ref={infoButtonRef}
-                      className="performance-info-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        
-                        // Calculate tooltip position relative to button
-                        if (infoButtonRef.current) {
-                          const buttonRect = infoButtonRef.current.getBoundingClientRect();
-                          const tooltipWidth = 380;
-                          const newPosition = {
-                            top: buttonRect.bottom + 8, // 8px gap below button
-                            right: window.innerWidth - (buttonRect.left + buttonRect.width/2 + tooltipWidth/2) // center tooltip under the icon
-                          };
-                          setTooltipPosition(newPosition);
-                        }
-                        
-                        setShowPerformanceTooltip(prevState => !prevState);
-                      }}
-                      aria-label="Performance Mode Information"
-                      aria-expanded={showPerformanceTooltip}
-                      aria-controls="performance-tooltip"
-                    >
-                      <Info size={14} aria-hidden="true" />
-                    </button>
-                  </div>
-                </>
+                  <button 
+                    ref={infoButtonRef}
+                    className="performance-info-btn-compact"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      
+                      if (infoButtonRef.current) {
+                        const buttonRect = infoButtonRef.current.getBoundingClientRect();
+                        const tooltipWidth = 380;
+                        const newPosition = {
+                          top: buttonRect.bottom + 8,
+                          right: window.innerWidth - (buttonRect.left + buttonRect.width/2 + tooltipWidth/2)
+                        };
+                        setTooltipPosition(newPosition);
+                      }
+                      
+                      setShowPerformanceTooltip(prevState => !prevState);
+                    }}
+                    aria-label="Performance Mode Information"
+                    aria-expanded={showPerformanceTooltip}
+                    aria-controls="performance-tooltip"
+                    title="Performance Mode Information"
+                  >
+                    <Info size={12} aria-hidden="true" />
+                  </button>
+                </div>
               )}
 
+              <div className="user-info">
+                <span className="user-name">{user.name.split(' ')[0]}</span>
+                <span className="user-role">({user.role})</span>
+              </div>
               <button
                 className="logout-btn"
                 onClick={logout}
@@ -210,10 +199,24 @@ function AppContent() {
                 title="Logout"
               >
                 <LogOut size={16} aria-hidden="true" />
-                Logout
+                <span>Logout</span>
               </button>
             </div>
-          </nav>
+          </div>          {/* Secondary row for language controls */}
+          {currentView === 'translation' && (
+            <div className="header-secondary-row">
+              <div className="translation-controls">
+                <div className="language-section-center">
+                  <LanguageSelector
+                    sourceLanguage={sourceLanguage}
+                    targetLanguage={targetLanguage}
+                    onSourceChange={setSourceLanguage}
+                    onTargetChange={setTargetLanguage}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
