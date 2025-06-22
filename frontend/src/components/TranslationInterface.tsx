@@ -43,9 +43,9 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     temperature?: number;
     respiratoryRate?: number;
     oxygenSaturation?: number;
-  }>({});const inputRef = useRef<HTMLTextAreaElement>(null);
+  }>({});  const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Initialize performance monitoring
+  // Initialize performance monitoring (silent - for internal metrics only)
   const performanceMonitor = usePerformanceMonitor();
 
   // Emergency quick phrases
@@ -501,31 +501,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
             symptoms={detectedSymptoms || undefined}
             patientAge={patientAge}
             vitalSigns={Object.keys(vitalSigns).length > 0 ? vitalSigns : undefined}
-          />        </div>
-      )}      {/* Performance Monitoring Dashboard */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Performance Monitor</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-            <div className="bg-white p-2 rounded">
-              <div className="text-gray-500">Health Score</div>
-              <div className="font-bold text-lg">{performanceMonitor.getHealthScore()}%</div>
-            </div>
-            <div className="bg-white p-2 rounded">
-              <div className="text-gray-500">Avg Translation</div>
-              <div className="font-bold">{performanceMonitor.getMetrics().translationLatency}ms</div>
-            </div>
-            <div className="bg-white p-2 rounded">
-              <div className="text-gray-500">Cache Hit Rate</div>
-              <div className="font-bold">{(performanceMonitor.getMetrics().cacheHitRate).toFixed(1)}%</div>
-            </div>
-            <div className="bg-white p-2 rounded">
-              <div className="text-gray-500">Error Rate</div>
-              <div className="font-bold text-red-600">{(performanceMonitor.getMetrics().errorRate).toFixed(1)}%</div>
-            </div>
-          </div>
-        </div>
-      )}
+          />        </div>      )}
     </div>
   );
 };
