@@ -380,16 +380,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
               {notification}
             </div>
           ))}
-        </div>
-      )}      {/* Medical Context Indicator - Only show in emergency mode */}
-      {isEmergencyMode && (
-        <div className="medical-context-section">
-          <MedicalContextIndicator 
-            context="emergency" 
-            className="mb-2"
-          />
-        </div>
-      )}
+        </div>      )}
 
       {/* Mode selection tabs */}
       <div className={`mode-selector ${isEmergencyMode ? 'emergency-layout' : ''}`}>
