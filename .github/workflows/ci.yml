@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Backend dependencies
         working-directory: backend
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --legacy-peer-deps --no-audit
 
       - name: Backend ESLint
         working-directory: backend
@@ -36,11 +36,11 @@ jobs:
 
       - name: Run Backend Tests
         working-directory: tests
-        run: npm ci && npm test -- --coverage
+        run: npm ci --legacy-peer-deps --no-audit && npm test -- --coverage
 
       - name: Install Frontend dependencies
         working-directory: frontend
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --legacy-peer-deps --no-audit
 
       - name: Frontend ESLint
         working-directory: frontend
