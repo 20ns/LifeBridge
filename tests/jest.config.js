@@ -24,9 +24,8 @@ module.exports = {
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/.next/**'
-  ],
-  transformIgnorePatterns: [
-    '/node_modules/(?!(lucide-react)/)'
+  ],  transformIgnorePatterns: [
+    '/node_modules/(?!(lucide-react|aws-sdk-client-mock|sinon)/)'
   ],
   testTimeout: 10000,
   globals: {

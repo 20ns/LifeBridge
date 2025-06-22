@@ -430,14 +430,12 @@ describe('Emergency Scenario Workflows - Complete Testing', () => {
       expect(traumaScenario).toBeDefined();
       expect(traumaScenario.category).toBe('trauma');
       expect(traumaScenario.severity).toBe('critical');
-    });
-
-    test('should have trauma assessment protocol', () => {
+    });    test('should have trauma assessment protocol', () => {
       const primarySurvey = traumaScenario.communicationFlow.find(step =>
         step.action.includes('Primary Survey')
       );
       expect(primarySurvey).toBeDefined();
-      expect(primarySurvey.phrases).toContain('Check airway, breathing, circulation');
+      expect(primarySurvey.phrases).toContain('Checking airway, breathing, circulation');
     });
 
     test('should have spinal immobilization warnings', () => {
