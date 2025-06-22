@@ -6,8 +6,8 @@
 const https = require('https');
 
 // Test configuration
-const API_BASE = 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/prod';
-const NOVA_ENDPOINT = `${API_BASE}/nova-sign-language`;
+const API_BASE = 'https://sevmuborah.execute-api.eu-north-1.amazonaws.com/dev';
+const NOVA_ENDPOINT = `${API_BASE}/gesture-recognition`;
 
 // Test payloads matching what the frontend would send
 const testCases = [
