@@ -8,11 +8,10 @@ interface GestureGuideProps {
 const GestureGuide: React.FC<GestureGuideProps> = ({ isVisible, onClose }) => {
   if (!isVisible) return null;
 
-  const gestures = [
-    {
+  const gestures = [    {
       name: '🚨 Emergency',
-      instruction: 'Make a CLOSED FIST and hold for 2 seconds',
-      description: 'All fingers folded into palm, thumb tucked in',
+      instruction: 'Make a TIGHT CLOSED FIST and hold for 2 seconds',
+      description: 'ALL fingers completely folded into palm, thumb tucked UNDER or INSIDE fist',
       priority: 'CRITICAL',
       color: 'text-red-600'
     },
@@ -121,10 +120,9 @@ const GestureGuide: React.FC<GestureGuideProps> = ({ isVisible, onClose }) => {
                   <p className="text-sm text-gray-600">
                     {gesture.description}
                   </p>
-                  
-                  {gesture.name.includes('Emergency') && (
+                    {gesture.name.includes('Emergency') && (
                     <div className="mt-2 p-2 bg-red-50 rounded text-xs text-red-700">
-                      ⚠️ Must hold for FULL 2 seconds to confirm emergency
+                      ⚠️ Must hold TIGHT FIST for FULL 2 seconds. If detected as "Yes", tuck thumb INSIDE fist completely.
                     </div>
                   )}
                   
@@ -136,15 +134,14 @@ const GestureGuide: React.FC<GestureGuideProps> = ({ isVisible, onClose }) => {
                 </div>
               </div>
             ))}
-          </div>
-
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          </div>          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h3 className="font-semibold text-gray-800 mb-2">🔧 Troubleshooting:</h3>
             <ul className="text-gray-700 space-y-1 text-sm">
+              <li>• <strong>Emergency fist shows as "Yes":</strong> Tuck thumb COMPLETELY inside/under fingers</li>
               <li>• <strong>Low confidence:</strong> Hold gesture more steadily, improve lighting</li>
               <li>• <strong>No detection:</strong> Ensure hand is fully visible in camera frame</li>
-              <li>• <strong>Wrong gesture:</strong> Check finger positions match the descriptions</li>
-              <li>• <strong>Emergency not working:</strong> Make sure ALL fingers are completely folded into fist</li>
+              <li>• <strong>Wrong gesture:</strong> Check finger positions match the descriptions exactly</li>
+              <li>• <strong>Fist not working:</strong> Make sure ALL fingers are folded tight against palm</li>
             </ul>
           </div>
         </div>
