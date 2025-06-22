@@ -75,6 +75,11 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     isVisible: boolean;
     isLeaving: boolean;
   } | null>(null);
+  // Keep a ref in sync with currentNotification to avoid extra re-renders in callbacks
+  const currentNotificationRef = useRef<typeof currentNotification>(null);
+  useEffect(() => {
+    currentNotificationRef.current = currentNotification;
+  }, [currentNotification]);
   const [translatedText, setTranslatedText] = useState('');
 
   // Caching mechanism
@@ -176,7 +181,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     };
 
     // If there's a current notification, start its fade-out transition
-    if (currentNotification) {
+    if (currentNotificationRef.current) {
       setCurrentNotification(prev => prev ? { ...prev, isLeaving: true } : null);
       
       // After fade-out completes, show the new notification
@@ -212,7 +217,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         });
       }, 300);
     }, 5000);
-  }, [currentNotification]);
+  }, []);
   // Refs for managing transition state and timeouts
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const overrideCooldownRef = useRef<NodeJS.Timeout | null>(null);
