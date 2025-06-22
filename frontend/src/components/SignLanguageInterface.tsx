@@ -131,14 +131,13 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
   return (
     <div className="interface-container sign-language-interface">
       <div className="interface-header">
-        <h3>Medical Sign Language Translator</h3>
-        <div className="status-indicators">
+        <h3>Medical Sign Language Translator</h3>        <div className="status-indicators">
           <div className={`ml-mode-indicator ${mlMode}`}>
             <span className="indicator-icon">
-              {mlMode === 'ml' ? '🤖' : '⚙️'}
+              {mlMode === 'nova' ? '�' : '⚙️'}
             </span>
             <span className="indicator-text">
-              {mlMode === 'ml' ? 'Enhanced ML' : 'Basic Mode'}
+              {mlMode === 'nova' ? 'Nova Micro AI' : 'Basic Mode'}
             </span>
           </div>
         </div>
