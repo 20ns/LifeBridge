@@ -18,26 +18,27 @@ function App() {
     setSourceLanguage(targetLanguage);
     setTargetLanguage(sourceLanguage);
   };
-
   useEffect(() => {
-    // This function will be called when a click happens anywhere on the page
-    const closeTooltip = () => {
-      setShowPerformanceTooltip(false);
+    const closeTooltip = (event: MouseEvent) => {
+      // Close tooltip if clicking outside of it and outside the info button
+      if (showPerformanceTooltip && 
+          tooltipRef.current && 
+          infoButtonRef.current &&
+          !tooltipRef.current.contains(event.target as Node) &&
+          !infoButtonRef.current.contains(event.target as Node)) {
+        setShowPerformanceTooltip(false);
+      }
     };
 
     if (showPerformanceTooltip) {
-      // Add the listener on the next tick to avoid capturing the click that opened the tooltip
-      const timerId = setTimeout(() => {
-        document.addEventListener('click', closeTooltip);
-      }, 0);
-
-      // Cleanup: remove the listener when the component unmounts or the tooltip closes
+      // Add listener immediately for better responsiveness
+      document.addEventListener('mousedown', closeTooltip);
+      
       return () => {
-        clearTimeout(timerId);
-        document.removeEventListener('click', closeTooltip);
+        document.removeEventListener('mousedown', closeTooltip);
       };
     }
-  }, [showPerformanceTooltip]);  return (
+  }, [showPerformanceTooltip]);return (
     <div className="App">
       {/* Skip Links for Accessibility */}
       <div className="skip-links">
@@ -101,8 +102,7 @@ function App() {
             >
               ×
             </button>
-          </div>
-          <div className="tooltip-content">
+          </div>          <div className="tooltip-content">
             <div className="mode-comparison">
               <div className="mode-section optimized">
                 <div className="mode-title">
@@ -110,15 +110,13 @@ function App() {
                   <strong>Optimized Mode</strong>
                 </div>
                 <ul>
-                  <li>⚡ Sub-2 second emergency translations</li>
-                  <li>🧠 Enhanced AI processing for accuracy</li>
-                  <li>🚨 Priority processing for medical emergencies</li>
+                  <li>⚡ Sub-2 second responses</li>
+                  <li>🚨 Emergency priority processing</li>
                   <li>📱 Real-time sign language detection</li>
-                  <li>🔄 Aggressive caching & pre-loading</li>
-                  <li>💰 Higher AWS resource usage</li>
+                  <li>💰 Higher resource usage</li>
                 </ul>
                 <p className="mode-use-case">
-                  <strong>Best for:</strong> Emergency situations, critical care, ambulances
+                  <strong>Best for:</strong> Emergency situations, critical care
                 </p>
               </div>
               
@@ -128,21 +126,15 @@ function App() {
                   <strong>Standard Mode</strong>
                 </div>
                 <ul>
-                  <li>🔋 Battery & resource conservation</li>
-                  <li>💰 Cost-effective AWS usage</li>
-                  <li>⚖️ Balanced speed vs efficiency</li>
-                  <li>🌐 Better for limited internet</li>
-                  <li>📊 Conservative processing approach</li>
-                  <li>⏱️ 5-8 second response times</li>
+                  <li>🔋 Battery conservation</li>
+                  <li>💰 Cost-effective usage</li>
+                  <li>⚖️ Balanced performance</li>
+                  <li>⏱️ 5-8 second responses</li>
                 </ul>
                 <p className="mode-use-case">
-                  <strong>Best for:</strong> Routine consultations, long shifts, mobile devices
+                  <strong>Best for:</strong> Routine consultations, long shifts
                 </p>
               </div>
-            </div>
-            
-            <div className="aws-info">
-              <p><strong>💡 AWS Free Tier Optimized:</strong> Both modes stay within 12-month free tier limits</p>
             </div>
           </div>
         </div>
