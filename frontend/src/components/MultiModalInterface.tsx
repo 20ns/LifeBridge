@@ -476,9 +476,10 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
                 medicalContext={isEmergencyMode ? 'emergency' : 'general'}
               />
             )}
-            
-            {activeMode === 'speech' && (              <SpeechInterface
+              {activeMode === 'speech' && (              <SpeechInterface
                 language={sourceLanguage}
+                sourceLanguage={sourceLanguage}
+                targetLanguage={targetLanguage}
                 onSpeechToText={(text) => {
                   const startTime = Date.now();
                   // Handle speech to text conversion
