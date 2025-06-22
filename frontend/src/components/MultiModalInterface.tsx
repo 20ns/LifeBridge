@@ -228,12 +228,16 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
 
   // Performance panel
   const PerformancePanel = () => (
-    <div className={`performance-panel ${showPerformancePanel ? 'visible' : 'hidden'}`}>
-      <div className="performance-header">
-        <Monitor className="performance-icon" />
-        <span>Performance Metrics</span>
-        <button onClick={() => setShowPerformancePanel(false)}>×</button>
-      </div>
+    <div className={`performance-panel ${showPerformancePanel ? 'visible' : 'hidden'}`}>        <div className="performance-header">
+          <Monitor className="performance-icon" />
+          <span>Performance Metrics</span>
+          <button 
+            className="close-button"
+            onClick={() => setShowPerformancePanel(false)}
+          >
+            ×
+          </button>
+        </div>
       <div className="performance-metrics">
         <div className="metric">
           <Zap className="metric-icon" />
@@ -265,10 +269,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   const OfflineFallback = () => (
     <div className="offline-fallback">
       <WifiOff className="offline-icon" />
-      <div className="offline-content">
-        <h3>Connection Lost</h3>
+      <div className="offline-content">        <h3>Connection Lost</h3>
         <p>Using cached translations and offline features</p>
-        <button onClick={() => window.location.reload()}>
+        <button 
+          className="retry-connection-button"
+          onClick={() => window.location.reload()}
+        >
           <RotateCcw className="button-icon" />
           Retry Connection
         </button>
