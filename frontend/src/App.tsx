@@ -16,31 +16,50 @@ function App() {
     setSourceLanguage(targetLanguage);
     setTargetLanguage(sourceLanguage);
   };
-
   return (
     <div className="App">
-      <header className="app-header">
+      {/* Skip Links for Accessibility */}
+      <div className="skip-links">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <a href="#navigation" className="skip-link">
+          Skip to navigation
+        </a>
+      </div>
+
+      <header className="app-header" role="banner">
         <div className="header-content">
           <div className="logo-section">
             <Heart className="logo-icon" />
             <h1>LifeBridge AI</h1>
             <p className="subtitle">Medical Translation Platform</p>
           </div>
-            <div className="header-controls">
+            <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
             <div className="tab-navigation">
               <button
                 className={`tab-btn ${activeTab === 'main' ? 'active' : ''}`}
                 onClick={() => setActiveTab('main')}
+                aria-pressed={activeTab === 'main'}
+                aria-describedby="main-tab-desc"
               >
                 <Home size={16} />
                 Main App
+                <span id="main-tab-desc" className="sr-only">
+                  Access the main medical translation interface
+                </span>
               </button>
               <button
                 className={`tab-btn ${activeTab === 'test' ? 'active' : ''}`}
                 onClick={() => setActiveTab('test')}
+                aria-pressed={activeTab === 'test'}
+                aria-describedby="test-tab-desc"
               >
                 <TestTube size={16} />
                 UI Testing
+                <span id="test-tab-desc" className="sr-only">
+                  Access emergency UI testing and device simulation
+                </span>
               </button>
             </div>
             
@@ -63,11 +82,12 @@ function App() {
                     {performanceMode === 'optimized' ? 'Optimized' : 'Standard'}
                   </button>
                 </div>
-              </>
-            )}
-          </div>
+              </>            )}
+          </nav>
         </div>
-      </header>      <main className="main-content">
+      </header>
+
+      <main className="main-content" id="main-content" role="main">
         {activeTab === 'main' ? (
           <>
             <div className="platform-description">
