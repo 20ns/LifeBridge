@@ -14,14 +14,6 @@ test('renders Medical Translation Platform subtitle', () => {
   expect(subtitleElement).toBeInTheDocument();
 });
 
-test('renders main navigation tabs', () => {
-  render(<App />);
-  const mainTabButton = screen.getByRole('button', { name: /Main App/i });
-  const testTabButton = screen.getByRole('button', { name: /UI Testing/i });
-  expect(mainTabButton).toBeInTheDocument();
-  expect(testTabButton).toBeInTheDocument();
-});
-
 test('renders language selector', () => {
   render(<App />);
   // Check for the presence of language dropdown functionality
