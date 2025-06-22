@@ -413,14 +413,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
           {/* Input Section */}          <div className="input-section">
             <div className="section-header">
               <h3>Source Text</h3>
-              <button
-                onClick={() => setIsListening(!isListening)}
-                className={`start-recording-button ${isListening ? 'recording' : ''}`}
-                title={isListening ? 'Stop Recording' : 'Start Recording'}
-              >
-                <Mic size={16} />
-                {isListening ? 'Stop Recording' : 'Start Recording'}
-              </button>
+              {/* Removed redundant start-recording button; recording is handled in Speech section */}
             </div>
 
             <textarea
