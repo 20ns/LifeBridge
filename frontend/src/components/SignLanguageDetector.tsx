@@ -329,10 +329,10 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
         <video
           ref={videoRef}
           className="input-video"
-          // style={{ display: 'none' }} // Made video visible for debugging camera feed
+          style={{ display: 'none' }} // Hide the raw video feed
           playsInline
-          autoPlay // Ensure video attempts to play
-          muted // Often required for autoplay
+          autoPlay
+          muted
         />
         <canvas
           ref={canvasRef}
@@ -344,7 +344,7 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
             borderRadius: '8px',
             maxWidth: '100%',
             height: 'auto',
-            display: isActive ? 'block' : 'none' // Hide canvas if not active
+            display: isActive ? 'block' : 'none'
           }}
         />
       </div>
