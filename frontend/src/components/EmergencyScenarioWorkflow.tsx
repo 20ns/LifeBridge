@@ -483,7 +483,7 @@ const EmergencyScenarioWorkflow: React.FC<EmergencyScenarioWorkflowProps> = ({
         </div>
       )}      {/* Instructions */}
       {!activeScenario && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="speech-instructions text-center py-8 text-gray-500">
           <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <p className="text-lg font-medium mb-2">Select an Emergency Scenario</p>
           <p className="text-sm">Choose a medical emergency scenario above to access guided workflows and translated phrases.</p>

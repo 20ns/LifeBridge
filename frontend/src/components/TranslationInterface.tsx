@@ -208,7 +208,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
 
     return () => clearTimeout(timer);
   }, [inputText, sourceLanguage, targetLanguage, realTimeMode, sendTypingIndicator]);  return (
-    <div className="translation-interface">
+    <div className="interface-container translation-interface">
       {/* Top Controls Bar - Medical Context and Settings */}
       <div className="top-controls-bar">
         <div className="context-selector">
@@ -370,7 +370,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
         </div>
       </div>{/* Emergency Quick Actions */}
       {context === 'emergency' && !showEmergencyWorkflow && (
-        <div className="emergency-quick-actions">
+        <div className="speech-instructions emergency-quick-actions">
           <h4>🚨 Emergency Quick Phrases</h4>
           <div className="emergency-buttons">
             {emergencyPhrases.map((phrase) => (
