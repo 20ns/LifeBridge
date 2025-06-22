@@ -273,6 +273,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         setActiveMode('text'); // Return to text mode when exiting emergency
         addNotification('✅ Emergency mode deactivated - Returned to normal interface');
         
+        // Ensure sign-language detection is fully stopped to prevent
+        // background gestures (e.g., a lingering fist) from re-triggering
+        if (signLanguageInterfaceRef.current?.isDetectionActive()) {
+          signLanguageInterfaceRef.current.triggerStopDetection();
+        }
+        
         // If manually exiting emergency mode, set override to prevent gesture auto-trigger
         if (isManualTrigger) {
           if (DEBUG) console.log('[Emergency Button] Setting manual override to prevent gesture re-triggering');
