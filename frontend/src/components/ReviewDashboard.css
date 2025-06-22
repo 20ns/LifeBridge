@@ -4,6 +4,9 @@
   margin: 0 auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .review-dashboard.loading {
@@ -26,6 +29,9 @@
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 1px solid #e0e0e0;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .dashboard-header h1 {
@@ -38,6 +44,7 @@
 .metrics-summary {
   display: flex;
   gap: 20px;
+  justify-content: center;
 }
 
 .metric-card {
@@ -709,4 +716,17 @@
   .metrics-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Loading wrapper to keep text static while spinner rotates */
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-text {
+  font-size: 18px;
+  color: #666;
 }
