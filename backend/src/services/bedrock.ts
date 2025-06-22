@@ -1,9 +1,11 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import { AWS_REGION, BEDROCK_MODEL_ID } from '../config';
 
-const client = new BedrockRuntimeClient({ region: 'eu-north-1' });
+// Create client with region from config
+const client = new BedrockRuntimeClient({ region: AWS_REGION });
 
-// Using Amazon Nova Micro for cost-effective translation in Stockholm region
-const MODEL_ID = 'arn:aws:bedrock:eu-north-1:272942077493:inference-profile/eu.amazon.nova-micro-v1:0';
+// Model ID is also read from config to support different deployments
+const MODEL_ID = BEDROCK_MODEL_ID;
 
 export interface TranslationResult {
   translatedText: string;
