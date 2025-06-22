@@ -20,10 +20,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Install root scripts
-        run: |
-          npm install -g npm@latest
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+            tests/package-lock.json
 
       - name: Install Backend dependencies
         working-directory: backend
