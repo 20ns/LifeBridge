@@ -389,10 +389,15 @@ const EmergencyPhrases: React.FC<EmergencyPhrasesProps> = ({
     sourceLanguage,
     translateText,
     emergencyCategories,
-    displayedCategories,
-    translatedCategoriesForCurrentLang,
-    // Assuming setCategoryLoadingStates, setCategoryErrorStates, setDisplayedCategories,
-    // setTranslatedCategoriesForCurrentLang are stable from useState
+    // displayedCategories, // Removed to break update loop
+    // translatedCategoriesForCurrentLang, // Removed to break update loop
+    // State setters are stable and can be included if ESLint requires, but are not the cause of the loop.
+    // The function will close over displayedCategories and translatedCategoriesForCurrentLang
+    // from the render cycle triggered by primary dependency changes (e.g., targetLanguage).
+    setCategoryLoadingStates,
+    setCategoryErrorStates,
+    setDisplayedCategories,
+    setTranslatedCategoriesForCurrentLang
   ]);
 
 
