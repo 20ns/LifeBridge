@@ -72,16 +72,21 @@ jest.mock('@aws-sdk/client-bedrock-runtime', () => ({
     InvokeModelCommand: jest.fn()
 }));
 
-describe('Medical Grade Features End-to-End Tests', () => {
-    let auditLogger, qualityAssurance, offlineService, phiRedaction, impactMetrics;
+// Import services after mocks are defined
+const { AuditLogger } = require('../backend/src/services/auditLogger');
+const { QualityAssuranceService } = require('../backend/src/services/qualityAssurance');
+const { OfflineService } = require('../backend/src/services/offlineService');
+const { PHIRedactionService } = require('../backend/src/services/phiRedaction');
+const { ImpactMetricsService } = require('../backend/src/services/impactMetrics');
 
-    beforeAll(async () => {
+describe('Medical Grade Features End-to-End Tests', () => {
+    let auditLogger, qualityAssurance, offlineService, phiRedaction, impactMetrics;    beforeAll(async () => {
         // Initialize services with mock AWS clients
-        const { AuditLogger } = require('../backend/src/services/auditLogger');
-        const { QualityAssuranceService } = require('../backend/src/services/qualityAssurance');
-        const { OfflineService } = require('../backend/src/services/offlineService');
-        const { PHIRedactionService } = require('../backend/src/services/phiRedaction');
-        const { ImpactMetricsService } = require('../backend/src/services/impactMetrics');
+        auditLogger = new AuditLogger();
+        qualityAssurance = new QualityAssuranceService();
+        offlineService = new OfflineService();
+        phiRedaction = new PHIRedactionService();
+        impactMetrics = new ImpactMetricsService();
 
         auditLogger = new AuditLogger();
         qualityAssurance = new QualityAssuranceService();
