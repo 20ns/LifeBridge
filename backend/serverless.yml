@@ -1,3 +1,4 @@
+# serverless.yml
 service: lifebridge-backend
 frameworkVersion: '3'
 
@@ -5,63 +6,80 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: eu-north-1
-  stage: ${opt:stage, 'dev'}  environment:
+  stage: ${opt:stage, 'dev'}
+
+  environment:
     STAGE: ${self:provider.stage}
+
     # Medical-grade compliance configuration
     AUDIT_LOGS_TABLE: lifebridge-audit-logs-${self:provider.stage}
     REVIEW_REQUESTS_TABLE: lifebridge-review-requests-${self:provider.stage}
     IMPACT_METRICS_TABLE: lifebridge-impact-metrics-${self:provider.stage}
-    KMS_KEY_ID: !Ref LifeBridgeKMSKey
+    KMS_KEY_ID: alias/aws/dynamodb
     REVIEW_ALERTS_TOPIC_ARN: !Ref ReviewAlertsSnsTopic
     AUDIT_LOG_GROUP: /aws/lifebridge/audit-${self:provider.stage}
-    AWS_REGION: ${self:provider.region}iamRoleStatements:
-   - Effect: Allow
-     Action:
-       - bedrock:InvokeModel
-       - bedrock:ListFoundationModels
-     Resource: '*'
-   - Effect: Allow
-     Action:
-       - polly:SynthesizeSpeech
-     Resource: '*'
-   - Effect: Allow
-     Action:
-       - logs:CreateLogGroup
-       - logs:CreateLogStream
-       - logs:PutLogEvents
-     Resource: '*'
-   # Medical-grade compliance and quality assurance permissions
-   - Effect: Allow
-     Action:
-       - dynamodb:PutItem
-       - dynamodb:GetItem
-       - dynamodb:UpdateItem
-       - dynamodb:Query
-       - dynamodb:Scan
-     Resource: 
-       - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-audit-logs-${self:provider.stage}
-       - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-review-requests-${self:provider.stage}
-       - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-impact-metrics-${self:provider.stage}
-       - arn:aws:dynamodb:${self:provider.region}:*:index/*
-   - Effect: Allow
-     Action:
-       - kms:Encrypt
-       - kms:Decrypt
-       - kms:ReEncrypt*
-       - kms:GenerateDataKey*
-       - kms:DescribeKey
-     Resource: 
-       - arn:aws:kms:${self:provider.region}:*:key/*
-   - Effect: Allow
-     Action:
-       - sns:Publish
-       - sns:Subscribe
-       - sns:CreateTopic
-     Resource: '*'
-   - Effect: Allow
-     Action:
-       - cloudwatch:PutMetricData
-     Resource: '*'
+    REGION: ${self:provider.region}
+
+  iamRoleStatements:
+    # Bedrock (LLM) access
+    - Effect: Allow
+      Action:
+        - bedrock:InvokeModel
+        - bedrock:ListFoundationModels
+      Resource: '*'
+
+    # Amazon Polly
+    - Effect: Allow
+      Action:
+        - polly:SynthesizeSpeech
+      Resource: '*'
+
+    # CloudWatch Logs
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: '*'
+
+    # DynamoDB – medical-grade compliance + analytics
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource:
+        - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-audit-logs-${self:provider.stage}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-review-requests-${self:provider.stage}
+        - arn:aws:dynamodb:${self:provider.region}:*:table/lifebridge-impact-metrics-${self:provider.stage}
+        - arn:aws:dynamodb:${self:provider.region}:*:index/*
+
+    # KMS
+    - Effect: Allow
+      Action:
+        - kms:Encrypt
+        - kms:Decrypt
+        - kms:ReEncrypt*
+        - kms:GenerateDataKey*
+        - kms:DescribeKey
+      Resource:
+        - arn:aws:kms:${self:provider.region}:*:key/*
+
+    # SNS Alerts
+    - Effect: Allow
+      Action:
+        - sns:Publish
+        - sns:Subscribe
+        - sns:CreateTopic
+      Resource: '*'
+
+    # CloudWatch Metrics
+    - Effect: Allow
+      Action:
+        - cloudwatch:PutMetricData
+      Resource: '*'
 
 functions:
   translate:
@@ -311,52 +329,12 @@ resources:
           - Key: Environment
             Value: ${self:provider.stage}
 
-    # KMS key for encryption at rest
-    LifeBridgeKMSKey:
-      Type: AWS::KMS::Key
-      Properties:
-        Description: LifeBridge medical data encryption key
-        KeyPolicy:
-          Version: '2012-10-17'
-          Statement:
-            - Sid: Enable IAM User Permissions
-              Effect: Allow
-              Principal:
-                AWS: 
-                  - 'arn:aws:iam::#{AWS::AccountId}:root'
-              Action: 'kms:*'
-              Resource: '*'
-            - Sid: Allow LifeBridge Lambda Functions
-              Effect: Allow
-              Principal:
-                AWS: 
-                  - !GetAtt IamRoleLambdaExecution.Arn
-              Action:
-                - kms:Encrypt
-                - kms:Decrypt
-                - kms:ReEncrypt*
-                - kms:GenerateDataKey*
-                - kms:DescribeKey
-              Resource: '*'
-        Tags:
-          - Key: Purpose
-            Value: LifeBridge-Medical-Data-Encryption
-          - Key: Environment
-            Value: ${self:provider.stage}
-
-    LifeBridgeKMSKeyAlias:
-      Type: AWS::KMS::Alias
-      Properties:
-        AliasName: alias/lifebridge-${self:provider.stage}
-        TargetKeyId: !Ref LifeBridgeKMSKey
-
     # SNS topic for review alerts
     ReviewAlertsSnsTopic:
       Type: AWS::SNS::Topic
       Properties:
         TopicName: lifebridge-review-alerts-${self:provider.stage}
         DisplayName: LifeBridge Review Alerts
-        KmsMasterKeyId: !Ref LifeBridgeKMSKey
         Tags:
           - Key: Purpose
             Value: Human-Review-Notifications
@@ -368,8 +346,7 @@ resources:
       Type: AWS::Logs::LogGroup
       Properties:
         LogGroupName: /aws/lifebridge/audit-${self:provider.stage}
-        RetentionInDays: 2557  # 7 years for medical compliance
-        KmsKeyId: !GetAtt LifeBridgeKMSKey.Arn
+        RetentionInDays: 2557   # 7 years
 
   Outputs:
     AuditLogsTableName:
@@ -389,12 +366,6 @@ resources:
       Value: !Ref ImpactMetricsTable
       Export:
         Name: ${self:service}-${self:provider.stage}-ImpactMetricsTable
-
-    KMSKeyId:
-      Description: KMS Key ID for encryption
-      Value: !Ref LifeBridgeKMSKey
-      Export:
-        Name: ${self:service}-${self:provider.stage}-KMSKey
 
     ReviewAlertsTopicArn:
       Description: SNS Topic ARN for review alerts

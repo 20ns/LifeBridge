@@ -150,9 +150,8 @@ class ImpactMetricsService {
   private cloudWatchClient: CloudWatchClient;
   private metricsTableName: string;
 
-  constructor() {
-    this.dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION || 'eu-north-1' });
-    this.cloudWatchClient = new CloudWatchClient({ region: process.env.AWS_REGION || 'eu-north-1' });
+  constructor() {    this.dynamoClient = new DynamoDBClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
+    this.cloudWatchClient = new CloudWatchClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
     this.metricsTableName = process.env.IMPACT_METRICS_TABLE || 'lifebridge-impact-metrics-dev';
   }
 
@@ -392,8 +391,7 @@ quality standards and HIPAA compliance.
   // Store medical outcome in DynamoDB
   private async storeMedicalOutcome(outcome: MedicalOutcome): Promise<void> {
     const command = new PutItemCommand({
-      TableName: this.metricsTableName,
-      Item: {
+      TableName: this.metricsTableName,      Item: {
         pk: { S: 'OUTCOME' },
         sk: { S: `${outcome.timestamp}#${outcome.incidentId}` },
         type: { S: 'medical_outcome' },
@@ -406,8 +404,8 @@ quality standards and HIPAA compliance.
         timeSavingPercentage: { N: outcome.improvementMetrics.timeSavingPercentage.toString() },
         errorReduction: { N: outcome.improvementMetrics.errorReduction.toString() },
         satisfactionImprovement: { N: outcome.improvementMetrics.satisfactionImprovement.toString() },
-        hospitalId: outcome.hospitalId ? { S: outcome.hospitalId } : undefined,
-        timestamp: { S: outcome.timestamp }
+        timestamp: { S: outcome.timestamp },
+        ...(outcome.hospitalId && { hospitalId: { S: outcome.hospitalId } })
       }
     });
 
@@ -456,10 +454,9 @@ quality standards and HIPAA compliance.
         errorCount: { N: metrics.errorCount.toString() },
         offlineUsage: { N: metrics.offlineUsage.toString() },
         cacheHitRate: { N: metrics.cacheHitRate.toString() },
-        userSatisfactionScore: { N: metrics.userSatisfactionScore.toString() },
-        duration: { N: metrics.duration.toString() },
-        hospitalId: metrics.hospitalId ? { S: metrics.hospitalId } : undefined,
-        timestamp: { S: metrics.timestamp }
+        userSatisfactionScore: { N: metrics.userSatisfactionScore.toString() },        duration: { N: metrics.duration.toString() },
+        timestamp: { S: metrics.timestamp },
+        ...(metrics.hospitalId && { hospitalId: { S: metrics.hospitalId } })
       }
     });
 
@@ -478,11 +475,10 @@ quality standards and HIPAA compliance.
         period: { S: savings.period },
         totalCostSavings: { N: savings.savings.totalCostSavings.toString() },
         timeSavings: { N: savings.savings.timeSavings.toString() },
-        efficiencyGain: { N: savings.savings.efficiencyGain.toString() },
-        roiPercentage: { N: savings.savings.roiPercentage.toString() },
+        efficiencyGain: { N: savings.savings.efficiencyGain.toString() },        roiPercentage: { N: savings.savings.roiPercentage.toString() },
         patientVolume: { N: savings.patientVolume.toString() },
-        hospitalId: savings.hospitalId ? { S: savings.hospitalId } : undefined,
-        timestamp: { S: savings.timestamp }
+        timestamp: { S: savings.timestamp },
+        ...(savings.hospitalId && { hospitalId: { S: savings.hospitalId } })
       }
     });
 

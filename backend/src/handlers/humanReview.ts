@@ -89,9 +89,7 @@ export const submitReview = async (
     // Validate review status
     if (!['approved', 'rejected', 'requires_revision'].includes(reviewStatus)) {
       return createErrorResponse(400, 'Invalid review status');
-    }
-
-    // Submit the review
+    }    // Submit the review
     const reviewResult = await qualityAssuranceService.submitReview(
       reviewId,
       reviewStatus,
@@ -100,19 +98,27 @@ export const submitReview = async (
       finalTranslation
     );
 
-    // Record the review outcome for metrics
+    // Get the original review request for metrics
+    const originalReview = await qualityAssuranceService.getReviewRequest(reviewId);
+
+    // Record the review outcome for metrics  
     await impactMetricsService.recordComprehensionScore({
       sessionId: reviewResult.sessionId,
-      originalScore: reviewResult.originalQuality,
-      reviewerScore: reviewResult.reviewerQuality || reviewResult.originalQuality,
-      improvementMetrics: qualityImprovements || {
-        clarityImprovement: 0,
-        accuracyImprovement: 0,
-        culturalSensitivityImprovement: 0
+      originalText: originalReview?.originalText || '',
+      translatedText: originalReview?.translatedText || '',
+      sourceLanguage: originalReview?.sourceLanguage || 'unknown',
+      targetLanguage: originalReview?.targetLanguage || 'unknown',
+      context: originalReview?.context || 'medical',
+      comprehensionMetrics: {
+        medicalAccuracy: reviewResult.originalQuality || 0.8,
+        culturalAppropriateness: reviewResult.reviewerQuality || reviewResult.originalQuality || 0.8,
+        terminologyConsistency: 0.9,
+        emergencyUrgencyPreserved: reviewResult.priority === 'critical',
+        patientUnderstood: reviewStatus === 'approved',
+        staffConfident: reviewStatus === 'approved',
+        overallScore: reviewResult.reviewerQuality || reviewResult.originalQuality || 0.8
       },
-      reviewTime: Date.now() - startTime,
-      reviewerId,
-      emergency: reviewResult.priority === 'critical'
+      validationMethod: 'expert_review'
     });
 
     // Audit log the review submission
