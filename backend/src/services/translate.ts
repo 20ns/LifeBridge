@@ -47,9 +47,9 @@ const complexMedicalPatterns = [
 
 // Determine if text needs AI reasoning (Bedrock) or simple translation (Amazon Translate)
 const needsAIReasoning = (text: string, context?: string): boolean => {
-  // Emergency contexts always use Bedrock for safety validation
+  // For predefined emergency phrases, AWS Translate is preferred for direct translation.
   if (context === 'emergency') {
-    return true;
+    return false; // Use AWS Translate for emergency phrases
   }
 
   // Complex medical scenarios need AI
