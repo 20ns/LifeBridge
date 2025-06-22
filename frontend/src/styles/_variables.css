@@ -32,11 +32,14 @@
   /* Base Colors */
   --white: #ffffff;
   --black: #000000;
-  
-  /* Text Colors - High Contrast for Medical Context */
+    /* Text Colors - High Contrast for Medical Context */
   --text-primary: var(--neutral-800);
   --text-secondary: var(--neutral-600);
+  --text-muted: var(--neutral-500);
   --text-inverse: var(--white);
+  
+  /* Primary Color Alias */
+  --primary-color: var(--primary-blue);
   
   /* Background Colors */
   --bg-primary: var(--white);
