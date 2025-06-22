@@ -7,6 +7,14 @@ interface SignData {
   timestamp: number;
 }
 
+interface MLGestureResponse {
+  gesture: string;
+  confidence: number;
+  medical_priority: 'critical' | 'high' | 'medium' | 'low';
+  urgency_score: number;
+  mode: 'ml' | 'fallback';
+}
+
 interface SignToTextMapping {
   [key: string]: {
     text: string;
@@ -14,6 +22,9 @@ interface SignToTextMapping {
     context: string[];
   };
 }
+
+// ML Gesture Recognition API endpoint
+const ML_GESTURE_API_ENDPOINT = 'https://9t2to2akvf.execute-api.eu-north-1.amazonaws.com/dev/gesture-recognition-ml';
 
 // Medical sign language to text mappings for emergency scenarios
 const medicalSignMappings: SignToTextMapping = {
@@ -65,7 +76,35 @@ export const useSignLanguageDetection = () => {
   const [currentText, setCurrentText] = useState<string>('');
   const [confidenceScore, setConfidenceScore] = useState<number>(0);
   const [detectionHistory, setDetectionHistory] = useState<SignData[]>([]);
+  const [mlMode, setMlMode] = useState<'ml' | 'fallback'>('fallback');
   const gestureStabilityRef = useRef<{[key: string]: number}>({});
+
+  // Enhanced ML gesture recognition function
+  const recognizeGestureML = useCallback(async (landmarks: any[]): Promise<MLGestureResponse | null> => {
+    try {
+      const response = await fetch(ML_GESTURE_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          landmarks: landmarks,
+          timestamp: Date.now()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`ML API error: ${response.status}`);
+      }
+
+      const result: MLGestureResponse = await response.json();
+      setMlMode(result.mode);
+      return result;
+    } catch (error) {
+      console.error('ML gesture recognition failed:', error);
+      return null;
+    }
+  }, []);
 
   // Start sign language detection
   const startDetection = useCallback(() => {
@@ -80,44 +119,65 @@ export const useSignLanguageDetection = () => {
     setIsActive(false);
   }, []);
 
-  // Process detected sign and convert to text
-  const handleSignDetected = useCallback((signData: SignData) => {
-    const { gesture, confidence, timestamp } = signData;
+  // Enhanced sign detection handler with ML integration
+  const handleSignDetected = useCallback(async (signData: SignData) => {
+    const { landmarks, confidence, timestamp } = signData;
+    
+    // Try ML recognition first
+    const mlResult = await recognizeGestureML(landmarks);
+    
+    let finalGesture = signData.gesture;
+    let finalConfidence = confidence;
+    let medicalPriority: 'critical' | 'high' | 'medium' | 'low' = 'medium';
+    
+    if (mlResult) {
+      finalGesture = mlResult.gesture;
+      finalConfidence = mlResult.confidence;
+      medicalPriority = mlResult.medical_priority;
+      
+      console.log(`ML Recognition: ${mlResult.gesture} (confidence: ${Math.round(mlResult.confidence * 100)}%, priority: ${mlResult.medical_priority}, mode: ${mlResult.mode})`);
+    }
+    
+    const finalSignData = {
+      ...signData,
+      gesture: finalGesture,
+      confidence: finalConfidence
+    };
     
     // Update detection history
-    setDetectionHistory(prev => [...prev.slice(-19), signData]); // Keep last 20 detections
+    setDetectionHistory(prev => [...prev.slice(-19), finalSignData]);
     
     // Check gesture stability (avoid rapid changes)
     const now = Date.now();
-    if (gestureStabilityRef.current[gesture]) {
-      const timeSinceLastDetection = now - gestureStabilityRef.current[gesture];
+    if (gestureStabilityRef.current[finalGesture]) {
+      const timeSinceLastDetection = now - gestureStabilityRef.current[finalGesture];
       if (timeSinceLastDetection < 2000) { // Wait 2 seconds between same gestures
         return;
       }
     }
     
-    gestureStabilityRef.current[gesture] = now;
+    gestureStabilityRef.current[finalGesture] = now;
     
     // Get medical text mapping
-    const mapping = medicalSignMappings[gesture];
+    const mapping = medicalSignMappings[finalGesture];
     if (!mapping) {
-      console.warn(`Unknown gesture: ${gesture}`);
+      console.warn(`Unknown gesture: ${finalGesture}`);
       return;
     }
 
     // Update current text and confidence
     setCurrentText(mapping.text);
-    setConfidenceScore(confidence);
+    setConfidenceScore(finalConfidence);
     
     // Add to detected signs
     setDetectedSigns(prev => [...prev, {
-      ...signData,
+      ...finalSignData,
       gesture: mapping.text // Store the translated text
     }]);
 
     // Log for medical context
-    console.log(`Sign detected: ${gesture} -> "${mapping.text}" (confidence: ${Math.round(confidence * 100)}%)`);
-  }, []);
+    console.log(`Sign detected: ${finalGesture} -> "${mapping.text}" (confidence: ${Math.round(finalConfidence * 100)}%)`);
+  }, [recognizeGestureML]);
 
   // Get text from detected signs for translation
   const getTextForTranslation = useCallback(() => {
@@ -213,7 +273,6 @@ export const useSignLanguageDetection = () => {
       return originalGesture && medicalSignMappings[originalGesture].medicalPriority === 'critical';
     });
   }, [detectedSigns]);
-
   return {
     // State
     isActive,
@@ -221,12 +280,14 @@ export const useSignLanguageDetection = () => {
     currentText,
     confidenceScore,
     detectionHistory,
+    mlMode,
     
     // Actions
     startDetection,
     stopDetection,
     handleSignDetected,
     clearHistory,
+    recognizeGestureML,
     
     // Utility functions
     getTextForTranslation,
