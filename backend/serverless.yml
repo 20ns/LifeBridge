@@ -150,14 +150,13 @@ functions:
           path: /batch-sign-processing
           method: post
           cors: true
-
   gestureRecognitionML:
     handler: src/python/gesture_recognition.lambda_handler
     runtime: python3.9
     timeout: 30
     environment:
-      MODEL_BUCKET: lifebridge-ml-models-${self:provider.stage}
-      MODEL_KEY: gesture_recognition/model.joblib
+      MODEL_BUCKET: lifebridge-sagemaker-1749301458 # Corrected to match sagemaker_setup_info.json and training script
+      MODEL_KEY: models/medical_gesture_model.joblib    # Corrected to match training script S3 key
     events:
       - http:
           path: /gesture-recognition-ml
@@ -199,3 +198,10 @@ custom:
   serverless-offline:
     httpPort: 3001
     host: localhost
+  pythonRequirements:
+    dockerizePip: true  # Recommended for Lambda compatibility
+    zip: true           # Package dependencies into a .requirements.zip and merge
+    slim: true          # Remove unnecessary files from packages (e.g., tests, .pyc)
+    strip: true         # Strip symbols from shared libraries to reduce size
+    usePoetry: false    # Explicitly disable Poetry if not used
+    requirementsPath: src/python/requirements.txt  # Explicitly point to our requirements file

@@ -72,7 +72,6 @@ const medicalSignMappings: SignToTextMapping = {
 };
 
 export const useSignLanguageDetection = () => {
-  console.log('[useSignLangDetection] Hook execution started/re-executed.'); // Log hook execution
 
   const [isActive, setIsActive] = useState(false);
   const [detectedSigns, setDetectedSigns] = useState<SignData[]>([]);
@@ -82,76 +81,111 @@ export const useSignLanguageDetection = () => {
   const [mlMode, setMlMode] = useState<'ml' | 'fallback'>('fallback'); // Start in fallback mode
   const gestureStabilityRef = useRef<{[key: string]: number}>({});  // Enhanced ML gesture recognition function with fallback
   const recognizeGestureML = useCallback(async (landmarks: any[]): Promise<MLGestureResponse | null> => {
-    // Skip ML API for now to avoid 0% confidence issues
-    // Use only local gesture detection for better reliability
-    console.log('[ML] Using fallback mode - ML API disabled for stability');
-    return null;
-  }, []);
+    console.log('[ML] Attempting to recognize gesture via API');
+    try {
+      const response = await fetch(ML_GESTURE_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ landmarks }),
+      });
 
+      if (!response.ok) {
+        console.log(`[ML] API request failed with status ${response.status}`);
+        setMlMode('fallback');
+        return null;
+      }
+
+      const data: MLGestureResponse = await response.json();
+      console.log('[ML] API response successful:', data);
+      setMlMode('ml');
+      return data;
+
+    } catch (error) {
+      console.log('[ML] Error calling gesture recognition API');
+      setMlMode('fallback');
+      return null;
+    }
+  }, []);
   // Start sign language detection
   const startDetection = useCallback(() => {
-    console.log('[useSignLangDetection] startDetection called. Current isActive:', isActive);
     setIsActive(true);
-    console.log('[useSignLangDetection] setIsActive(true) called.');
     setDetectedSigns([]);
     setCurrentText('');
     gestureStabilityRef.current = {};
-  }, [isActive]); // Added isActive to dependency array to log its current value
+  }, []);
 
   // Stop sign language detection
   const stopDetection = useCallback(() => {
-    console.log('[useSignLangDetection] stopDetection called. Current isActive:', isActive);
     setIsActive(false);
-    console.log('[useSignLangDetection] setIsActive(false) called.');
-  }, [isActive]); // Added isActive to dependency array
-  // Enhanced sign detection handler with clean logic
-  const handleSignDetected = useCallback(async (signData: SignData) => {
-    const { landmarks, confidence, gesture: detectedGesture, timestamp } = signData;
+  }, []);// Enhanced sign detection handler with clean logic, now incorporating ML call
+  const handleSignDetected = useCallback(async (signDataFromDetector: SignData) => {
+    const { landmarks, confidence: localConfidence, gesture: localGesture, timestamp } = signDataFromDetector;
+
+    let finalGestureToProcess = localGesture;
+    let finalConfidenceToUse = localConfidence;
+    let detectionSource: 'local' | 'ml' = 'local';
+
+    // Attempt to use ML model for gesture recognition
+    const mlResponse = await recognizeGestureML(landmarks);
+
+    // Use ML response if it's confident enough, otherwise fallback to local
+    const mlConfidenceThreshold = 0.6;
+    if (mlResponse && mlResponse.gesture && mlResponse.confidence >= mlConfidenceThreshold) {
+      finalGestureToProcess = mlResponse.gesture;
+      finalConfidenceToUse = mlResponse.confidence;
+      detectionSource = 'ml';
+      setMlMode('ml');
+    } else {
+      // Keep localGesture and localConfidence
+      setMlMode('fallback');
+    }
+
+    console.log(`[Hook] Using ${detectionSource} detection. Gesture: ${finalGestureToProcess}, Confidence: ${Math.round(finalConfidenceToUse * 100)}%`);
     
-    console.log(`[Hook] Processing detected gesture: ${detectedGesture} with confidence: ${Math.round(confidence * 100)}%`);
-    
-    // Get medical text mapping
-    const signMapping = medicalSignMappings[detectedGesture];
+    // Get medical text mapping based on the chosen gesture
+    const signMapping = medicalSignMappings[finalGestureToProcess];
     if (!signMapping) {
-      console.warn(`Unknown gesture: ${detectedGesture}`);
       return;
     }
 
     // Create final sign data with mapped text
-    const finalSignData = {
-      ...signData,
-      gesture: signMapping.text
+    const signDataForStateUpdate: SignData = {
+      landmarks: landmarks,
+      confidence: finalConfidenceToUse,
+      gesture: signMapping.text,
+      timestamp: timestamp
     };
     
     // Update detection history
-    setDetectionHistory(prev => [...prev.slice(-19), finalSignData]);
+    setDetectionHistory(prev => [...prev.slice(-19), signDataForStateUpdate]);
     
     // For emergency gestures, process immediately
     const isEmergency = signMapping.medicalPriority === 'critical';
     if (isEmergency) {
-      console.log(`🚨 EMERGENCY DETECTED: ${detectedGesture} -> "${signMapping.text}"`);
       setCurrentText(signMapping.text);
-      setConfidenceScore(confidence);
-      setDetectedSigns(prev => [...prev, finalSignData]);
+      setConfidenceScore(finalConfidenceToUse);
+      setDetectedSigns(prev => [...prev, signDataForStateUpdate]);
       return;
     }
     
-    // For non-emergency gestures, check stability
+    // For non-emergency gestures, check stability using the raw gesture string
     const now = Date.now();
-    const lastDetection = gestureStabilityRef.current[detectedGesture];
-    if (lastDetection && (now - lastDetection) < 1500) {
-      return; // Too soon since last detection
+    const lastDetectionTime = gestureStabilityRef.current[finalGestureToProcess];
+    if (lastDetectionTime && (now - lastDetectionTime) < 1500) { // Debounce for 1.5 seconds
+      return;
     }
     
-    gestureStabilityRef.current[detectedGesture] = now;
+    gestureStabilityRef.current[finalGestureToProcess] = now;
     
     // Update state
     setCurrentText(signMapping.text);
-    setConfidenceScore(confidence);
-    setDetectedSigns(prev => [...prev, finalSignData]);
+    setConfidenceScore(finalConfidenceToUse);
+    setDetectedSigns(prev => [...prev, signDataForStateUpdate]);
     
-    console.log(`✅ Gesture processed: ${detectedGesture} -> "${signMapping.text}" (${Math.round(confidence * 100)}%)`);
-  }, []);
+    console.log(`✅ Gesture processed (via ${detectionSource}): ${finalGestureToProcess} -> "${signMapping.text}" (${Math.round(finalConfidenceToUse * 100)}%)`);
+  }, [recognizeGestureML]); // Added recognizeGestureML to the dependency array
 
   // Get text from detected signs for translation
   const getTextForTranslation = useCallback(() => {

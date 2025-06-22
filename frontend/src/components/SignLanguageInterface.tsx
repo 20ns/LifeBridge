@@ -41,9 +41,6 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
     isEmergencyDetected
   } = useSignLanguageDetection();
 
-  // Log to check if startDetection and stopDetection are functions
-  console.log('[SignLangInterface] After hook. typeof startDetection:', typeof startDetection, 'typeof stopDetection:', typeof stopDetection, 'isActive from hook:', isActive);
-
   const [autoTranslate, setAutoTranslate] = useState(false);
   const [lastTranslationTime, setLastTranslationTime] = useState(0);
   const [showAnimationPlayer, setShowAnimationPlayer] = useState(false);
@@ -57,12 +54,12 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
         key => prevPropsRef.current![key as keyof SignLanguageInterfaceProps] !== currentProps[key as keyof SignLanguageInterfaceProps]
       );
       if (changedProps.length > 0) {
-        console.log('[SignLangInterface] Re-rendered due to changed props:', changedProps.join(', '));
+        // Removed console.log for changed props
       } else {
-        console.log('[SignLangInterface] Re-rendered without prop changes.');
+        // Removed console.log for no prop changes
       }
     } else {
-      console.log('[SignLangInterface] Initial render.');
+      // Removed console.log for initial render
     }
     prevPropsRef.current = currentProps;
   });
@@ -119,22 +116,17 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
     triggerStartDetection: () => {
-      console.log('[SignLangInterface via ref] triggerStartDetection called');
       if (!isActive) {
         startDetection();
       }
     },
     triggerStopDetection: () => {
-      console.log('[SignLangInterface via ref] triggerStopDetection called');
       if (isActive) {
         stopDetection();
       }
     },
     isDetectionActive: () => isActive
   }));
-
-  // Log isActive state before returning JSX
-  console.log('[SignLangInterface] Rendering. isActive:', isActive);
 
   return (
     <div className="interface-container sign-language-interface">
