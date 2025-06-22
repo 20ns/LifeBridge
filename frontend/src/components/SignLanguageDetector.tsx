@@ -511,19 +511,18 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
         camera.stop();
         setCamera(null);
       }
+      // Ensure webcam tracks are fully stopped when detection deactivates
+      if (videoRef.current && videoRef.current.srcObject) {
+        console.log('[SignLangDetector] Releasing webcam tracks after deactivation');
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+        // @ts-ignore
+        videoRef.current.srcObject = null;
+      }
       if (hands) {
         console.log('[SignLangDetector] Closing Hands');
         hands.close();
         setHands(null);
-      }
-    }    return () => {
-      console.log('[SignLangDetector] Cleanup: Stopping camera and closing Hands if active.');
-      if (camera) {
-        camera.stop();
-        console.log('[SignLangDetector] Camera stopped during cleanup.');
-      }
-      if (hands) {
-        hands.close().then(() => console.log('[SignLangDetector] MediaPipe Hands closed during cleanup.'));
       }
       if (emergencyTimer) {
         clearTimeout(emergencyTimer);
@@ -533,7 +532,7 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
       emergencyStartTimeRef.current = null;
       setLastGestureTime({});
       setGestureStabilityBuffer({});
-    };
+    }
   }, [isActive, onResults]);
 
   // Start camera when hands is initialized
