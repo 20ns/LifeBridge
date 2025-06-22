@@ -55,7 +55,9 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  flex-shrink: 0;
+  flex-wrap: wrap;
+  flex-shrink: 1;
+  justify-content: flex-end;
 }
 
 /* Main Content */
