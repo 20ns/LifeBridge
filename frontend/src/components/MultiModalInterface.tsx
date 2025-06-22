@@ -284,15 +284,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
           if (DEBUG) console.log('[Emergency Button] Setting manual override to prevent gesture re-triggering');
           setManualEmergencyOverride(true);
           
-          // Clear the override after a cooldown period
+          // Keep override active until the user intentionally re-enters Sign mode.
+          // This prevents any background gesture from re-activating Emergency.
           if (overrideCooldownRef.current) {
             clearTimeout(overrideCooldownRef.current);
-          }
-          overrideCooldownRef.current = setTimeout(() => {
-            if (DEBUG) console.log('[Emergency Button] Clearing manual override after cooldown');
-            setManualEmergencyOverride(false);
             overrideCooldownRef.current = null;
-          }, 10000); // 10 second cooldown to prevent immediate re-triggering
+          }
         }
       }
       
@@ -331,6 +328,11 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       }, 300);
     }
     
+    // If the user explicitly switches back to Sign mode, re-enable gesture-based emergency.
+    if (mode === 'sign' && manualEmergencyOverride) {
+      setManualEmergencyOverride(false);
+    }
+
     setActiveMode(mode);
     
     // Stop any active listening when switching modes
@@ -340,7 +342,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
 
     trackPerformance('modeSwitch', startTime);
     addNotification(`Switched to ${mode} mode`);
-  }, [trackPerformance, addNotification]);
+  }, [trackPerformance, addNotification, manualEmergencyOverride]);
   // Effect to manage sign language detection based on activeMode
   useEffect(() => {
     if (activeMode === 'sign') {
