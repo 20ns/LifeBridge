@@ -61,31 +61,30 @@ class LifeBridgeIntegrationTests {
             text: testCase.text,
             sourceLanguage: testCase.sourceLanguage,
             targetLanguage: testCase.targetLanguage,
-            context: testCase.context
-          })
+            context: testCase.context          })
         });
         
         const result = await response.json();
         
-        if (response.ok) {
-          console.log(`✅ Translation (${testCase.targetLanguage}): "${result.translatedText}"`);
-          console.log(`🎯 Confidence: ${Math.round(result.confidence * 100)}%`);
+        if (response.ok && result.data) {
+          console.log(`✅ Translation (${testCase.targetLanguage}): "${result.data.translatedText}"`);
+          console.log(`🎯 Confidence: ${Math.round(result.data.confidence * 100)}%`);
           
-          if (result.detectedLanguage) {
-            console.log(`🔍 Detected Language: ${result.detectedLanguage}`);
+          if (result.data.detectedLanguage) {
+            console.log(`🔍 Detected Language: ${result.data.detectedLanguage}`);
           }
           
           // Check if translation contains expected keywords (basic quality check)
           const hasExpectedContent = testCase.expectedKeywords.some(keyword => 
-            result.translatedText.toLowerCase().includes(keyword.toLowerCase())
+            result.data.translatedText.toLowerCase().includes(keyword.toLowerCase())
           );
           
           this.testResults.translation.push({
             test: testCase.context,
             success: true,
-            confidence: result.confidence,
+            confidence: result.data.confidence,
             hasExpectedContent,
-            translation: result.translatedText
+            translation: result.data.translatedText
           });
           
         } else {
@@ -113,12 +112,11 @@ class LifeBridgeIntegrationTests {
     try {
       const response = await fetch(`${this.baseUrl}/emergency-phrases?language=es&translate=true`);
       const result = await response.json();
-      
-      if (response.ok) {
-        console.log(`✅ Emergency phrases loaded: ${result.phrases?.length || 0} phrases`);
-        if (result.phrases && result.phrases.length > 0) {
+        if (response.ok && result.data) {
+        console.log(`✅ Emergency phrases loaded: ${result.data.phrases?.length || 0} phrases`);
+        if (result.data.phrases && result.data.phrases.length > 0) {
           console.log('Sample phrases:');
-          result.phrases.slice(0, 3).forEach((phrase, index) => {
+          result.data.phrases.slice(0, 3).forEach((phrase, index) => {
             console.log(`   ${index + 1}. EN: "${phrase.english}"`);
             console.log(`      ES: "${phrase.translated || phrase.english}"`);
           });
@@ -126,8 +124,8 @@ class LifeBridgeIntegrationTests {
         
         this.testResults.emergencyPhrases = {
           success: true,
-          count: result.phrases?.length || 0,
-          translated: result.translated
+          count: result.data.phrases?.length || 0,
+          translated: result.data.translated
         };
       } else {
         console.log('❌ Failed to load emergency phrases');
@@ -164,18 +162,17 @@ class LifeBridgeIntegrationTests {
           },
           body: JSON.stringify({ text: testText.text })
         });
+          const result = await response.json();
         
-        const result = await response.json();
-        
-        if (response.ok) {
-          const isCorrect = result.detectedLanguage === testText.expected;
+        if (response.ok && result.data) {
+          const isCorrect = result.data.detectedLanguage === testText.expected;
           console.log(`   "${testText.text}"`);
-          console.log(`   Expected: ${testText.expected} | Detected: ${result.detectedLanguage} ${isCorrect ? '✅' : '❌'}`);
+          console.log(`   Expected: ${testText.expected} | Detected: ${result.data.detectedLanguage} ${isCorrect ? '✅' : '❌'}`);
           
           this.testResults.languageDetection.push({
             text: testText.text,
             expected: testText.expected,
-            detected: result.detectedLanguage,
+            detected: result.data.detectedLanguage,
             correct: isCorrect
           });
         } else {
@@ -222,20 +219,19 @@ class LifeBridgeIntegrationTests {
             outputFormat: 'mp3'
           })
         });
+          const result = await response.json();
         
-        const result = await response.json();
-        
-        if (response.ok) {
+        if (response.ok && result.data) {
           console.log(`   ✅ TTS for "${testCase.text}" (${testCase.language})`);
-          if (result.audioUrl) {
-            console.log(`      Audio URL generated: ${result.audioUrl.substring(0, 50)}...`);
+          if (result.data.audioUrl) {
+            console.log(`      Audio URL generated: ${result.data.audioUrl.substring(0, 50)}...`);
           }
           
           this.testResults.textToSpeech.push({
             text: testCase.text,
             language: testCase.language,
             success: true,
-            hasAudioUrl: !!result.audioUrl
+            hasAudioUrl: !!result.data.audioUrl
           });
         } else {
           console.log(`   ❌ TTS failed for "${testCase.text}"`);
