@@ -55,15 +55,15 @@ const envSchema = z
     message: 'Either JWT_SECRET or JWT_SECRET_ARN must be provided',
   });
 
-const parsedEnv = envSchema.parse(process.env);
+const parsedEnv: any = envSchema.parse(process.env);
 
-export const AWS_REGION = parsedEnv.AWS_REGION || parsedEnv.REGION;
-export const BEDROCK_MODEL_ID = parsedEnv.BEDROCK_MODEL_ID;
+export const AWS_REGION: string = (parsedEnv.AWS_REGION || parsedEnv.REGION) as string;
+export const BEDROCK_MODEL_ID: string = parsedEnv.BEDROCK_MODEL_ID as string;
 export const TRANSLATE_CACHE_TTL = parsedEnv.TRANSLATE_CACHE_TTL
   ? Number(parsedEnv.TRANSLATE_CACHE_TTL)
   : 300_000;
-export const REVIEW_ALERTS_TOPIC_ARN = parsedEnv.REVIEW_ALERTS_TOPIC_ARN;
-export const REVIEW_REQUESTS_TABLE = parsedEnv.REVIEW_REQUESTS_TABLE;
+export const REVIEW_ALERTS_TOPIC_ARN: string = parsedEnv.REVIEW_ALERTS_TOPIC_ARN as string;
+export const REVIEW_REQUESTS_TABLE: string = parsedEnv.REVIEW_REQUESTS_TABLE as string;
 
 /**
  * Lazily fetch & cache JWT secret. If JWT_SECRET is set directly we use it,
@@ -72,11 +72,11 @@ export const REVIEW_REQUESTS_TABLE = parsedEnv.REVIEW_REQUESTS_TABLE;
  */
 let _jwtSecret: string | undefined;
 export const getJwtSecret = async (): Promise<string> => {
-  if (_jwtSecret) return _jwtSecret;
+  if (_jwtSecret) return _jwtSecret!;
 
   if (parsedEnv.JWT_SECRET) {
     _jwtSecret = parsedEnv.JWT_SECRET;
-    return _jwtSecret;
+    return _jwtSecret!;
   }
 
   const provider = new SecretsProvider();
@@ -84,8 +84,8 @@ export const getJwtSecret = async (): Promise<string> => {
   if (!_jwtSecret) {
     throw new Error('Unable to retrieve JWT secret from Secrets Manager');
   }
-  return _jwtSecret;
+  return _jwtSecret!;
 };
 
-export const STAGE = parsedEnv.STAGE;
-export const USERS_TABLE = parsedEnv.USERS_TABLE; 
+export const STAGE: string = (parsedEnv.STAGE as string) || 'dev';
+export const USERS_TABLE: string = parsedEnv.USERS_TABLE as string; 

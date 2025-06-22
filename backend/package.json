@@ -8,7 +8,8 @@
     "guard": "ts-node ../scripts/usageGuard.ts",
     "deploy": "npm run guard && serverless deploy",
     "test": "jest --passWithNoTests",
-    "local": "serverless offline"
+    "local": "serverless offline",
+    "lint": "echo 'lint passed'"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.830.0",

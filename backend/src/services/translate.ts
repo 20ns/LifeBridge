@@ -1,6 +1,7 @@
 import { TranslateClient, TranslateTextCommand } from '@aws-sdk/client-translate';
 import { ComprehendClient, DetectDominantLanguageCommand } from '@aws-sdk/client-comprehend';
 import { translateText as bedrockTranslate } from './bedrock';
+import { getCachedTranslation, putCachedTranslation } from './translationCache';
 
 const translateClient = new TranslateClient({ region: 'eu-north-1' });
 const comprehendClient = new ComprehendClient({ region: 'eu-north-1' });
@@ -230,13 +231,25 @@ export const translateText = async (
       console.log('💰 Standard mode: Conservative AI usage');
     }
     
+    let result: TranslationResult;
     if (useAI) {
       console.log('🧠 Using Bedrock AI for complex medical translation');
-      return await translateWithBedrock(text, sourceLanguage, targetLanguage, detectedContext);
+      result = await translateWithBedrock(text, sourceLanguage, targetLanguage, detectedContext);
     } else {
       console.log('⚡ Using Amazon Translate for fast basic translation');
-      return await translateWithAmazonTranslate(text, sourceLanguage, targetLanguage);
+      result = await translateWithAmazonTranslate(text, sourceLanguage, targetLanguage);
     }
+
+    // Store in cache asynchronously (don't await)
+    putCachedTranslation(
+      text,
+      result.translatedText,
+      sourceLanguage,
+      targetLanguage,
+      result.confidence
+    ).catch((err) => console.warn('cache put error', err));
+
+    return result;
 
   } catch (error) {
     console.error('Translation service error:', error);
