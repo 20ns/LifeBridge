@@ -13,20 +13,102 @@ export interface TranslationResult {
   targetLanguage: string;
 }
 
+// Emergency fallback phrases for critical situations
+const EMERGENCY_FALLBACKS: Record<string, Record<string, string>> = {
+  'Call for help': {
+    es: '¡Llama a ayuda!',
+    fr: 'Appelez à l\'aide!',
+    de: 'Rufen Sie um Hilfe!',
+    zh: '呼救！',
+    ar: 'اطلب المساعدة!',
+    ru: 'Зовите на помощь!',
+    pt: 'Peça ajuda!',
+    hi: 'मदद के लिए बुलाओ!',
+    ja: '助けを呼んでください！'
+  },
+  'Emergency': {
+    es: 'Emergencia',
+    fr: 'Urgence',
+    de: 'Notfall',
+    zh: '紧急情况',
+    ar: 'طوارئ',
+    ru: 'Экстренная ситуация',
+    pt: 'Emergência',
+    hi: 'आपातकाल',
+    ja: '緊急事態'
+  },
+  'Pain': {
+    es: 'Dolor',
+    fr: 'Douleur',
+    de: 'Schmerz',
+    zh: '疼痛',
+    ar: 'ألم',
+    ru: 'Боль',
+    pt: 'Dor',
+    hi: 'दर्द',
+    ja: '痛み'
+  },
+  'Help': {
+    es: 'Ayuda',
+    fr: 'Aide',
+    de: 'Hilfe',
+    zh: '帮助',
+    ar: 'مساعدة',
+    ru: 'Помощь',
+    pt: 'Ajuda',
+    hi: 'सहायता',
+    ja: '助け'
+  }
+};
+
+// Fallback translation for critical emergency phrases
+const getFallbackTranslation = (text: string, targetLanguage: string): string | null => {
+  // Check for exact matches first
+  if (EMERGENCY_FALLBACKS[text] && EMERGENCY_FALLBACKS[text][targetLanguage]) {
+    return EMERGENCY_FALLBACKS[text][targetLanguage];
+  }
+  
+  // Check for partial matches (case insensitive)
+  const lowerText = text.toLowerCase();
+  for (const [key, translations] of Object.entries(EMERGENCY_FALLBACKS)) {
+    if (lowerText.includes(key.toLowerCase()) && translations[targetLanguage]) {
+      return translations[targetLanguage];
+    }
+  }
+  
+  return null;
+};
+
 export const translateText = async (
   text: string,
   sourceLanguage: string,
-  targetLanguage: string
+  targetLanguage: string,
+  context?: 'emergency' | 'consultation' | 'medication' | 'general'
 ): Promise<TranslationResult> => {
   try {
-    const prompt = `You are a professional medical translator. Please translate the following medical text from ${sourceLanguage} to ${targetLanguage}. 
+    // Enhanced medical context prompts
+    const contextPrompts = {
+      emergency: `You are a critical care medical translator. This is an EMERGENCY translation. Translate with maximum accuracy and urgency. Medical errors could be life-threatening.`,
+      consultation: `You are a clinical medical translator. This is for patient consultation. Ensure precise medical terminology and maintain professional tone.`,
+      medication: `You are a pharmaceutical translator. This involves medication instructions. Be extremely precise with dosages, timing, and medical terms.`,
+      general: `You are a professional medical translator. Ensure medical accuracy and clarity.`
+    };
 
-Important guidelines:
-- Provide only the translation without any explanation or additional text
-- Maintain medical terminology accuracy
-- Preserve the original meaning and context
+    const selectedContext = context || 'general';
+    const contextPrompt = contextPrompts[selectedContext];
 
-Text to translate: "${text}"
+    const prompt = `${contextPrompt}
+
+Translate the following medical text from ${sourceLanguage} to ${targetLanguage}.
+
+Critical requirements:
+- Provide ONLY the translation without explanation
+- Maintain exact medical terminology
+- Preserve urgency indicators (if any)
+- Keep cultural sensitivity in mind
+- If uncertain about medical terms, prioritize safety
+
+Source text: "${text}"
 
 Translation:`;
 
@@ -68,7 +150,11 @@ Translation:`;
       translatedText = translatedText.substring(12).trim();
     }
 
-    return {
+    // Check for emergency fallback translations
+    const fallbackTranslation = getFallbackTranslation(text, targetLanguage);
+    if (fallbackTranslation) {
+      translatedText = fallbackTranslation;
+    }    return {
       translatedText,
       confidence: 0.9,
       detectedLanguage: sourceLanguage,
@@ -78,15 +164,37 @@ Translation:`;
 
   } catch (error) {
     console.error('Translation error:', error);
+    
+    // Try fallback translation for emergency phrases
+    const fallback = getFallbackTranslation(text, targetLanguage);
+    if (fallback) {
+      console.log('Using emergency fallback translation');
+      return {
+        translatedText: fallback,
+        confidence: 0.7, // Lower confidence for fallback
+        detectedLanguage: sourceLanguage,
+        sourceLanguage,
+        targetLanguage
+      };
+    }
+    
+    // If no fallback available, throw error
     throw new Error(`Translation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
 export const detectLanguage = async (text: string): Promise<string> => {
   try {
-    const prompt = `Detect the language of the following text and respond with only the two-letter ISO language code (e.g., 'en' for English, 'es' for Spanish).
+    const prompt = `You are a medical language detection expert. Analyze the following text and determine its language.
 
-Text: "${text}"
+Consider:
+- Medical terminology that might be in Latin/English regardless of the base language
+- Emergency phrases that might be urgent
+- Cultural context in medical communication
+
+Respond with ONLY the two-letter ISO language code (e.g., 'en', 'es', 'fr', 'de', 'zh', 'ar', 'ru', 'pt', 'hi', 'ja').
+
+Text to analyze: "${text}"
 
 Language code:`;
 

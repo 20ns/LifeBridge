@@ -22,14 +22,12 @@ export const handler = async (
     // Validate request body
     if (!event.body) {
       return createErrorResponse(400, 'Request body is required');
-    }
-
-    const validation = validateRequestBody(event.body, ['text', 'sourceLanguage', 'targetLanguage']);
+    }    const validation = validateRequestBody(event.body, ['text', 'sourceLanguage', 'targetLanguage']);
     if (!validation.isValid) {
       return createErrorResponse(400, validation.error!);
     }
 
-    const { text, sourceLanguage, targetLanguage } = validation.data;
+    const { text, sourceLanguage, targetLanguage, context } = validation.data;
 
     // Validate input
     if (!text.trim()) {
@@ -38,11 +36,9 @@ export const handler = async (
 
     if (text.length > 5000) {
       return createErrorResponse(400, 'Text too long (maximum 5000 characters)');
-    }
-
-    // Perform translation
-    console.log(`Translating: "${text}" from ${sourceLanguage} to ${targetLanguage}`);
-    const result = await translateText(text, sourceLanguage, targetLanguage);
+    }    // Perform translation
+    console.log(`Translating: "${text}" from ${sourceLanguage} to ${targetLanguage} (context: ${context || 'general'})`);
+    const result = await translateText(text, sourceLanguage, targetLanguage, context);
 
     console.log('Translation successful:', result);
     return createResponse(200, result, 'Translation completed successfully');

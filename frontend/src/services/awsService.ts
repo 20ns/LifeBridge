@@ -28,7 +28,8 @@ export interface TranslationResult {
 export const translateText = async (
   text: string, 
   sourceLanguage: string, 
-  targetLanguage: string
+  targetLanguage: string,
+  context?: 'emergency' | 'consultation' | 'medication' | 'general'
 ): Promise<TranslationResult> => {
   try {
     const response = await fetch(`${API_BASE_URL}/translate`, {
@@ -39,9 +40,10 @@ export const translateText = async (
       body: JSON.stringify({
         text,
         sourceLanguage,
-        targetLanguage
+        targetLanguage,
+        context: context || 'general'
       })
-    });    if (!response.ok) {
+    });if (!response.ok) {
       const errorData = await response.json();
       throw new Error(`Translation failed: ${errorData.message || 'Unknown error'}`);
     }
