@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import TranslationInterface from './components/TranslationInterface';
 import EmergencyPhrases from './components/EmergencyPhrases';
