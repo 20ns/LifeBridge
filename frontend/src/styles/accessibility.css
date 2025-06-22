@@ -1,0 +1,119 @@
+/* WCAG 2.1 AA Accessibility Enhancements */
+
+/* Skip Links */
+.skip-links {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  z-index: 10000;
+}
+
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  color: #fff;
+  background: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 0 0 4px 0;
+  transition: all 0.2s ease;
+}
+
+.skip-link:focus {
+  position: static;
+  left: auto;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  z-index: 10001;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Screen Reader Only Content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.sr-only:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  background-color: #000;
+  color: #fff;
+  border-radius: 4px;
+  z-index: 10000;
+}
+
+/* Enhanced Focus Indicators - WCAG 2.1 AA Compliant */
+*:focus {
+  outline: 3px solid #4A90E2;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+  transition: outline 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus {
+  outline: 3px solid #4A90E2;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.2);
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+  *:focus {
+    outline: 4px solid #000;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.8);
+  }
+  
+  .tab-btn {
+    border: 2px solid #000;
+  }
+  
+  .tab-btn:hover {
+    background-color: #000;
+    color: #fff;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Touch Target Enhancements - WCAG 2.1 AA (44px minimum) */
+.tab-btn {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+  cursor: pointer;
+}

@@ -810,3 +810,975 @@
   background: linear-gradient(135deg, #dc2626, #b91c1c); /* Darker red on hover when recording */
   border-color: #991b1b;
 }
+
+/* Translation Interface Base Styles */
+.translation-container {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.section-header h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.input-controls, 
+.output-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* Microphone Button */
+.mic-button {
+  background: var(--secondary-green);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-inverse);
+  transition: all 0.2s ease;
+}
+
+.mic-button:hover {
+  background: var(--secondary-green-dark);
+  transform: scale(1.05);
+}
+
+.mic-button.listening {
+  background: var(--accent-red);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Text Input Styles */
+.text-input {
+  width: 100%;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-base);
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s ease;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-actions {
+  margin-top: var(--spacing-md);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Button System */
+.translate-button {
+  background: var(--primary-blue);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.5rem;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.translate-button:hover:not(:disabled) {
+  background: var(--primary-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.translate-button:disabled {
+  background: var(--neutral-300);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.control-button {
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-md);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.control-button:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+}
+
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Status Indicators and Loading States */
+.listening-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  color: var(--accent-red);
+  font-size: var(--font-size-sm);
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-red);
+  border-radius: 50%;
+  animation: pulse 1s infinite;
+}
+
+.translation-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-blue);
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  align-self: center;
+}
+
+.text-output {
+  min-height: 120px;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  color: var(--text-primary);
+}
+
+.text-output p {
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.translation-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--neutral-300);
+  border-top: 2px solid var(--primary-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.confidence-score {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Speech Interface Styling - Consistent with Text Mode */
+.speech-interface {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-secondary);
+  min-height: calc(100vh - 200px);
+}
+
+.speech-interface .translation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.speech-interface .input-section,
+.speech-interface .output-section {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  position: relative;
+  min-height: 350px;
+}
+
+.speech-interface .input-section:focus-within,
+.speech-interface .output-section:focus-within {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.speech-interface .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.speech-interface .section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;  
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.speech-interface .language-indicator {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+/* Speech Controls */
+.speech-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.speech-recording-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.speech-recording-btn:hover {
+  background: var(--bg-primary);
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+}
+
+.speech-recording-btn.recording {
+  background: linear-gradient(135deg, var(--accent-red), var(--accent-red-dark));
+  border-color: var(--accent-red-dark);
+  color: var(--text-inverse);
+  animation: recording-pulse 2s infinite;
+}
+
+@keyframes recording-pulse {
+  0%, 100% { 
+    transform: translateY(-2px) scale(1);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+  }
+  50% { 
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(220, 38, 38, 0.4);
+  }
+}
+
+.speech-recording-btn.disabled {
+  background: var(--neutral-100);
+  color: var(--neutral-400);
+  border-color: var(--neutral-200);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Recording Feedback */
+.recording-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.voice-activity-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.voice-status {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.audio-level-display {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.audio-level-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--neutral-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.audio-level-fill {
+  height: 100%;
+  transition: width 0.1s ease;
+  border-radius: 3px;
+}
+
+/* Medical Instructions */
+.medical-instructions {
+  background: var(--bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+}
+
+.medical-instructions h4 {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.medical-instructions ul {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+  list-style-type: disc;
+}
+
+.medical-instructions li {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.medical-instructions .emergency-tip {
+  color: var(--accent-red);
+  font-weight: 600;
+}
+
+/* Speech Output */
+.speech-output {
+  min-height: 120px;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.recognized-text {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.output-placeholder {
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.text-to-speech-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--secondary-green);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.text-to-speech-btn:hover {
+  background: var(--secondary-green-dark);
+  transform: translateY(-1px);
+}
+
+.text-to-speech-btn.speaking {
+  background: var(--accent-orange);
+}
+
+/* Status Messages */
+.status-messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.status-message {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.status-message.processing {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-blue);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.status-message.speaking {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--secondary-green);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.status-message.confidence {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--secondary-green);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.status-message.error {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--accent-red);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.error-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-red);
+  border-radius: 50%;
+}
+
+/* Sign Language Interface Styling - Consistent with Text Mode */
+.sign-language-interface {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-secondary);
+  min-height: calc(100vh - 200px);
+}
+
+.sign-language-interface .translation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.sign-language-interface .input-section,
+.sign-language-interface .output-section {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  position: relative;
+  min-height: 400px;
+}
+
+.sign-language-interface .input-section:focus-within,
+.sign-language-interface .output-section:focus-within {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Clean Sign Language Interface Styling */
+.sign-language-interface-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: var(--spacing-lg);
+}
+
+.sign-language-interface {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.sign-controls {
+  margin-bottom: var(--spacing-lg);
+}
+
+.sign-btn {
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: var(--primary-blue);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.sign-btn:hover {
+  background: var(--primary-blue-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+}
+
+.sign-btn.recording {
+  background: var(--accent-red);
+  animation: pulse 2s infinite;
+}
+
+.sign-btn.recording:hover {
+  background: var(--accent-red-dark);
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: translateY(-2px) scale(1);
+  }
+  50% { 
+    transform: translateY(-2px) scale(1.05);
+  }
+}
+
+.detection-area {
+  margin: var(--spacing-xl) 0;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-placeholder {
+  padding: var(--spacing-xl);
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-xl);
+  color: var(--text-secondary);
+}
+
+.translation-result {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.translation-result h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+}
+
+.translation-result p {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Detection Controls */
+.detection-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.detection-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.detection-toggle:hover {
+  background: var(--bg-primary);
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+}
+
+.detection-toggle.active {
+  background: linear-gradient(135deg, var(--secondary-green), var(--secondary-green-dark));
+  border-color: var(--secondary-green-dark);
+  color: var(--text-inverse);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+}
+
+.auto-translate-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.auto-translate-toggle input[type="checkbox"] {
+  margin-right: var(--spacing-xs);
+}
+
+.gesture-guide-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gesture-guide-btn:hover {
+  background: var(--bg-primary);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+/* Detection Status */
+.detection-status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.status-dot.active {
+  background: var(--secondary-green);
+  animation: status-pulse 2s infinite;
+}
+
+.status-dot.inactive {
+  background: var(--neutral-400);
+}
+
+@keyframes status-pulse {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.status-text {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.ml-mode-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+/* Camera Section */
+.camera-section {
+  flex: 1;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-placeholder {
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+/* Sign Output */
+.sign-output {
+  min-height: 120px;
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.detected-text,
+.translated-text {
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.detected-text strong,
+.translated-text strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Confidence Display */
+.confidence-display {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.confidence-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--neutral-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confidence-fill {
+  height: 100%;
+  background: var(--secondary-green);
+  transition: width 0.3s ease;
+  border-radius: 3px;
+}
+
+/* Detection History */
+.detection-history {
+  margin-top: var(--spacing-md);
+}
+
+.detection-history h4 {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.signs-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.sign-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+}
+
+.sign-text {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.sign-time {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+/* Animation Section */
+.animation-section {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.animation-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.close-animation-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.close-animation-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Detection Statistics */
+.detection-stats {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.detection-stats h4 {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.stat-item {
+  text-align: center;
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.stat-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-value {
+  display: block;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .speech-interface .translation-grid,
+  .sign-language-interface .translation-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+  
+  .speech-interface .input-section,
+  .speech-interface .output-section,
+  .sign-language-interface .input-section,
+  .sign-language-interface .output-section {
+    min-height: auto;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -3,6 +3,7 @@ import { Mic, MicOff, Volume2, Loader, Activity, Volume1 } from 'lucide-react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { speakText } from '../services/awsService';
 import '../App.css';
+import './TranslationInterface.css';
 
 interface SpeechInterfaceProps {
   language: string;
@@ -80,138 +81,137 @@ const SpeechInterface: React.FC<SpeechInterfaceProps> = ({
       </div>
     );
   }
-
   return (
-    <div className={`interface-container space-y-3 ${className}`}>
-      {/* Enhanced Instructions for Medical Context */}
-      <div className="speech-instructions p-3 bg-gray-50 rounded-lg mb-12">
-        <p className="font-bold mb-2">Medical Speech Recognition Instructions:</p>
-        <ul className="space-y-1">
-          <li>• Speak medical terms slowly and clearly</li>
-          <li>• Spell out medication names if not recognized</li>
-          <li>• Use full phrases: "blood pressure is 120 over 80"</li>
-          {realTimeMode && <li>• Real-time mode: Natural pauses trigger processing</li>}
-          {medicalContext === 'emergency' && (
-            <li className="text-red-600">• Emergency mode: Priority processing for urgent terms</li>
-          )}
-        </ul>
-      </div>
-
-      {/* Enhanced Speech Controls with Medical Context */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {/* Speech-to-Text Button with enhanced indicators */}        <button
-          onClick={handleSpeechToText}
-          disabled={isProcessing}
-          className={`speech-recording-btn ${isRecording ? 'recording' : ''} ${isProcessing ? 'disabled' : ''}`}
-        >
-          {isProcessing ? (
-            <Loader className="w-5 h-5 animate-spin" />
-          ) : isRecording ? (
-            <MicOff className="w-5 h-5" />
-          ) : (
-            <Mic className="w-5 h-5" />
-          )}
-          
-          {isProcessing ? 'Processing...' : isRecording ? 'Stop Recording' : 'Start Recording'}
-          
-          {/* Voice Activity Indicator */}
-          {voiceActivityDetection && isRecording && (
-            <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${
-              isVoiceDetected ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
-            }`} />
-          )}
-        </button>
-
-        {/* Audio Level Indicator */}
-        {voiceActivityDetection && isRecording && (
-          <div className="flex items-center gap-2">
-            <Volume1 className="w-4 h-4 text-gray-600" />
-            <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-green-500 transition-all duration-100"
-                style={{ width: `${Math.min(audioLevel * 100, 100)}%` }}
-              />
-            </div>
+    <div className={`speech-interface ${className}`}>
+      {/* Speech Interface Grid - Following Text Mode Design */}
+      <div className="translation-grid">
+        {/* Input Section - Speech Recognition */}
+        <div className="input-section">
+          <div className="section-header">
+            <h3 className="section-title">Speech Input</h3>
+            <div className="language-indicator">{language}</div>
           </div>
-        )}
-
-        {/* Medical Context Indicator */}
-        {medicalContext !== 'general' && (
-          <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded text-xs">
-            <Activity className="w-3 h-3 text-blue-600" />
-            <span className="text-blue-700 capitalize">{medicalContext}</span>
-          </div>
-        )}
-
-        {/* Text-to-Speech Button */}
-        {textToSpeak && (
-          <button
-            onClick={handleTextToSpeech}
-            disabled={isSpeaking || !textToSpeak.trim()}
-            className={`
-              flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all
-              bg-green-500 hover:bg-green-600 text-white
-              ${isSpeaking ? 'opacity-50 cursor-not-allowed' : ''}
-            `}
-          >
-            {isSpeaking ? (
-              <Loader className="w-5 h-5 animate-spin" />
-            ) : (
-              <Volume2 className="w-5 h-5" />
-            )}
-            
-            {isSpeaking ? 'Speaking...' : 'Speak Text'}
-          </button>
-        )}
-      </div>      {/* Enhanced Status Indicators */}
-      <div className="space-y-2">
-        {isRecording && (
-          <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-red-700">
-              Recording... Speak clearly into your microphone
-              {voiceActivityDetection && (
-                <span className="ml-2">
-                  {isVoiceDetected ? '🗣️ Voice detected' : '⏸️ Waiting for voice...'}
-                </span>
+          
+          <div className="speech-controls">
+            <button
+              onClick={handleSpeechToText}
+              disabled={isProcessing}
+              className={`speech-recording-btn ${isRecording ? 'recording' : ''} ${isProcessing ? 'disabled' : ''}`}
+            >
+              {isProcessing ? (
+                <Loader className="w-5 h-5 animate-spin" />
+              ) : isRecording ? (
+                <MicOff className="w-5 h-5" />
+              ) : (
+                <Mic className="w-5 h-5" />
               )}
-            </span>
+              {isProcessing ? 'Processing...' : isRecording ? 'Stop Recording' : 'Start Recording'}
+            </button>
+            
+            {/* Voice Activity & Audio Level Indicators */}
+            {isRecording && (
+              <div className="recording-feedback">
+                {voiceActivityDetection && (
+                  <div className="voice-activity-indicator">
+                    <Activity className={`w-4 h-4 ${isVoiceDetected ? 'text-green-500' : 'text-yellow-500'}`} />
+                    <span className="voice-status">
+                      {isVoiceDetected ? 'Voice detected' : 'Waiting for voice...'}
+                    </span>
+                  </div>
+                )}
+                
+                {audioLevel !== undefined && (
+                  <div className="audio-level-display">
+                    <Volume1 className="w-4 h-4 text-blue-600" />
+                    <div className="audio-level-bar">
+                      <div 
+                        className="audio-level-fill" 
+                        style={{ 
+                          width: `${Math.min(100, audioLevel * 100)}%`,
+                          backgroundColor: audioLevel > 0.5 ? '#10b981' : audioLevel > 0.2 ? '#f59e0b' : '#ef4444'
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
 
-        {isProcessing && (
-          <div className="speech-instructions flex items-center gap-2">
-            <Loader className="w-4 h-4 text-blue-600 animate-spin" />
-            <span className="text-sm text-blue-700">
-              Processing speech with medical terminology optimization...
-            </span>
+          {/* Medical Context Instructions */}
+          <div className="medical-instructions">
+            <h4>Medical Speech Tips:</h4>
+            <ul>
+              <li>Speak medical terms slowly and clearly</li>
+              <li>Spell out medication names if not recognized</li>
+              <li>Use full phrases: "blood pressure is 120 over 80"</li>
+              {realTimeMode && <li>Real-time mode: Natural pauses trigger processing</li>}
+              {medicalContext === 'emergency' && (
+                <li className="emergency-tip">Emergency mode: Priority processing for urgent terms</li>
+              )}
+            </ul>
           </div>
-        )}
+        </div>
 
-        {isSpeaking && (
-          <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg">
-            <Volume2 className="w-4 h-4 text-green-600" />
-            <span className="text-sm text-green-700">
-              Speaking translation...
-            </span>
+        {/* Output Section - Recognition Results */}
+        <div className="output-section">
+          <div className="section-header">
+            <h3 className="section-title">Recognition Output</h3>
+            {textToSpeak && (
+              <button
+                onClick={handleTextToSpeech}
+                disabled={isSpeaking}
+                className={`text-to-speech-btn ${isSpeaking ? 'speaking' : ''}`}
+              >
+                {isSpeaking ? (
+                  <Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Volume2 className="w-4 h-4" />
+                )}
+                {isSpeaking ? 'Speaking...' : 'Play'}
+              </button>
+            )}
           </div>
-        )}
-
-        {confidence && (
-          <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg">
-            <span className="text-sm text-green-700">
-              Transcription confidence: {Math.round(confidence * 100)}%
-            </span>
+          
+          <div className="speech-output">
+            {textToSpeak ? (
+              <div className="recognized-text">{textToSpeak}</div>
+            ) : (
+              <div className="output-placeholder">
+                {isRecording ? 'Listening for speech...' : 'Click "Start Recording" to begin'}
+              </div>
+            )}
           </div>
-        )}
 
-        {currentError && (
-          <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-            <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-            <span className="text-sm text-red-700">
-              {currentError}
-            </span>
-          </div>        )}
+          {/* Status Messages */}
+          <div className="status-messages">
+            {isProcessing && (
+              <div className="status-message processing">
+                <Loader className="w-4 h-4 animate-spin" />
+                <span>Processing with medical terminology optimization...</span>
+              </div>
+            )}
+
+            {isSpeaking && (
+              <div className="status-message speaking">
+                <Volume2 className="w-4 h-4" />
+                <span>Speaking translation...</span>
+              </div>
+            )}
+
+            {confidence && (
+              <div className="status-message confidence">
+                <span>Confidence: {Math.round(confidence * 100)}%</span>
+              </div>
+            )}
+
+            {currentError && (
+              <div className="status-message error">
+                <div className="error-dot"></div>
+                <span>{currentError}</span>
+              </div>
+            )}          </div>
+        </div>
       </div>
     </div>
   );

@@ -480,7 +480,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
               />
             )}
             {/* Always render SignLanguageInterface but control visibility */}
-            <div style={{ display: activeMode === 'sign' ? 'block' : 'none' }}>
+            <div className="translation-card" style={{ display: activeMode === 'sign' ? 'block' : 'none' }}>
               <SignLanguageInterface
                 ref={signLanguageInterfaceRef} // Assign ref
                 onEmergencyDetected={handleSignEmergencyDetected}
