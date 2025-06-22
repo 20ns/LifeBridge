@@ -16,6 +16,7 @@ import TranslationInterface from './TranslationInterface';
 import SpeechInterface from './SpeechInterface';
 import SignLanguageInterface, { SignLanguageInterfaceHandle } from './SignLanguageInterface'; // Import handle
 import EmergencyPhrasesEnhanced from './EmergencyPhrasesEnhanced';
+import { translateText } from '../services/awsService';
 import './MultiModalInterface.css';
 
 type CommunicationMode = 'text' | 'speech' | 'sign' | 'emergency';
@@ -39,12 +40,14 @@ interface MultiModalInterfaceProps {
   sourceLanguage: string;
   targetLanguage: string;
   onLanguageSwitch: () => void;
+  performanceMode: 'standard' | 'optimized';
 }
 
 const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   sourceLanguage,
   targetLanguage,
-  onLanguageSwitch
+  onLanguageSwitch,
+  performanceMode
 }) => {
   // State management
   const [activeMode, setActiveMode] = useState<CommunicationMode>('text');
@@ -240,19 +243,28 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   // Memoized callbacks for SignLanguageInterface
   const handleSignEmergencyDetected = useCallback(() => {
     handleEmergencyMode(true);
-  }, [handleEmergencyMode]);
-
-  const handleSignTranslationRequest = useCallback((text: string, context: string) => {
+  }, [handleEmergencyMode]);  const handleSignTranslationRequest = useCallback(async (text: string, context: string) => {
     const startTime = Date.now();
-    // Simulate API call for sign language translation
-    // In a real app, this would involve an API call and updating state based on the response.
     console.log(`[MultiModalInterface] Sign translation requested. Text: "${text}", Context: "${context}"`);
-    setTimeout(() => {
-      setTranslatedText(`Translated (Sign): ${text} [Context: ${context}]`);
+    
+    try {
+      // Determine the context based on sign language detection
+      const translationContext: 'emergency' | 'consultation' | 'medication' | 'general' = 
+        context.includes('emergency') ? 'emergency' : 
+        context.includes('medication') ? 'medication' : 
+        context.includes('medical') ? 'consultation' : 'general';
+      
+      // Use the translation service with performance mode
+      const result = await translateText(text, sourceLanguage, targetLanguage, translationContext, performanceMode);
+      setTranslatedText(result.translatedText);
       trackPerformance('signDetection', startTime);
-      addNotification(`Sign language text ready for translation: "${text}"`);
-    }, 500); // Reduced timeout for quicker feedback
-  }, [trackPerformance, addNotification]); // setTranslatedText is stable
+      addNotification(`Sign language translated: "${result.translatedText}"`);
+    } catch (error) {
+      console.error('Sign language translation failed:', error);
+      setTranslatedText(`Translation failed: ${text}`);
+      addNotification('Sign language translation failed');
+    }
+  }, [sourceLanguage, targetLanguage, performanceMode, trackPerformance, addNotification]);
 
   // Enhanced connection quality indicator with better visual states
   const ConnectionIndicator = () => (
@@ -345,8 +357,11 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
             LifeBridge Communication
           </h2>
         </div>
-        
-        <div className="header-right">
+          <div className="header-right">
+          <div className={`performance-mode-indicator ${performanceMode}`}>
+            <Zap size={14} />
+            <span>{performanceMode === 'optimized' ? 'OPTIMIZED' : 'STANDARD'}</span>
+          </div>
           <button 
             className="performance-toggle"
             onClick={() => setShowPerformancePanel(!showPerformancePanel)}
@@ -444,12 +459,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
           <OfflineFallback />
         ) : (
           <>
-            {activeMode === 'text' && (
-              <TranslationInterface
+            {activeMode === 'text' && (              <TranslationInterface
                 sourceLanguage={sourceLanguage}
                 targetLanguage={targetLanguage}
                 isListening={isListening}
                 setIsListening={setIsListening}
+                performanceMode={performanceMode}
               />
             )}
             

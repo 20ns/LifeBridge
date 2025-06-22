@@ -193,11 +193,13 @@ export const translateText = async (
   text: string, 
   sourceLanguage: string, 
   targetLanguage: string,
-  context?: 'emergency' | 'consultation' | 'medication' | 'general'
-): Promise<TranslationResult> => {
-  // Check cache first
+  context?: 'emergency' | 'consultation' | 'medication' | 'general',
+  performanceMode: 'standard' | 'optimized' = 'standard'
+): Promise<TranslationResult> => {  // Check cache first - but skip cache for optimized emergency mode
   const cacheKey = createCacheKey(text, sourceLanguage, targetLanguage, context);
-  if (translationCache.has(cacheKey)) {
+  const isEmergencyOptimized = performanceMode === 'optimized' && context === 'emergency';
+  
+  if (!isEmergencyOptimized && translationCache.has(cacheKey)) {
     console.log('Using cached translation');
     return translationCache.get(cacheKey)!;
   }
@@ -220,12 +222,12 @@ export const translateText = async (
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        },        body: JSON.stringify({
           text,
           sourceLanguage,
           targetLanguage,
-          context: context || 'general'
+          context: context || 'general',
+          performanceMode
         })
       });
 

@@ -725,3 +725,58 @@
   border: none;
   box-shadow: none;
 }
+
+/* Performance Mode Indicator */
+.performance-mode-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.performance-mode-indicator.standard {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: white;
+  border-color: #6c757d;
+}
+
+.performance-mode-indicator.optimized {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border-color: #28a745;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+  animation: pulse-optimized 2s infinite;
+}
+
+@keyframes pulse-optimized {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+  }
+}
+
+.performance-mode-indicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Performance mode in emergency mode */
+.emergency-mode .performance-mode-indicator.optimized {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  border-color: #ff6b35;
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+}
+
+.emergency-mode .performance-mode-indicator.optimized span {
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
