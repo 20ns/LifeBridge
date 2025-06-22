@@ -155,8 +155,18 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     });
   }, []);
 
-  // Emergency mode handler
+  // Emergency mode handler with exit confirmation
   const handleEmergencyMode = useCallback((enable: boolean) => {
+    if (!enable && isEmergencyMode) {
+      // Show confirmation dialog when trying to exit emergency mode
+      const confirmed = window.confirm(
+        'Are you sure you want to exit emergency mode?\n\nThis will return you to the normal interface.'
+      );
+      if (!confirmed) {
+        return; // User cancelled, stay in emergency mode
+      }
+    }
+    
     setIsEmergencyMode(enable);
     if (enable) {
       setActiveMode('emergency');
@@ -165,7 +175,19 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       setActiveMode('text');
       addNotification('Emergency mode deactivated');
     }
-  }, []);
+  }, [isEmergencyMode]);
+
+  // Handle clicking on LifeBridge AI text when in emergency mode
+  const handleHeaderClick = useCallback(() => {
+    if (isEmergencyMode) {
+      const confirmed = window.confirm(
+        'Are you sure you want to exit emergency mode?\n\nThis will return you to the normal interface.'
+      );
+      if (confirmed) {
+        handleEmergencyMode(false);
+      }
+    }
+  }, [isEmergencyMode, handleEmergencyMode]);
 
   // Notification system
   const addNotification = useCallback((message: string) => {
@@ -264,7 +286,9 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         </div>
         
         <div className="header-center">
-          <h2>LifeBridge Communication</h2>
+          <h2 onClick={handleHeaderClick} style={{ cursor: isEmergencyMode ? 'pointer' : 'default' }}>
+            LifeBridge Communication
+          </h2>
         </div>
         
         <div className="header-right">
@@ -415,15 +439,13 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       </div>
 
       {/* Performance panel overlay */}
-      <PerformancePanel />
-
-      {/* Quick access emergency button (always visible) */}
+      <PerformancePanel />      {/* Quick access emergency button (always visible) */}
       <button 
-        className="emergency-quick-access"
-        onClick={() => handleEmergencyMode(true)}
-        title="Emergency Access"
+        className={`emergency-quick-access ${isEmergencyMode ? 'active' : ''}`}
+        onClick={() => handleEmergencyMode(!isEmergencyMode)}
+        title={isEmergencyMode ? "Exit Emergency Mode" : "Emergency Access"}
       >
-        🚨
+        {isEmergencyMode ? '✕' : '🚨'}
       </button>
     </div>
   );
