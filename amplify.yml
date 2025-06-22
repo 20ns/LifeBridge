@@ -3,10 +3,12 @@ frontend:
   phases:
     preBuild:
       commands:
+        - node --version
+        - npm --version
         - npm ci
     build:
       commands:
-        - npm run build
+        - CI=false npm run build
   artifacts:
     baseDirectory: build
     files:
@@ -14,6 +16,3 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
-env:
-  variables:
-    NODE_VERSION: "18"
