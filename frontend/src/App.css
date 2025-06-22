@@ -1274,25 +1274,53 @@ a:focus {
   color: var(--text-inverse);
 }
 
-.emergency-mode * {
-  color: var(--text-inverse);
+/* Ensure specific emergency text color overrides in other files take precedence */
+/* .emergency-mode * { color: var(--text-inverse); } */ /* This was too broad, relying on .emergency-mode base and specific overrides */
+
+/* Global Emergency Mode Text Visibility Fix - Layout Consistent */
+.emergency-mode {
+  /* Subtle emergency indication without layout changes */
+  position: relative;
 }
 
-/* Preserve readability in form elements and translation areas */
-.emergency-mode .language-selector select,
-.emergency-mode .language-dropdown select,
-.emergency-mode select.language-select,
-.emergency-mode .text-input,
-.emergency-mode .text-output,
+.emergency-mode::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent-red);
+  z-index: 1000;
+  animation: emergency-indicator 2s ease-in-out infinite;
+}
+
+@keyframes emergency-indicator {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Ensure text visibility without aggressive overrides */
+.emergency-mode .mode-tab {
+  color: var(--text-primary) !important;
+  background: var(--bg-primary) !important;
+}
+
+.emergency-mode .mode-tab.active {
+  background: var(--accent-red) !important;
+  color: var(--text-inverse) !important;
+}
+
+/* Emergency Mode Input Fields - Subtle styling */
 .emergency-mode input,
-.emergency-mode textarea {
-  color: var(--text-primary) !important;
-  background: var(--bg-primary) !important;
+.emergency-mode textarea,
+.emergency-mode select {
+  border-color: var(--accent-red) !important;
 }
 
-.emergency-mode .language-selector select option,
-.emergency-mode .language-dropdown select option,
-.emergency-mode select.language-select option {
-  color: var(--text-primary) !important;
-  background: var(--bg-primary) !important;
+.emergency-mode input:focus,
+.emergency-mode textarea:focus,
+.emergency-mode select:focus {
+  border-color: #b91c1c !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1) !important;
 }

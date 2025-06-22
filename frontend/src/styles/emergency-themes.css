@@ -714,6 +714,7 @@
 }
 
 /* Emergency Mode Global Button Overrides for Maximum Contrast */
+/*
 .emergency-mode .emergency-btn,
 .emergency-mode .emergency-btn-primary,
 .emergency-mode .emergency-btn-secondary,
@@ -733,7 +734,7 @@
   border-color: #000000 !important;
   transform: scale(1.05);
 }
-
+*/
 .emergency-mode .speech-recording-btn {
   background: #ffffff !important;
   color: #000000 !important;

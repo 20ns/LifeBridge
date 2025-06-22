@@ -1,0 +1,360 @@
+/* Enhanced Language Selector - Professional Medical Interface */
+.language-selector {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.language-selector:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.language-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.language-dropdown {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  transition: all 0.3s ease;
+  min-width: 200px;
+  flex: 1;
+}
+
+.language-dropdown:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-medium);
+}
+
+.language-dropdown:focus-within {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: var(--bg-primary);
+}
+
+.language-dropdown svg {
+  color: var(--primary-blue);
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.language-select {
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  flex: 1;
+  padding: var(--spacing-xs) 0;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 32px;
+}
+
+.language-select:focus {
+  outline: none;
+}
+
+.language-select option {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
+  font-weight: 500;
+}
+
+.swap-button {
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.swap-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%);
+}
+
+.swap-button:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+.swap-button:hover {
+  transform: scale(1.1) rotate(180deg);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+}
+
+.swap-button:active {
+  transform: scale(0.95) rotate(180deg);
+}
+
+.swap-button svg {
+  color: var(--text-inverse);
+  width: 20px;
+  height: 20px;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+/* Enhanced Visual Feedback */
+.language-dropdown.source {
+  border-left: 4px solid var(--secondary-green);
+}
+
+.language-dropdown.target {
+  border-left: 4px solid var(--primary-blue);
+}
+
+/* Language Selection Animation */
+.language-select.changing {
+  animation: language-change 0.3s ease;
+}
+
+@keyframes language-change {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Enhanced Visual Feedback Animations */
+.swap-button.swapping {
+  animation: swap-animation 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes swap-animation {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.1) rotate(90deg); }
+  50% { transform: scale(1.2) rotate(180deg); }
+  75% { transform: scale(1.1) rotate(270deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+
+.language-select.changing {
+  animation: language-change-feedback 0.3s ease;
+}
+
+@keyframes language-change-feedback {
+  0% { transform: scale(1); background: var(--bg-secondary); }
+  50% { transform: scale(1.02); background: var(--primary-blue-light); color: var(--text-inverse); }
+  100% { transform: scale(1); background: var(--bg-secondary); }
+}
+
+/* Enhanced Dropdown States */
+.language-dropdown.active {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: var(--bg-primary);
+}
+
+.language-dropdown.source.active {
+  border-left-color: var(--secondary-green);
+}
+
+.language-dropdown.target.active {
+  border-left-color: var(--primary-blue);
+}
+
+/* Enhanced Selection Visual Feedback */
+.language-select:focus + .selection-indicator {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.selection-indicator {
+  position: absolute;
+  top: 50%;
+  right: 40px;
+  width: 8px;
+  height: 8px;
+  background: var(--primary-blue);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.2s ease;
+}
+
+/* Language Pair Connection Indicator */
+.language-pair::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 20px;
+  background: linear-gradient(to bottom, var(--secondary-green), var(--primary-blue));
+  border-radius: 1px;
+  opacity: 0.3;
+  z-index: -1;
+}
+
+/* Success State for Language Changes */
+.language-dropdown.success {
+  border-color: var(--secondary-green);
+  background: #ecfdf5;
+  animation: success-flash 0.5s ease;
+}
+
+@keyframes success-flash {
+  0% { background: #ecfdf5; }
+  50% { background: #d1fae5; }
+  100% { background: #ecfdf5; }
+}
+
+/* Enhanced Accessibility */
+.language-selector:focus-within {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+.language-dropdown:focus-within svg {
+  animation: icon-pulse 0.5s ease;
+}
+
+@keyframes icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .language-selector {
+    padding: var(--spacing-md);
+  }
+  
+  .language-pair {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .language-dropdown {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .swap-button {
+    width: 40px;
+    height: 40px;
+    transform: rotate(90deg);
+  }
+  
+  .swap-button:hover {
+    transform: scale(1.1) rotate(270deg);
+  }
+}
+
+/* Emergency Mode Overrides - Layout Consistent */
+.emergency-mode .language-selector {
+  background: rgba(254, 242, 242, 0.95);
+  border: 2px solid var(--accent-red);
+  /* Keep original dimensions and spacing */
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
+.emergency-mode .language-dropdown {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  color: var(--text-primary);
+  /* Keep original size */
+  min-width: 200px;
+  padding: var(--spacing-md);
+}
+
+.emergency-mode .language-dropdown svg {
+  color: var(--accent-red);
+}
+
+.emergency-mode .language-select {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.emergency-mode .language-dropdown:focus-within {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  background: var(--bg-primary);
+}
+
+.emergency-mode .swap-button {
+  background: linear-gradient(135deg, var(--accent-red), #b91c1c);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  /* Keep original dimensions */
+  width: 48px;
+  height: 48px;
+}
+
+.emergency-mode .swap-button:hover {
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+  transform: scale(1.1) rotate(180deg);
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .language-selector {
+    border-width: 3px;
+    border-color: var(--text-primary);
+  }
+  
+  .language-dropdown {
+    border-width: 3px;
+  }
+  
+  .swap-button {
+    border: 3px solid var(--text-inverse);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .language-selector,
+  .language-dropdown,
+  .swap-button,
+  .language-select {
+    transition: none;
+  }
+  
+  .swap-button:hover {
+    transform: scale(1.05);
+  }
+}
