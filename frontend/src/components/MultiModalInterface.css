@@ -81,7 +81,7 @@
 .multi-modal-interface.emergency-mode p,
 .multi-modal-interface.emergency-mode span {
   color: #ffffff !important;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  text-shadow: none; /* Removed text shadow to diagnose "cream" border issue */
 }
 
 @keyframes emergency-pulse {
