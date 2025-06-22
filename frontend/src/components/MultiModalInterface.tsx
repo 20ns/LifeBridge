@@ -16,6 +16,7 @@ import TranslationInterface from './TranslationInterface';
 import SpeechInterface from './SpeechInterface';
 import SignLanguageInterface, { SignLanguageInterfaceHandle } from './SignLanguageInterface';
 import EmergencyPhrasesEnhanced from './EmergencyPhrasesEnhanced';
+import MedicalContextIndicator from './MedicalContextIndicator';
 import { translateText } from '../services/awsService';
 import './MultiModalInterface.css';
 
@@ -380,7 +381,15 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
             </div>
           ))}
         </div>
-      )}      {/* Mode selection tabs */}
+      )}      {/* Medical Context Indicator */}
+      <div className="medical-context-section">
+        <MedicalContextIndicator 
+          context={isEmergencyMode ? 'emergency' : 'general'} 
+          className="mb-2"
+        />
+      </div>
+
+      {/* Mode selection tabs */}
       <div className={`mode-selector ${isEmergencyMode ? 'emergency-layout' : ''}`}>
         <button
           className={`mode-tab ${activeMode === 'text' ? 'active' : ''}`}
