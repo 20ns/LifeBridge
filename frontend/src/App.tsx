@@ -28,7 +28,7 @@ function App() {
 }
 
 function AppContent() {
-  const { user, logout, canAccessReviewDashboard } = useAuth();
+  const { user, isLoading, logout, canAccessReviewDashboard } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -81,7 +81,16 @@ function AppContent() {
     }
   }, [showPerformanceTooltip]);
 
-  // If user is not logged in, show login page
+  // Show a seamless splash while we verify authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <img src="/logo.png" alt="LifeBridgeAI" width={48} height={48} className="animate-pulse" />
+      </div>
+    );
+  }
+
+  // Once loading is complete, if still no user, present login page
   if (!user) {
     return <LoginPage />;
   }
