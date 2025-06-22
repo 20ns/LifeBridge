@@ -89,6 +89,38 @@ const medicalPriorityMap: { [key: string]: { priority: string; actions: string[]
   }
 };
 
+// Helper function to verify a fist gesture from landmarks
+const isFistGesture = (landmarks: any[]): boolean => {
+ if (!landmarks || landmarks.length !== 21) return false;
+
+ // Landmark indices for fingertips and major joints
+ const fingerLandmarks = {
+   thumb: { tip: 4, mcp: 2 },
+   index: { tip: 8, mcp: 5 },
+   middle: { tip: 12, mcp: 9 },
+   ring: { tip: 16, mcp: 13 },
+   pinky: { tip: 20, mcp: 17 }
+ };
+
+ // Check if each finger is folded by comparing the y-coordinate of the tip to the MCP joint.
+ // For a folded finger, the tip should be below the MCP joint.
+ const isFingerFolded = (tipIdx: number, mcpIdx: number): boolean => {
+   if (!landmarks[tipIdx] || !landmarks[mcpIdx]) return false;
+   return landmarks[tipIdx].y > landmarks[mcpIdx].y;
+ };
+
+ const thumbFolded = isFingerFolded(fingerLandmarks.thumb.tip, fingerLandmarks.thumb.mcp);
+ const indexFolded = isFingerFolded(fingerLandmarks.index.tip, fingerLandmarks.index.mcp);
+ const middleFolded = isFingerFolded(fingerLandmarks.middle.tip, fingerLandmarks.middle.mcp);
+ const ringFolded = isFingerFolded(fingerLandmarks.ring.tip, fingerLandmarks.ring.mcp);
+ const pinkyFolded = isFingerFolded(fingerLandmarks.pinky.tip, fingerLandmarks.pinky.mcp);
+
+ const foldedCount = [thumbFolded, indexFolded, middleFolded, ringFolded, pinkyFolded].filter(Boolean).length;
+
+ // A confirmed fist requires at least 4 fingers to be folded, including the thumb.
+ return foldedCount >= 4 && thumbFolded;
+};
+
 // Enhanced gesture analysis using medical context
 const enhanceGestureAnalysis = (gesture: string, landmarks: any[], medicalContext?: string): ProcessingResult => {
   const basePriority = medicalPriorityMap[gesture] || { priority: 'low', actions: ['General assistance'] };
@@ -108,6 +140,20 @@ const enhanceGestureAnalysis = (gesture: string, landmarks: any[], medicalContex
   // Generate medical-appropriate translation text
   const translationText = generateMedicalTranslationText(gesture, medicalContext);
   
+  // For emergency gestures, perform an additional validation step
+  if (gesture === 'emergency') {
+   if (!isFistGesture(landmarks)) {
+     // If the backend validation fails, downgrade the priority and adjust the text
+     return {
+       processedGesture: 'possible_emergency_mistake',
+       medicalPriority: 'medium',
+       translationText: 'Patient may be attempting a gesture, but it is not a clear emergency signal. Please verify.',
+       recommendedActions: ['Assess patient for other signs of distress', 'Attempt to communicate through other means'],
+       confidence: enhancedConfidence * 0.5, // Reduce confidence due to ambiguity
+     };
+   }
+ }
+
   return {
     processedGesture: gesture,
     medicalPriority: basePriority.priority as any,
