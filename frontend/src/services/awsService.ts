@@ -125,6 +125,18 @@ export interface TranslationResult {
   translatedText: string;
   confidence: number;
   detectedLanguage?: string;
+  medicalAnalysis?: {
+    containsMedical: boolean;
+    isEmergency: boolean;
+    criticalityScore: number;
+    recommendedContext: 'emergency' | 'consultation' | 'medication' | 'general';
+    modifierContext: 'acute' | 'chronic' | 'neutral';
+    detectedTerms: Array<{
+      term: string;
+      category: string;
+      criticality: string;
+    }>;
+  };
 }
 
 export interface EmergencyProtocol {
@@ -242,7 +254,8 @@ export const translateText = async (
       const result: TranslationResult = {
         translatedText: translationData.translatedText,
         confidence: translationData.confidence || 0.8,
-        detectedLanguage: translationData.sourceLanguage || sourceLanguage
+        detectedLanguage: translationData.sourceLanguage || sourceLanguage,
+        medicalAnalysis: translationData.medicalAnalysis
       };
 
       // Cache the result

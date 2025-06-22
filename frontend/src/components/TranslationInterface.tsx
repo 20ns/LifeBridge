@@ -171,7 +171,6 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       };
     }
   }, [sourceLanguage, targetLanguage, inputText, translatedText, isTranslating, realTimeMode, isTyping, context, performanceMode]); // Dependencies are safe now
-
   const handleTranslate = useCallback(async (textToTranslate?: string) => {
     const text = textToTranslate || inputText;
     if (!text.trim()) return;
@@ -189,6 +188,32 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       
       setTranslatedText(result.translatedText);
       setConfidence(result.confidence);
+      
+      // Update medical analysis from API response if available
+      if (result.medicalAnalysis) {
+        setMedicalAnalysis({
+          containsMedical: result.medicalAnalysis.containsMedical,
+          isEmergency: result.medicalAnalysis.isEmergency,
+          requiresMedicationAccuracy: result.medicalAnalysis.detectedTerms.some(term => term.category === 'medication'),
+          detectedTerms: result.medicalAnalysis.detectedTerms.map(term => ({
+            term: term.term,
+            category: term.category as any,
+            alternatives: [],
+            criticality: term.criticality as any
+          })),
+          recommendedContext: result.medicalAnalysis.recommendedContext,
+          criticalityScore: result.medicalAnalysis.criticalityScore,
+          modifierContext: result.medicalAnalysis.modifierContext
+        });
+        
+        // Show medical suggestions based on API analysis
+        setShowMedicalSuggestions(result.medicalAnalysis.containsMedical && result.medicalAnalysis.criticalityScore > 30);
+      } else {
+        // Fallback to local analysis if API doesn't provide it
+        const analysis = analyzeMedicalContent(text);
+        setMedicalAnalysis(analysis);
+        setShowMedicalSuggestions(analysis.containsMedical && analysis.criticalityScore > 30);
+      }
       
       // Turn off real-time mode after manual translation to prevent conflicts
       if (realTimeMode && textToTranslate) {

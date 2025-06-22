@@ -6,6 +6,7 @@ import { qualityAssuranceService } from '../services/qualityAssurance';
 import { phiRedactionService } from '../services/phiRedaction';
 import { impactMetricsService } from '../services/impactMetrics';
 import { offlineService } from '../services/offlineService.core';
+import { analyzeMedicalContent } from '../services/medicalTerminology';
 import * as crypto from 'crypto';
 
 export const handler = async (
@@ -63,9 +64,7 @@ export const handler = async (
         error_message: validation.error
       });
       return createErrorResponse(400, validation.error!);
-    }
-
-    const { text, sourceLanguage, targetLanguage, context, performanceMode = 'standard' } = validation.data;
+    }    const { text, sourceLanguage, targetLanguage, context, performanceMode = 'standard' } = validation.data;
 
     // Validate input
     if (!text.trim()) {
@@ -75,6 +74,11 @@ export const handler = async (
     if (text.length > 5000) {
       return createErrorResponse(400, 'Text too long (maximum 5000 characters)');
     }
+
+    // STEP 0: Medical Content Analysis for Criticality Scoring
+    console.log('🩺 Analyzing medical content for criticality...');
+    const medicalAnalysis = analyzeMedicalContent(text);
+    console.log(`🎯 Criticality analysis: Score ${medicalAnalysis.criticalityScore}/100, Emergency: ${medicalAnalysis.isEmergency}, Context: ${medicalAnalysis.recommendedContext}`);
 
     // STEP 1: PHI Detection and Redaction (HIPAA Compliance)
     console.log('🔒 Starting PHI detection and redaction...');
@@ -227,9 +231,7 @@ export const handler = async (
       processing_time_ms: Date.now() - startTime,
       quality_score: qualityResult.qualityMetrics.overall_quality,
       human_review_required: false
-    });
-
-    // STEP 8: Prepare Final Response
+    });    // STEP 8: Prepare Final Response
     const finalResponse = {
       translatedText: translationResult.translatedText,
       confidence: translationResult.confidence,
@@ -251,7 +253,20 @@ export const handler = async (
       },
       offlineCapable: offlineCapabilities.canHandleOffline,
       processingTime: Date.now() - startTime,
-      emergency: isEmergency
+      emergency: isEmergency,
+      // Medical Analysis (Criticality Scoring)
+      medicalAnalysis: {
+        containsMedical: medicalAnalysis.containsMedical,
+        isEmergency: medicalAnalysis.isEmergency,
+        criticalityScore: medicalAnalysis.criticalityScore,
+        recommendedContext: medicalAnalysis.recommendedContext,
+        modifierContext: medicalAnalysis.modifierContext,
+        detectedTerms: medicalAnalysis.detectedTerms.map(term => ({
+          term: term.term,
+          category: term.category,
+          criticality: term.criticality
+        }))
+      }
     };
 
     console.log('✅ Medical-grade translation completed successfully:', finalResponse);
