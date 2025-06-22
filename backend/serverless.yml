@@ -255,6 +255,15 @@ functions:
           method: post
           cors: true
 
+  offlineSync:
+    handler: dist/handlers/offlineSync.handler
+    timeout: 15
+    events:
+      - http:
+          path: /sync
+          method: post
+          cors: true
+
 plugins:
   - serverless-offline
 

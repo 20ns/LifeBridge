@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { signToTranslation, batchSignProcessing } from '../services/awsService';
+import { enqueueOfflineEvent } from '../utils/offlineQueue';
 
 interface SignData {
   landmarks: any[];
@@ -222,6 +223,19 @@ export const useSignLanguageDetection = () => {
     setDetectedSigns(prev => [...prev, signDataForStateUpdate]);
     
     console.log(`✅ Gesture processed (via ${detectionSource}): ${finalGestureToProcess} -> "${signMapping.text}" (${Math.round(finalConfidenceToUse * 100)}%)`);
+
+    // Queue event if offline for later sync
+    if (!navigator.onLine) {
+      enqueueOfflineEvent({
+        type: 'sign',
+        data: {
+          gesture: finalGestureToProcess,
+          text: signMapping.text,
+          confidence: finalConfidenceToUse,
+        },
+        timestamp: Date.now(),
+      });
+    }
   }, [recognizeGestureNova]); // Added recognizeGestureNova to the dependency array
 
   // Get text from detected signs for translation
