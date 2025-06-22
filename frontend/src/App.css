@@ -295,6 +295,24 @@
   background: var(--neutral-50);
 }
 
+/* Header Controls Layout */
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.language-section {
+  display: flex;
+  align-items: center;
+}
+
+.performance-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
