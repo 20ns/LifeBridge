@@ -37,9 +37,7 @@ function App() {
         document.removeEventListener('click', closeTooltip);
       };
     }
-  }, [showPerformanceTooltip]);
-
-  return (
+  }, [showPerformanceTooltip]);  return (
     <div className="App">
       {/* Skip Links for Accessibility */}
       <div className="skip-links">
@@ -83,73 +81,72 @@ function App() {
               >
                 <Info size={14} />
               </button>
-              
-              {/* Performance Mode Tooltip */}
-              {/* Performance Mode Tooltip */}
-              {showPerformanceTooltip && (
-                <div
-                  className="performance-tooltip"
-                  ref={tooltipRef}
-                  onClick={(e) => e.stopPropagation()} // Stop clicks inside the tooltip from closing it
-                >
-                  <div className="tooltip-header">
-                    <h4>Performance Modes</h4>
-                    <button
-                      className="tooltip-close"
-                      onClick={() => setShowPerformanceTooltip(false)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <div className="tooltip-content">
-                    <div className="mode-comparison">
-                      <div className="mode-section optimized">
-                        <div className="mode-title">
-                          <span className="mode-indicator optimized"></span>
-                          <strong>Optimized Mode</strong>
-                        </div>
-                        <ul>
-                          <li>⚡ Sub-2 second emergency translations</li>
-                          <li>🧠 Enhanced AI processing for accuracy</li>
-                          <li>🚨 Priority processing for medical emergencies</li>
-                          <li>📱 Real-time sign language detection</li>
-                          <li>🔄 Aggressive caching & pre-loading</li>
-                          <li>💰 Higher AWS resource usage</li>
-                        </ul>
-                        <p className="mode-use-case">
-                          <strong>Best for:</strong> Emergency situations, critical care, ambulances
-                        </p>
-                      </div>
-                      
-                      <div className="mode-section standard">
-                        <div className="mode-title">
-                          <span className="mode-indicator standard"></span>
-                          <strong>Standard Mode</strong>
-                        </div>
-                        <ul>
-                          <li>🔋 Battery & resource conservation</li>
-                          <li>💰 Cost-effective AWS usage</li>
-                          <li>⚖️ Balanced speed vs efficiency</li>
-                          <li>🌐 Better for limited internet</li>
-                          <li>📊 Conservative processing approach</li>
-                          <li>⏱️ 5-8 second response times</li>
-                        </ul>
-                        <p className="mode-use-case">
-                          <strong>Best for:</strong> Routine consultations, long shifts, mobile devices
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="aws-info">
-                      <p><strong>💡 AWS Free Tier Optimized:</strong> Both modes stay within 12-month free tier limits</p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </nav>
         </div>
-      </header>      <main className="main-content" id="main-content" role="main">
+      </header>
+
+      {/* Performance Mode Tooltip - Moved outside header for proper positioning */}
+      {showPerformanceTooltip && (
+        <div
+          className="performance-tooltip"
+          ref={tooltipRef}
+          onClick={(e) => e.stopPropagation()} // Stop clicks inside the tooltip from closing it
+        >
+          <div className="tooltip-header">
+            <h4>Performance Modes</h4>
+            <button
+              className="tooltip-close"
+              onClick={() => setShowPerformanceTooltip(false)}
+            >
+              ×
+            </button>
+          </div>
+          <div className="tooltip-content">
+            <div className="mode-comparison">
+              <div className="mode-section optimized">
+                <div className="mode-title">
+                  <span className="mode-indicator optimized"></span>
+                  <strong>Optimized Mode</strong>
+                </div>
+                <ul>
+                  <li>⚡ Sub-2 second emergency translations</li>
+                  <li>🧠 Enhanced AI processing for accuracy</li>
+                  <li>🚨 Priority processing for medical emergencies</li>
+                  <li>📱 Real-time sign language detection</li>
+                  <li>🔄 Aggressive caching & pre-loading</li>
+                  <li>💰 Higher AWS resource usage</li>
+                </ul>
+                <p className="mode-use-case">
+                  <strong>Best for:</strong> Emergency situations, critical care, ambulances
+                </p>
+              </div>
+              
+              <div className="mode-section standard">
+                <div className="mode-title">
+                  <span className="mode-indicator standard"></span>
+                  <strong>Standard Mode</strong>
+                </div>
+                <ul>
+                  <li>🔋 Battery & resource conservation</li>
+                  <li>💰 Cost-effective AWS usage</li>
+                  <li>⚖️ Balanced speed vs efficiency</li>
+                  <li>🌐 Better for limited internet</li>
+                  <li>📊 Conservative processing approach</li>
+                  <li>⏱️ 5-8 second response times</li>
+                </ul>
+                <p className="mode-use-case">
+                  <strong>Best for:</strong> Routine consultations, long shifts, mobile devices
+                </p>
+              </div>
+            </div>
+            
+            <div className="aws-info">
+              <p><strong>💡 AWS Free Tier Optimized:</strong> Both modes stay within 12-month free tier limits</p>
+            </div>
+          </div>
+        </div>
+      )}<main className="main-content" id="main-content" role="main">
         <MultiModalInterface
           sourceLanguage={sourceLanguage}
           targetLanguage={targetLanguage}
