@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle, Mic } from 'lucide-react';
+import { Volume2, Copy, Check, Wifi, WifiOff, AlertTriangle, Mic, Activity } from 'lucide-react';
 import { translateText, speakText } from '../services/awsService';
 import { useRealTimeTranslation } from '../hooks/useRealTimeTranslation';
 import { usePerformanceMonitor } from '../utils/performanceMonitor';
+import { analyzeMedicalContent, MedicalAnalysis } from '../utils/medicalTerminology';
 import SpeechInterface from './SpeechInterface';
 import EmergencyScenarioWorkflow from './EmergencyScenarioWorkflow';
 import QRecommendations from './QRecommendations';
@@ -14,6 +15,7 @@ interface TranslationInterfaceProps {
   isListening: boolean;
   setIsListening: (listening: boolean) => void;
   performanceMode: 'standard' | 'optimized';
+  medicalContext?: 'emergency' | 'consultation' | 'medication' | 'general';
 }
 
 const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
@@ -21,14 +23,17 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   targetLanguage,
   isListening,
   setIsListening,
-  performanceMode
+  performanceMode,
+  medicalContext = 'general'
 }) => {
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [confidence, setConfidence] = useState<number | null>(null);
-  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>('general');  const [realTimeMode, setRealTimeMode] = useState(false);
+  const [context, setContext] = useState<'emergency' | 'consultation' | 'medication' | 'general'>(medicalContext);
+  const [medicalAnalysis, setMedicalAnalysis] = useState<MedicalAnalysis | null>(null);
+  const [showMedicalSuggestions, setShowMedicalSuggestions] = useState(false);const [realTimeMode, setRealTimeMode] = useState(false);
   const [showEmergencyWorkflow, setShowEmergencyWorkflow] = useState(false);
   const [showQRecommendations, setShowQRecommendations] = useState(true);  const [detectedSymptoms, setDetectedSymptoms] = useState<string>('');
   const [patientAge] = useState<number | undefined>(undefined);
@@ -68,6 +73,9 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   });  // Handle input changes with optional real-time translation
   const handleInputChange = (value: string) => {
     setInputText(value);
+    
+    // Analyze medical content
+    handleTextAnalysis(value);
     
     // Clear previous translation if user is editing
     if (!realTimeMode && translatedText) {
@@ -209,7 +217,33 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     }, 1500); // Increased debounce time
 
     return () => clearTimeout(timer);
-  }, [inputText, sourceLanguage, targetLanguage, realTimeMode, sendTypingIndicator]);  return (
+  }, [inputText, sourceLanguage, targetLanguage, realTimeMode, sendTypingIndicator]);
+
+  // Medical analysis and validation
+  const handleTextAnalysis = useCallback((text: string) => {
+    if (text.trim()) {
+      const analysis = analyzeMedicalContent(text);
+      setMedicalAnalysis(analysis);
+      
+      // Auto-suggest context if different from current
+      if (analysis.recommendedContext !== context) {
+        console.log(`Recommended context change: ${context} → ${analysis.recommendedContext}`);
+      }
+      
+      // Show medical suggestions for complex terms
+      setShowMedicalSuggestions(analysis.containsMedical && analysis.criticalityScore > 30);
+    } else {
+      setMedicalAnalysis(null);
+      setShowMedicalSuggestions(false);
+    }
+  }, [context]);
+
+  // Update context when medicalContext prop changes
+  useEffect(() => {
+    setContext(medicalContext);
+  }, [medicalContext]);
+
+  return (
     <div className="interface-container translation-interface">
       {/* Top Controls Bar - Medical Context and Settings */}
       <div className="top-controls-bar">
@@ -295,6 +329,61 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
               className="translation-input"
               rows={4}
             />
+
+            {/* Medical Analysis Display */}
+            {medicalAnalysis && (
+              <div className="medical-analysis-panel">
+                <div className="analysis-header">
+                  <Activity className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium">Medical Analysis</span>
+                </div>
+                
+                <div className="analysis-content">
+                  {medicalAnalysis.isEmergency && (
+                    <div className="emergency-alert">
+                      <AlertTriangle className="w-4 h-4 text-red-600" />
+                      <span className="text-red-700 font-medium">Emergency content detected</span>
+                    </div>
+                  )}
+                  
+                  <div className="analysis-metrics">
+                    <div className="metric">
+                      <span className="metric-label">Context:</span>
+                      <span className={`metric-value context-${medicalAnalysis.recommendedContext}`}>
+                        {medicalAnalysis.recommendedContext}
+                      </span>
+                    </div>
+                    
+                    <div className="metric">
+                      <span className="metric-label">Criticality:</span>
+                      <div className="criticality-bar">
+                        <div 
+                          className="criticality-fill"
+                          style={{ width: `${medicalAnalysis.criticalityScore}%` }}
+                        ></div>
+                      </div>
+                      <span className="metric-value">{medicalAnalysis.criticalityScore}/100</span>
+                    </div>
+                  </div>
+                  
+                  {medicalAnalysis.detectedTerms.length > 0 && (
+                    <div className="detected-terms">
+                      <span className="terms-label">Medical terms detected:</span>
+                      <div className="terms-list">
+                        {medicalAnalysis.detectedTerms.slice(0, 3).map((term, index) => (
+                          <span key={index} className={`term-badge ${term.criticality}`}>
+                            {term.term}
+                          </span>
+                        ))}
+                        {medicalAnalysis.detectedTerms.length > 3 && (
+                          <span className="more-terms">+{medicalAnalysis.detectedTerms.length - 3} more</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="input-actions">
               <button
