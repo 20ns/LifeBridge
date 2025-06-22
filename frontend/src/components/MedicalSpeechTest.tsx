@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mic, MicOff, CheckCircle, XCircle, RotateCcw, Download, Activity } from 'lucide-react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { translateText } from '../services/awsService';
+import '../App.css';
 
 interface TestPhrase {
   id: string;
@@ -339,11 +340,10 @@ const MedicalSpeechTest: React.FC = () => {
       )}
 
       {/* Recording Controls */}
-      <div className="mb-6 flex items-center justify-center gap-4">
-        {!isTestActive ? (
+      <div className="mb-6 flex items-center justify-center gap-4">        {!isTestActive ? (
           <button
             onClick={startTest}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="speech-recording-btn"
             disabled={!currentPhrase}
           >
             <Mic size={20} />
@@ -352,7 +352,7 @@ const MedicalSpeechTest: React.FC = () => {
         ) : (
           <button
             onClick={stopTest}
-            className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            className="speech-recording-btn recording"
           >
             <MicOff size={20} />
             Stop Recording
