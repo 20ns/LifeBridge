@@ -53,8 +53,8 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   performanceMode
 }) => {  // State management
   const [activeMode, setActiveMode] = useState<CommunicationMode>('text');
-  const [isEmergencyMode, setIsEmergencyMode] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isEmergencyMode, setIsEmergencyMode] = useState(false);  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [manualEmergencyOverride, setManualEmergencyOverride] = useState(false);
   const [connectionQuality, setConnectionQuality] = useState<ConnectionQuality>({
     status: 'excellent',
     latency: 50,
@@ -158,50 +158,12 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     }
     return null;
   }, []);
-
   const setCachedTranslation = useCallback((key: string, data: any) => {
     translationCache.current.set(key, {
       data,
       timestamp: Date.now()
-    });  }, []);  // Enhanced emergency mode handler
-  const handleEmergencyMode = useCallback((enabled: boolean) => {
-    if (isTransitioning) return; // Prevent multiple rapid clicks
-    
-    setIsTransitioning(true);
-    
-    // Small delay for smooth visual transition
-    setTimeout(() => {
-      setIsEmergencyMode(enabled);
-      if (enabled) {
-        setActiveMode('emergency');
-      } else {
-        // When exiting emergency mode, smoothly transition back to text mode (home page)
-        setActiveMode('text');
-      }
-        // Add emergency notification
-      if (enabled) {
-        addNotification('🚨 Emergency mode activated - Priority processing enabled');
-      } else {
-        addNotification('✅ Emergency mode deactivated - Returned to normal interface');
-      }
-      
-      // Reset transition state
-      setTimeout(() => setIsTransitioning(false), 300);
-    }, 100);
-  }, [isTransitioning]);
-
-  // Handle clicking on LifeBridge AI text when in emergency mode
-  const handleHeaderClick = useCallback(() => {
-    if (isEmergencyMode) {
-      const confirmed = window.confirm(
-        'Are you sure you want to exit emergency mode?\n\nThis will return you to the normal interface.'
-      );
-      if (confirmed) {
-        handleEmergencyMode(false);
-      }
-    }
-  }, [isEmergencyMode, handleEmergencyMode]);
-  // Notification system with seamless transitions
+    });
+  }, []);  // Notification system with seamless transitions - moved early to avoid dependency issues
   const addNotification = useCallback((message: string) => {
     const newNotification = {
       id: Date.now() + Math.random(),
@@ -248,6 +210,98 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       }, 300);
     }, 5000);
   }, [currentNotification]);
+  // Refs for managing transition state and timeouts
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const overrideCooldownRef = useRef<NodeJS.Timeout | null>(null);
+  const isTransitioningRef = useRef(false);
+  // Cleanup function for transition timeouts
+  const cleanupTransition = useCallback(() => {
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
+    }
+    if (overrideCooldownRef.current) {
+      clearTimeout(overrideCooldownRef.current);
+      overrideCooldownRef.current = null;
+    }
+    isTransitioningRef.current = false;
+    setIsTransitioning(false);
+  }, []);  // Enhanced emergency mode handler with robust transition management
+  const handleEmergencyMode = useCallback((enabled: boolean, isManualTrigger = false) => {
+    // Prevent multiple rapid clicks using ref instead of state
+    if (isTransitioningRef.current) {
+      console.log('[Emergency Button] Already transitioning, ignoring click');
+      return;
+    }
+    
+    // Prevent redundant state changes - if already in the target state, do nothing
+    if (enabled === isEmergencyMode) {
+      console.log(`[Emergency Button] Already in ${enabled ? 'emergency' : 'normal'} mode, no action needed`);
+      return;
+    }
+    
+    console.log(`[Emergency Button] Starting transition to ${enabled ? 'emergency' : 'normal'} mode`);
+    console.log(`[Emergency Button] Current states: isEmergencyMode=${isEmergencyMode}, activeMode=${activeMode}`);
+    
+    // Clean up any existing transition
+    cleanupTransition();
+    
+    // Set transition state
+    isTransitioningRef.current = true;
+    setIsTransitioning(true);
+    
+    // Use a small delay to ensure smooth visual transition
+    setTimeout(() => {
+      // Update the emergency mode and active mode
+      console.log(`[Emergency Button] Setting emergency mode to: ${enabled}`);
+      setIsEmergencyMode(enabled);
+        if (enabled) {
+        console.log('[Emergency Button] Switching to emergency mode');
+        setActiveMode('emergency');
+        addNotification('🚨 Emergency mode activated - Priority processing enabled');
+      } else {
+        console.log('[Emergency Button] Switching to text mode (home page)');
+        setActiveMode('text'); // Return to text mode when exiting emergency
+        addNotification('✅ Emergency mode deactivated - Returned to normal interface');
+        
+        // If manually exiting emergency mode, set override to prevent gesture auto-trigger
+        if (isManualTrigger) {
+          console.log('[Emergency Button] Setting manual override to prevent gesture re-triggering');
+          setManualEmergencyOverride(true);
+          
+          // Clear the override after a cooldown period
+          if (overrideCooldownRef.current) {
+            clearTimeout(overrideCooldownRef.current);
+          }
+          overrideCooldownRef.current = setTimeout(() => {
+            console.log('[Emergency Button] Clearing manual override after cooldown');
+            setManualEmergencyOverride(false);
+            overrideCooldownRef.current = null;
+          }, 10000); // 10 second cooldown to prevent immediate re-triggering
+        }
+      }
+      
+      // Set a timeout to reset the transition state after CSS animation completes
+      transitionTimeoutRef.current = setTimeout(() => {
+        console.log('[Emergency Button] Transition complete, resetting state');
+        isTransitioningRef.current = false;
+        setIsTransitioning(false);
+        transitionTimeoutRef.current = null;
+      }, 500); // Give extra time to ensure CSS animation completes
+    }, 50); // Small delay for smooth visual feedback
+    
+  }, [addNotification, cleanupTransition, isEmergencyMode, activeMode]);// Include current states for debugging
+
+  // Handle clicking on LifeBridge AI text when in emergency mode
+  const handleHeaderClick = useCallback(() => {
+    if (isEmergencyMode) {
+      const confirmed = window.confirm(
+        'Are you sure you want to exit emergency mode?\n\nThis will return you to the normal interface.'
+      );
+      if (confirmed) {
+        handleEmergencyMode(false);
+      }
+    }  }, [isEmergencyMode, handleEmergencyMode]);
 
   // Enhanced mode switching with visual feedback
   const handleModeSwitch = useCallback((mode: CommunicationMode) => {
@@ -290,11 +344,22 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
     }
   }, [activeMode]);
 
-
-  // Memoized callbacks for SignLanguageInterface
+  // Memoized callback for SignLanguageInterface
   const handleSignEmergencyDetected = useCallback(() => {
-    handleEmergencyMode(true);
-  }, [handleEmergencyMode]);  const handleSignTranslationRequest = useCallback(async (text: string, context: string) => {
+    // Only trigger emergency mode if we're not already in emergency mode
+    // AND not under manual override AND not transitioning
+    if (!isEmergencyMode && !isTransitioningRef.current && !manualEmergencyOverride) {
+      console.log('[Gesture Detection] Emergency gesture detected, activating emergency mode');
+      handleEmergencyMode(true);
+    } else {
+      console.log('[Gesture Detection] Emergency gesture detected but ignoring due to:', {
+        isEmergencyMode,
+        isTransitioning: isTransitioningRef.current,
+        manualOverride: manualEmergencyOverride      });
+    }
+  }, [handleEmergencyMode, isEmergencyMode, manualEmergencyOverride]);
+
+  const handleSignTranslationRequest = useCallback(async (text: string, context: string) => {
     const startTime = Date.now();
     console.log(`[MultiModalInterface] Sign translation requested. Text: "${text}", Context: "${context}"`);
     
@@ -393,6 +458,25 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       </div>
     </div>
   );
+  // Cleanup timeouts on unmount to prevent memory leaks and stuck states
+  useEffect(() => {
+    return () => {
+      cleanupTransition();
+    };
+  }, [cleanupTransition]);
+  // Ensure transition state resets if emergency mode changes externally
+  useEffect(() => {
+    // If we're not in a transition but somehow the state got stuck, reset it
+    if (!isTransitioning) return;
+    
+    // Failsafe: reset transition state after maximum expected time
+    const failsafeTimeout = setTimeout(() => {
+      console.log('[Emergency Button] Failsafe timeout triggered, resetting transition state');
+      cleanupTransition();
+    }, 800); // Longer than the normal timeout
+    
+    return () => clearTimeout(failsafeTimeout);
+  }, [isTransitioning, cleanupTransition]);
 
   return (
     <div className={`multi-modal-interface ${isEmergencyMode ? 'emergency-mode' : ''} ${isMobileDevice ? 'mobile-device' : ''}`}>
@@ -563,10 +647,29 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       {/* Performance panel overlay */}
       <PerformancePanel />      {/* Quick access emergency button (always visible) */}
       <button 
-        className={`emergency-quick-access ${isEmergencyMode ? 'active' : ''} ${isTransitioning ? 'transitioning' : ''}`}
-        onClick={() => handleEmergencyMode(!isEmergencyMode)}
+        className={`emergency-quick-access ${isEmergencyMode ? 'active' : ''} ${isTransitioning ? 'transitioning' : ''}`}        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // If the button somehow becomes unresponsive due to a lingering transition
+          // state, force-reset the transition so that the click can take effect.
+          if (isTransitioningRef.current) {
+            console.log('[Emergency Button] Transition appeared stuck - performing manual cleanup before toggling mode');
+            cleanupTransition();
+          }
+
+          console.log(`[Emergency Button] Manual click detected. Current state: emergency=${isEmergencyMode}, transitioning=${isTransitioning}`);
+          handleEmergencyMode(!isEmergencyMode, true); // Pass true for manual trigger
+        }}
+        onDoubleClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          // Double-click as emergency reset if button gets stuck
+          console.log('[Emergency Button] Double-click detected, forcing reset');
+          cleanupTransition();
+        }}
         title={isEmergencyMode ? "Exit Emergency Mode & Return to Home" : "Emergency Access"}
-        disabled={isTransitioning}
+        disabled={false} // Never disable the button - handle in onClick instead
       >
         {isTransitioning ? '⟳' : (isEmergencyMode ? '✕' : '🚨')}
       </button>
