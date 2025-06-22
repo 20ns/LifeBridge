@@ -8,49 +8,22 @@ provider:
   stage: ${opt:stage, 'dev'}
   environment:
     STAGE: ${self:provider.stage}
-    TRANSCRIBE_BUCKET: lifebridge-transcribe-temp-${self:provider.stage}
   iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - bedrock:InvokeModel
-        - bedrock:InvokeModelWithResponseStream
-        - bedrock:ListFoundationModels
-      Resource: '*'
-    - Effect: Allow
-      Action:
-        - qbusiness:Chat
-        - qbusiness:ChatSync
-        - qbusiness:ListApplications
-        - qbusiness:GetApplication
-        - qbusiness:ListConversations
-      Resource: '*'
-    - Effect: Allow
-      Action:
-        - polly:SynthesizeSpeech
-        - transcribe:StartTranscriptionJob
-        - transcribe:GetTranscriptionJob
-      Resource: '*'
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-        - s3:DeleteObject
-      Resource:
-        - arn:aws:s3:::lifebridge-transcribe-temp-${self:provider.stage}/*
-        - arn:aws:s3:::lifebridge-ml-models-${self:provider.stage}/*
-    - Effect: Allow
-      Action:
-        - s3:CreateBucket
-        - s3:ListBucket
-      Resource:
-        - arn:aws:s3:::lifebridge-transcribe-temp-${self:provider.stage}
-        - arn:aws:s3:::lifebridge-ml-models-${self:provider.stage}
-    - Effect: Allow
-      Action:
-        - logs:CreateLogGroup
-        - logs:CreateLogStream
-        - logs:PutLogEvents
-      Resource: '*'
+   - Effect: Allow
+     Action:
+       - bedrock:InvokeModel
+       - bedrock:ListFoundationModels
+     Resource: '*'
+   - Effect: Allow
+     Action:
+       - polly:SynthesizeSpeech
+     Resource: '*'
+   - Effect: Allow
+     Action:
+       - logs:CreateLogGroup
+       - logs:CreateLogStream
+       - logs:PutLogEvents
+     Resource: '*'
 
 functions:
   translate:
@@ -124,6 +97,7 @@ functions:
           path: /contextual-advice
           method: post
           cors: true
+
   signLanguageProcessor:
     handler: dist/handlers/signLanguageProcessor.handler
     timeout: 20
@@ -150,58 +124,33 @@ functions:
           path: /batch-sign-processing
           method: post
           cors: true
-  gestureRecognitionML:
-    handler: src/python/gesture_recognition.lambda_handler
-    runtime: python3.9
-    timeout: 30
-    environment:
-      MODEL_BUCKET: lifebridge-sagemaker-1749301458 # Corrected to match sagemaker_setup_info.json and training script
-      MODEL_KEY: models/medical_gesture_model.joblib    # Corrected to match training script S3 key
+  gestureRecognition:
+    handler: dist/handlers/gestureRecognition.handler
+    timeout: 20
     events:
       - http:
-          path: /gesture-recognition-ml
+          path: /gesture-recognition
           method: post
           cors: true
 
 plugins:
   - serverless-offline
-  - serverless-python-requirements
 
 resources:
   Resources:
-    # TranscribeBucket already exists; no need to recreate
+    # Buckets already exist; left commented for reference
     # TranscribeBucket:
     #   Type: AWS::S3::Bucket
     #   Properties:
     #     BucketName: lifebridge-transcribe-temp-${self:provider.stage}
-    #     LifecycleConfiguration:
-    #       Rules:
-    #         - Id: DeleteTranscriptionFiles
-    #           Status: Enabled
-    #           ExpirationInDays: 1
-    #     PublicAccessBlockConfiguration:
-    #       BlockPublicAcls: true
-    #       BlockPublicPolicy: true
-    #       IgnorePublicAcls: true
-    #       RestrictPublicBuckets: true    # MLModelsBucket already exists, no need to recreate
+    # ...
     # MLModelsBucket:
     #   Type: AWS::S3::Bucket
     #   Properties:
     #     BucketName: lifebridge-ml-models-${self:provider.stage}
-    #     PublicAccessBlockConfiguration:
-    #       BlockPublicAcls: true
-    #       BlockPublicPolicy: true
-    #       IgnorePublicAcls: true
-    #       RestrictPublicBuckets: true
+    # ...
 
 custom:
   serverless-offline:
     httpPort: 3001
     host: localhost
-  pythonRequirements:
-    dockerizePip: true  # Recommended for Lambda compatibility
-    zip: true           # Package dependencies into a .requirements.zip and merge
-    slim: true          # Remove unnecessary files from packages (e.g., tests, .pyc)
-    strip: true         # Strip symbols from shared libraries to reduce size
-    usePoetry: false    # Explicitly disable Poetry if not used
-    requirementsPath: src/python/requirements.txt  # Explicitly point to our requirements file
