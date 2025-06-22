@@ -7,7 +7,7 @@ import '@testing-library/jest-dom';
 import EmergencyScenarioWorkflow from '../../frontend/src/components/EmergencyScenarioWorkflow';
 
 // Mock AWS services
-jest.mock('../../frontend/src/services/awsService', () => ({
+jest.mock('../../../frontend/src/services/awsService', () => ({
   translateText: jest.fn().mockResolvedValue({
     translatedText: 'Translated emergency phrase',
     sourceLanguage: 'en',

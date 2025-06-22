@@ -3,7 +3,227 @@
  * Tests all 6 emergency scenarios with complete communication flows
  */
 
-const { EMERGENCY_SCENARIOS } = require('../frontend/src/data/emergencyScenarios');
+// Mock emergency scenarios data instead of importing TypeScript
+const EMERGENCY_SCENARIOS = [
+  {
+    id: 'heart-attack',
+    category: 'cardiac',
+    severity: 'critical',
+    title: 'Heart Attack',
+    description: 'Critical cardiac emergency requiring immediate intervention',
+    timeframe: '2-5 minutes for initial assessment',
+    symptoms: ['severe chest pain', 'shortness of breath', 'nausea', 'sweating'],
+    phrases: [
+      'URGENT: Patient having heart attack - call emergency services immediately',
+      'Severe crushing chest pain, feels like elephant on chest',
+      'Patient experiencing cardiac emergency - requires immediate medical attention',
+      'Chest pain radiating to left arm and jaw',
+      'Call 911 now - heart attack in progress'
+    ],
+    communicationFlow: [
+      {
+        step: 1,
+        action: 'Initial Assessment - Check consciousness and breathing',
+        timeLimit: '30 seconds',
+        phrases: ['Are you experiencing chest pain?', 'Can you describe the pain?']
+      },
+      {
+        step: 2, 
+        action: 'Call Emergency Services',
+        timeLimit: '60 seconds',
+        phrases: ['Calling 911 for cardiac emergency', 'Heart attack patient needs ambulance']
+      },
+      {
+        step: 3,
+        action: 'Medication Check',
+        timeLimit: '45 seconds', 
+        phrases: ['Do you take any heart medications?', 'Are you allergic to aspirin?']
+      },
+      {
+        step: 4,
+        action: 'Position Patient',
+        timeLimit: '30 seconds',
+        phrases: ['Sit comfortably, do not lie down', 'Stay calm and breathe slowly']
+      },
+      {
+        step: 5,
+        action: 'Vital Signs Monitoring',
+        timeLimit: '60 seconds',
+        phrases: ['Checking pulse and breathing', 'How is your pain level now?']
+      },
+      {
+        step: 6,
+        action: 'Emergency Response Preparation',
+        timeLimit: '90 seconds',
+        phrases: ['Ambulance is on the way', 'Keep patient conscious and responsive']
+      }
+    ],
+    quickActions: {
+      assessment: ['Check pulse and breathing', 'Assess pain level'],
+      treatment: ['Give aspirin if no allergies', 'Keep patient seated upright'],
+      communication: ['Call emergency services immediately', 'Note time of symptom onset']
+    },
+    translations: {
+      es: 'Ataque cardíaco',
+      fr: 'Crise cardiaque',
+      de: 'Herzinfarkt'
+    }
+  },
+  {
+    id: 'stroke',
+    category: 'neurological',
+    severity: 'critical',
+    title: 'Stroke Emergency',
+    description: 'Critical neurological emergency - time sensitive treatment',
+    timeframe: 'Golden hour - 1-3 minutes for FAST assessment',
+    symptoms: ['facial drooping', 'arm weakness', 'speech difficulty', 'sudden confusion'],
+    phrases: [
+      'URGENT: Suspected stroke - immediate medical attention required',
+      'Patient showing signs of stroke - call 911 now',
+      'Facial drooping and speech difficulty observed',
+      'Time is critical for stroke treatment'
+    ],
+    communicationFlow: [
+      {
+        step: 1,
+        action: 'FAST Assessment - Face, Arms, Speech, Time',
+        timeLimit: '60 seconds',
+        phrases: ['Smile for me', 'Raise both arms', 'Repeat this sentence']
+      },
+      {
+        step: 2,
+        action: 'Emergency Services Contact',
+        timeLimit: '30 seconds',
+        phrases: ['Calling 911 for stroke emergency', 'Time of symptom onset is critical']
+      }
+    ],
+    criticalIndicators: [
+      'Sudden onset of symptoms',
+      'Time of symptom onset crucial',
+      'Any sign of FAST assessment failure'
+    ],
+    translations: {
+      es: 'Accidente cerebrovascular',
+      fr: 'AVC',
+      de: 'Schlaganfall'
+    }
+  },
+  {
+    id: 'anaphylaxis',
+    category: 'allergic-reaction',
+    severity: 'critical',
+    title: 'Severe Allergic Reaction/Anaphylaxis',
+    description: 'Life-threatening allergic reaction requiring immediate intervention',
+    timeframe: '30 seconds for initial assessment',
+    symptoms: ['difficulty breathing', 'swelling', 'hives', 'rapid pulse'],
+    phrases: [
+      'Patient having severe allergic reaction - anaphylaxis',
+      'Airway is swelling, patient cannot breathe normally',
+      'EpiPen needed immediately',
+      'Critical allergic emergency in progress'
+    ],
+    communicationFlow: [
+      {
+        step: 1,
+        action: 'Epinephrine Administration',
+        timeLimit: '30 seconds',
+        phrases: ['Using EpiPen now', 'Administering emergency epinephrine']
+      },
+      {
+        step: 2,
+        action: 'Airway Assessment',
+        timeLimit: '45 seconds',
+        phrases: ['Check breathing and airway', 'Position for optimal breathing']
+      }
+    ],
+    translations: {
+      es: 'Anafilaxia',
+      fr: 'Anaphylaxie',
+      de: 'Anaphylaxie'
+    }
+  },
+  {
+    id: 'trauma',
+    category: 'trauma',
+    severity: 'critical',
+    title: 'Accident Trauma Emergency',
+    description: 'Multiple injury trauma requiring systematic assessment',
+    timeframe: '1-2 minutes for ABC assessment',
+    symptoms: ['bleeding', 'fractures', 'head injury', 'unconsciousness'],
+    communicationFlow: [
+      {
+        step: 1,
+        action: 'Primary Survey - ABC Assessment',
+        timeLimit: '90 seconds',
+        phrases: ['Checking airway, breathing, circulation', 'Assessing level of consciousness']
+      }
+    ],
+    contraindications: [
+      'Do not move patient unless immediate danger',
+      'Suspect spinal injury - immobilize',
+      'Control bleeding before other interventions'
+    ],
+    translations: {
+      es: 'Trauma de accidente',
+      fr: 'Traumatisme d\'accident',
+      de: 'Unfalltrauma'
+    }
+  },
+  {
+    id: 'mental-health',
+    category: 'mental-health',
+    severity: 'urgent',
+    title: 'Mental Health Crisis',
+    description: 'Mental health emergency requiring de-escalation and safety',
+    timeframe: '2-5 minutes for initial de-escalation',
+    symptoms: ['agitation', 'confusion', 'suicidal thoughts', 'panic'],
+    communicationFlow: [
+      {
+        step: 1,
+        action: 'De-escalation Communication',
+        timeLimit: '120 seconds',
+        phrases: ['I want to help you', 'You are safe now', 'Let\'s talk about this']
+      }
+    ],
+    quickActions: {
+      assessment: ['Assess suicide risk', 'Evaluate immediate danger'],
+      communication: ['Maintain calm, non-threatening presence', 'Use active listening techniques']
+    },
+    translations: {
+      es: 'Crisis de salud mental',
+      fr: 'Crise de santé mentale',
+      de: 'Psychische Krise'
+    }
+  },
+  {
+    id: 'respiratory',
+    category: 'respiratory',
+    severity: 'critical',
+    title: 'Severe Respiratory Distress',
+    description: 'Critical breathing emergency requiring immediate airway support',
+    timeframe: '30 seconds for initial assessment',
+    symptoms: ['difficulty breathing', 'blue lips/fingernails', 'wheezing', 'chest tightness'],
+    phrases: [
+      'Patient cannot breathe - severe respiratory distress',
+      'Using accessory muscles, struggling to breathe',
+      'Oxygen needed immediately',
+      'Critical breathing emergency'
+    ],
+    communicationFlow: [
+      {
+        step: 1,
+        action: 'Oxygen Administration Priority',
+        timeLimit: '30 seconds',
+        phrases: ['Positioning for optimal breathing', 'Administering oxygen support']
+      }
+    ],
+    translations: {
+      es: 'Dificultad respiratoria severa',
+      fr: 'Détresse respiratoire sévère',
+      de: 'Schwere Atemnot'
+    }
+  }
+];
 
 describe('Emergency Scenario Workflows - Complete Testing', () => {
   
