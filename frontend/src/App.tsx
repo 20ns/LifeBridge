@@ -3,62 +3,37 @@ import './App.css';
 import MultiModalInterface from './components/MultiModalInterface';
 import LanguageSelector from './components/LanguageSelector';
 import ReviewDashboard from './components/ReviewDashboard';
+import LoginPage from './components/LoginPage';
+import UserProfile from './components/UserProfile';
 import { AriaLiveProvider } from './components/AriaLive';
 import { AccessibilityProvider } from './contexts/AccessibilityContext';
 import { AppStateProvider } from './contexts/AppStateContext';
-import { Heart, Settings, Info, Users, MessageSquare } from 'lucide-react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { Heart, Settings, Info, Users, MessageSquare, Shield, User, LogOut } from 'lucide-react';
 import './styles/accessibility-enhanced.css';
 
-function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
-  const [targetLanguage, setTargetLanguage] = useState('es');
-  const [performanceMode, setPerformanceMode] = useState<'standard' | 'optimized'>('optimized');
-  const [showPerformanceTooltip, setShowPerformanceTooltip] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, right: 0 });
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const infoButtonRef = useRef<HTMLButtonElement>(null);
-
-
-  // Handle language switching
-  const handleLanguageSwitch = () => {
-    setSourceLanguage(targetLanguage);
-    setTargetLanguage(sourceLanguage);
-  };  useEffect(() => {
-    const closeTooltips = (event: MouseEvent) => {
-      // Close performance tooltip
-      if (showPerformanceTooltip && 
-          tooltipRef.current && 
-          infoButtonRef.current &&
-          !tooltipRef.current.contains(event.target as Node) &&
-          !infoButtonRef.current.contains(event.target as Node)) {
-        setShowPerformanceTooltip(false);
-      }
-    };
-
-    if (showPerformanceTooltip) {
-      document.addEventListener('mousedown', closeTooltips);
-      
-      return () => {
-        document.removeEventListener('mousedown', closeTooltips);
-      };
-    }
-  }, [showPerformanceTooltip]);  return (
-    <AccessibilityProvider>
-      <AppStateProvider>
-        <AriaLiveProvider>
-          <AppContent />
-        </AriaLiveProvider>
-      </AppStateProvider>
-    </AccessibilityProvider>
+function App() {
+  return (
+    <AuthProvider>
+      <AccessibilityProvider>
+        <AppStateProvider>
+          <AriaLiveProvider>
+            <AppContent />
+          </AriaLiveProvider>
+        </AppStateProvider>
+      </AccessibilityProvider>
+    </AuthProvider>
   );
 }
 
-const AppContent: React.FC = () => {
+function AppContent() {
+  const { user, logout, canAccessReviewDashboard } = useAuth();
+  const [currentView, setCurrentView] = useState<'translation' | 'review' | 'profile'>('translation');
   const [sourceLanguage, setSourceLanguage] = useState('en');
   const [targetLanguage, setTargetLanguage] = useState('es');
   const [performanceMode, setPerformanceMode] = useState<'standard' | 'optimized'>('optimized');
   const [showPerformanceTooltip, setShowPerformanceTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, right: 0 });
-  const [appMode, setAppMode] = useState<'translation' | 'review'>('translation');
   const tooltipRef = useRef<HTMLDivElement>(null);
   const infoButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -67,6 +42,9 @@ const AppContent: React.FC = () => {
     setSourceLanguage(targetLanguage);
     setTargetLanguage(sourceLanguage);
   };
+
+  // Check if user can access review dashboard
+  const hasReviewAccess = canAccessReviewDashboard();
 
   useEffect(() => {
     const closeTooltips = (event: MouseEvent) => {
@@ -88,6 +66,11 @@ const AppContent: React.FC = () => {
       };
     }
   }, [showPerformanceTooltip]);
+
+  // If user is not logged in, show login page
+  if (!user) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="App">
@@ -115,27 +98,48 @@ const AppContent: React.FC = () => {
             <p className="subtitle">Medical Translation Platform</p>
           </div>
 
-          <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">            <div className="controls-group">
+          <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
+            <div className="controls-group">
+              {/* User info and role-based navigation */}
+              <div className="user-info-section">
+                <span className="user-welcome">
+                  Welcome, {user.name} ({user.role})
+                </span>
+              </div>
+
               <div className="mode-switcher">
                 <button
-                  className={`mode-btn ${appMode === 'translation' ? 'active' : ''}`}
-                  onClick={() => setAppMode('translation')}
+                  className={`mode-btn ${currentView === 'translation' ? 'active' : ''}`}
+                  onClick={() => setCurrentView('translation')}
                   aria-label="Switch to Translation Mode"
                 >
                   <MessageSquare size={16} aria-hidden="true" />
                   Translation
                 </button>
+                
+                {/* Only show Review Dashboard for authorized users */}
+                {hasReviewAccess && (
+                  <button
+                    className={`mode-btn ${currentView === 'review' ? 'active' : ''}`}
+                    onClick={() => setCurrentView('review')}
+                    aria-label="Switch to Review Dashboard"
+                  >
+                    <Users size={16} aria-hidden="true" />
+                    Review Dashboard
+                  </button>
+                )}
+                
                 <button
-                  className={`mode-btn ${appMode === 'review' ? 'active' : ''}`}
-                  onClick={() => setAppMode('review')}
-                  aria-label="Switch to Review Dashboard"
+                  className={`mode-btn ${currentView === 'profile' ? 'active' : ''}`}
+                  onClick={() => setCurrentView('profile')}
+                  aria-label="View Profile"
                 >
-                  <Users size={16} aria-hidden="true" />
-                  Review Dashboard
+                  <User size={16} aria-hidden="true" />
+                  Profile
                 </button>
               </div>
 
-              {appMode === 'translation' && (
+              {currentView === 'translation' && (
                 <>
                   <div className="language-section">
                     <LanguageSelector
@@ -185,19 +189,54 @@ const AppContent: React.FC = () => {
                   </div>
                 </>
               )}
+
+              <button
+                className="logout-btn"
+                onClick={logout}
+                aria-label="Logout"
+                title="Logout"
+              >
+                <LogOut size={16} aria-hidden="true" />
+                Logout
+              </button>
             </div>
           </nav>
         </div>
-      </header>      <main className="main-content" id="main-content" role="main">
-        {appMode === 'translation' ? (
+      </header>
+
+      <main className="main-content" id="main-content" role="main">
+        {currentView === 'translation' && (
           <MultiModalInterface
             sourceLanguage={sourceLanguage}
             targetLanguage={targetLanguage}
             onLanguageSwitch={handleLanguageSwitch}
             performanceMode={performanceMode}
           />
-        ) : (
+        )}
+          {currentView === 'review' && hasReviewAccess && (
           <ReviewDashboard />
+        )}
+        
+        {currentView === 'profile' && (
+          <UserProfile />
+        )}
+        
+        {/* Access denied message for unauthorized users trying to access review */}
+        {currentView === 'review' && !hasReviewAccess && (
+          <div className="access-denied-container">
+            <div className="access-denied-message">
+              <Shield size={48} aria-hidden="true" />
+              <h2>Access Denied</h2>
+              <p>You don't have permission to access the Review Dashboard.</p>
+              <p>Required roles: Medical Interpreter, QA Reviewer, Compliance Officer, or Administrator</p>
+              <button 
+                className="btn-primary"
+                onClick={() => setCurrentView('translation')}
+              >
+                Return to Translation
+              </button>
+            </div>
+          </div>
         )}
       </main>
 
