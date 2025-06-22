@@ -19,7 +19,7 @@ Write-Host "🔍 Checking AWS Free Tier services..."
 # Test AWS Bedrock access
 Write-Host "🧠 Checking AWS Bedrock access..."
 try {
-    $bedrockModels = aws bedrock list-foundation-models --region us-east-1 2>$null
+    $bedrockModels = aws bedrock list-foundation-models --region eu-north-1 2>$null
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ Bedrock access confirmed" -ForegroundColor Green
     } else {
@@ -33,7 +33,7 @@ try {
 $bucketName = "lifebridge-ai-$(Get-Date -Format 'yyyyMMdd')-$(Get-Random -Maximum 9999)"
 Write-Host "📦 Creating S3 bucket: $bucketName"
 try {
-    aws s3 mb "s3://$bucketName" --region us-east-1
+    aws s3 mb "s3://$bucketName" --region eu-north-1
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ S3 bucket created successfully" -ForegroundColor Green
         # Save bucket name for later use

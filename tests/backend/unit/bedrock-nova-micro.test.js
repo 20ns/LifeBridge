@@ -4,7 +4,7 @@ const { BedrockRuntimeClient, InvokeModelCommand } = require('@aws-sdk/client-be
 // Test both direct Bedrock integration and service layer
 function createNovaMicroTests() {
   const euClient = new BedrockRuntimeClient({ region: 'eu-north-1' });
-  const usClient = new BedrockRuntimeClient({ region: 'us-east-1' });
+  const usClient = new BedrockRuntimeClient({ region: 'eu-north-1' });
   
   const EU_MODEL_ID = 'arn:aws:bedrock:eu-north-1:272942077493:inference-profile/eu.amazon.nova-micro-v1:0';
   const US_MODEL_ID = 'amazon.nova-micro-v1:0';
