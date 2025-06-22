@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } f
 import SignLanguageDetector from './SignLanguageDetector';
 import SignAnimationPlayer from './SignAnimationPlayer';
 import VisualFeedbackSystem from './VisualFeedbackSystem';
+import GestureGuide from './GestureGuide';
 import { useSignLanguageDetection } from '../hooks/useSignLanguageDetection';
 
 interface SignLanguageInterfaceProps {
@@ -44,6 +45,7 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
   const [autoTranslate, setAutoTranslate] = useState(false);
   const [lastTranslationTime, setLastTranslationTime] = useState(0);
   const [showAnimationPlayer, setShowAnimationPlayer] = useState(false);
+  const [showGestureGuide, setShowGestureGuide] = useState(false);
 
   const prevPropsRef = useRef<SignLanguageInterfaceProps | undefined>(undefined);
 
@@ -155,8 +157,7 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
           >
             {isActive ? '🤚 Stop Detection' : '👋 Start Detection'}
           </button>
-          
-          <label className="auto-translate-toggle">
+            <label className="auto-translate-toggle">
             <input
               type="checkbox"
               checked={autoTranslate}
@@ -165,6 +166,14 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
             />
             Auto-translate
           </label>
+          
+          <button
+            onClick={() => setShowGestureGuide(true)}
+            className="gesture-guide-btn secondary"
+            title="View gesture instructions"
+          >
+            📚 Gesture Guide
+          </button>
         </div>
       </div>
       
@@ -187,22 +196,16 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
             />
           </>
         )}
-      </div>
-
-      <div className="speech-instructions usage-tips" style={{ marginTop: '20px' }}>
-        <h4>Medical Sign Language Tips:</h4>
-        <ul>
-          <li>🚨 <strong>Emergency:</strong> Make a fist and hold for 2 seconds</li>
-          <li>🆘 <strong>Help:</strong> Raise all fingers and wave</li>
-          <li>😣 <strong>Pain:</strong> Point with two fingers (index + middle)</li>
-          <li>💊 <strong>Medicine:</strong> Thumb + pinky gesture</li>
-          <li>👩‍⚕️ <strong>Doctor:</strong> Point upward with index finger</li>
-          <li>💧 <strong>Water:</strong> Three fingers (thumb + index + middle)</li>
-          <li>✅ <strong>Yes:</strong> Thumbs up</li>
-          <li>❌ <strong>No:</strong> Point downward</li>
-        </ul>
+      </div>      <div className="speech-instructions usage-tips" style={{ marginTop: '20px' }}>
+        <h4>Quick Reference:</h4>
+        <div className="quick-tips">
+          <span className="tip">🚨 Emergency: Closed fist (2s hold)</span>
+          <span className="tip">🆘 Help: All fingers raised</span>
+          <span className="tip">😣 Pain: Two fingers</span>
+          <span className="tip">💊 Medicine: Thumb + pinky</span>
+        </div>
         <p className="tip-note">
-          💡 <strong>Tip:</strong> Hold gestures steady for 2-3 seconds for better detection
+          💡 <strong>Tip:</strong> Click "Gesture Guide" for detailed instructions
         </p>
       </div>
 
@@ -239,6 +242,12 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
                 className="animation-toggle-btn"
               >
                 {showAnimationPlayer ? 'Hide' : 'Show'} Sign Animation
+              </button>
+              <button
+                onClick={() => setShowGestureGuide(!showGestureGuide)}
+                className="gesture-guide-btn"
+              >
+                {showGestureGuide ? 'Hide' : 'Show'} Gesture Guide
               </button>
             </div>
           </div>
@@ -288,7 +297,11 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
             </div>
           </div>
         )}
-      </div>
+      </div>      {/* Gesture Guide Modal */}
+      <GestureGuide 
+        isVisible={showGestureGuide} 
+        onClose={() => setShowGestureGuide(false)} 
+      />
     </div>
   );
 });

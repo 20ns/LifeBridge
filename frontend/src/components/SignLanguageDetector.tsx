@@ -56,6 +56,9 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [gestureBuffer, setGestureBuffer] = useState<SignData[]>([]);
   const [emergencyTimer, setEmergencyTimer] = useState<NodeJS.Timeout | null>(null);
+  const [emergencyStartTime, setEmergencyStartTime] = useState<number | null>(null);
+  const [lastGestureTime, setLastGestureTime] = useState<{[key: string]: number}>({});
+  const [gestureStabilityBuffer, setGestureStabilityBuffer] = useState<{[key: string]: SignData[]}>({});
 
   const medicalGestures = {
     'pain': { name: 'Pain', priority: 'high' },
@@ -96,72 +99,106 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
             gesture: gesture,
             timestamp: Date.now()
           };
-          
-          // Special handling for emergency gesture (requires 2-second hold)
+            // Special handling for emergency gesture (requires 2-second hold)
           if (gesture === 'emergency') {
-            if (!emergencyTimer) {
-              console.log('[SignLangDetector] Emergency gesture detected - starting 2-second timer');
-              setDetectionStatus(`🚨 Emergency detected - hold fist for 2 seconds... (${Math.round(confidence * 100)}%)`);
+            const now = Date.now();
+            
+            if (!emergencyStartTime) {
+              // First time detecting emergency gesture
+              setEmergencyStartTime(now);
+              console.log('[SignLangDetector] Emergency gesture detected - starting 2-second hold validation');
+              setDetectionStatus(`🚨 Emergency detected - hold CLOSED FIST for 2 seconds... (${Math.round(confidence * 100)}%)`);
+            } else {
+              // Check if we've held the fist long enough
+              const holdTime = now - emergencyStartTime;
               
-              const timer = setTimeout(() => {
+              if (holdTime >= 2000) {
+                // 2 seconds completed - trigger emergency
                 console.log('[SignLangDetector] Emergency confirmed - 2 seconds completed');
                 onSignDetected(signData);
                 setDetectionStatus(`🚨 EMERGENCY CONFIRMED! (${Math.round(confidence * 100)}%)`);
-                setEmergencyTimer(null);
-              }, 2000);
-              
-              setEmergencyTimer(timer);
-            } else {
-              setDetectionStatus(`🚨 Hold fist steady... (${Math.round(confidence * 100)}%)`);
+                setEmergencyStartTime(null);
+              } else {
+                // Still holding, show countdown
+                const secondsLeft = Math.ceil((2000 - holdTime) / 1000);
+                setDetectionStatus(`🚨 Hold closed fist... ${secondsLeft}s remaining (${Math.round(confidence * 100)}%)`);
+              }
             }
             continue; // Don't process other logic for emergency
           } else {
             // Cancel emergency timer if different gesture is detected
-            if (emergencyTimer) {
-              clearTimeout(emergencyTimer);
-              setEmergencyTimer(null);
-              console.log('[SignLangDetector] Emergency timer cancelled - different gesture detected');
+            if (emergencyStartTime) {
+              setEmergencyStartTime(null);
+              console.log('[SignLangDetector] Emergency hold cancelled - different gesture detected:', gesture);
             }
           }
           
-          // For help gesture, trigger immediately (no buffer needed)
+          // For help gesture, require brief stability (1 second) to avoid false positives
           if (gesture === 'help') {
-            onSignDetected(signData);
-            setDetectionStatus(`🆘 HELP DETECTED! Wave all fingers (${Math.round(confidence * 100)}%)`);
+            const now = Date.now();
+            const lastHelpTime = lastGestureTime['help'] || 0;
+            
+            if (now - lastHelpTime > 1000) { // 1 second stability for help
+              onSignDetected(signData);
+              setDetectionStatus(`🆘 HELP DETECTED! All fingers raised (${Math.round(confidence * 100)}%)`);
+              setLastGestureTime(prev => ({ ...prev, help: now }));
+            } else {
+              const timeLeft = Math.ceil((1000 - (now - lastHelpTime)) / 1000);
+              setDetectionStatus(`🆘 Hold all fingers up... ${timeLeft}s (${Math.round(confidence * 100)}%)`);
+            }
             continue;
           }
           
-          // For other gestures, use buffer for stability
-          setGestureBuffer(prev => {
-            const newBuffer = [...prev, signData].slice(-3);
-            const recentSameGestures = newBuffer.filter(
-              item => item.gesture === gesture && item.timestamp > Date.now() - 1000
-            );
+          // For other gestures, use stability buffer (2-3 seconds for reliable detection)
+          const now = Date.now();
+          setGestureStabilityBuffer(prev => {
+            const currentBuffer = prev[gesture] || [];
+            const newBuffer = [...currentBuffer, signData].slice(-5); // Keep last 5 detections
             
-            if (recentSameGestures.length >= 2) {
-              onSignDetected(signData);
-              setDetectionStatus(`✅ ${gesture.toUpperCase()} detected (${Math.round(confidence * 100)}%)`);
+            // Filter to recent detections (within 2.5 seconds)
+            const recentDetections = newBuffer.filter(item => item.timestamp > now - 2500);
+            
+            // Check if gesture is stable (at least 3 detections in last 2.5 seconds with good confidence)
+            const stableDetections = recentDetections.filter(item => item.confidence > 0.8);
+            
+            if (stableDetections.length >= 3) {
+              const lastTriggered = lastGestureTime[gesture] || 0;
+              
+              // Prevent rapid-fire detections (3-second cooldown)
+              if (now - lastTriggered > 3000) {
+                onSignDetected(signData);
+                setDetectionStatus(`✅ ${gesture.toUpperCase()} detected (${Math.round(confidence * 100)}%)`);
+                setLastGestureTime(prev => ({ ...prev, [gesture]: now }));
+              } else {
+                const cooldownLeft = Math.ceil((3000 - (now - lastTriggered)) / 1000);
+                setDetectionStatus(`⏳ ${gesture} cooldown: ${cooldownLeft}s (${Math.round(confidence * 100)}%)`);
+              }
             } else {
-              setDetectionStatus(`👀 Recognizing ${gesture}... (${Math.round(confidence * 100)}%)`);
+              setDetectionStatus(`👀 Hold ${gesture} steady... ${stableDetections.length}/3 (${Math.round(confidence * 100)}%)`);
             }
-            return newBuffer;
-          });
-        } else if (gesture) {
+            
+            return { ...prev, [gesture]: newBuffer };
+          });        } else if (gesture) {
           // Cancel emergency timer if gesture not confident enough
-          if (emergencyTimer) {
-            clearTimeout(emergencyTimer);
-            setEmergencyTimer(null);
+          if (emergencyStartTime) {
+            setEmergencyStartTime(null);
+            console.log('[SignLangDetector] Emergency hold cancelled - low confidence');
           }
           setDetectionStatus(`🤔 Low confidence ${gesture} (${Math.round(confidence * 100)}%) - hold steady`);
         } else {
           // Cancel emergency timer if no gesture detected
-          if (emergencyTimer) {
-            clearTimeout(emergencyTimer);
-            setEmergencyTimer(null);
+          if (emergencyStartTime) {
+            setEmergencyStartTime(null);
+            console.log('[SignLangDetector] Emergency hold cancelled - no gesture detected');
           }
           setDetectionStatus(`👋 Make a clear gesture`);
         }
-      }} else {
+      }    } else {
+      // Cancel emergency timer if no hands detected
+      if (emergencyStartTime) {
+        setEmergencyStartTime(null);
+        console.log('[SignLangDetector] Emergency hold cancelled - no hands detected');
+      }
       setDetectionStatus('👋 No hands detected - show your hands to the camera');
       // Debug info when no hands are detected
       console.log('[SignLangDetector] No hands detected in frame');
@@ -202,7 +239,6 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
   };  // Proper gesture analysis based on medical sign language specifications
   const analyzeGesture = (landmarks: HandLandmark[]): string | null => {
     if (!landmarks || landmarks.length !== 21) return null;
-    console.log('[AnalyzeGesture] Landmarks:', JSON.parse(JSON.stringify(landmarks))); // Deep copy for logging
     
     // Hand landmark indices
     const thumbTip = 4, thumbMcp = 2;
@@ -210,25 +246,28 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
     const middleTip = 12, middlePip = 10, middleMcp = 9;
     const ringTip = 16, ringPip = 14, ringMcp = 13;
     const pinkyTip = 20, pinkyPip = 18, pinkyMcp = 17;
-    const wrist = 0;
 
     // Helper function to check if finger is extended (tip higher than pip)
     const isFingerExtended = (tipIdx: number, pipIdx: number): boolean => {
       if (!landmarks[tipIdx] || !landmarks[pipIdx]) return false;
       const tipY = landmarks[tipIdx].y;
       const pipY = landmarks[pipIdx].y;
-      const isExtended = tipY < pipY;
-      console.log(`[isFingerExtended] For finger (tipIdx ${tipIdx}, pipIdx ${pipIdx}): tipY=${tipY.toFixed(3)}, pipY=${pipY.toFixed(3)}, isExtended=${isExtended}`);
-      return isExtended; // Lower y = higher position
+      return tipY < pipY - 0.02; // Lower y = higher position, added threshold for stability
     };
 
-    // Special thumb check (different anatomy - check horizontal distance)
+    // Improved thumb check - more reliable fist detection
     const isThumbExtended = (): boolean => {
       if (!landmarks[thumbTip] || !landmarks[thumbMcp] || !landmarks[indexMcp]) return false;
+      
+      // Check horizontal distance from palm
       const thumbToIndexDistance = Math.abs(landmarks[thumbTip].x - landmarks[indexMcp].x);
-      const isExtended = thumbToIndexDistance > 0.05;
-      console.log(`[isThumbExtended] thumbTip.x: ${landmarks[thumbTip].x.toFixed(3)}, indexMcp.x: ${landmarks[indexMcp].x.toFixed(3)}, distance: ${thumbToIndexDistance.toFixed(3)}, isExtended=${isExtended}`);
-      return isExtended; // Threshold for thumb being away from hand
+      
+      // Also check if thumb tip is significantly away from palm center
+      const palmCenterX = (landmarks[indexMcp].x + landmarks[pinkyMcp].x) / 2;
+      const thumbToPalmDistance = Math.abs(landmarks[thumbTip].x - palmCenterX);
+      
+      // Thumb is extended if it's far enough from both index finger and palm center
+      return thumbToIndexDistance > 0.06 && thumbToPalmDistance > 0.05;
     };
 
     // Check finger states
@@ -237,29 +276,50 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
     const middleUp = isFingerExtended(middleTip, middlePip);
     const ringUp = isFingerExtended(ringTip, ringPip);
     const pinkyUp = isFingerExtended(pinkyTip, pinkyPip);
-    console.log(`[AnalyzeGesture] Finger states: ThumbUp=${thumbUp}, IndexUp=${indexUp}, MiddleUp=${middleUp}, RingUp=${ringUp}, PinkyUp=${pinkyUp}`);
 
     // Count extended fingers
-    const extendedFingers = [thumbUp, indexUp, middleUp, ringUp, pinkyUp];
-    const upCount = extendedFingers.filter(Boolean).length;
-    console.log(`[AnalyzeGesture] Extended fingers count (upCount): ${upCount}`);
+    const upCount = [thumbUp, indexUp, middleUp, ringUp, pinkyUp].filter(Boolean).length;
 
-    // Gesture recognition based on specifications
+    // Enhanced gesture recognition with better fist detection
     
-    // 🚨 Emergency: Closed fist (no fingers extended)
+    // 🚨 Emergency: Closed fist (no fingers extended) - MOST STRICT CHECK
     if (upCount === 0) {
-      console.log('[AnalyzeGesture] Condition for EMERGENCY met: upCount === 0. Returning "emergency".');
-      return 'emergency';
+      // Additional validation for proper fist
+      // Check that fingertips are close to palm (folded inward)
+      const palmCenter = landmarks[0]; // Wrist as palm reference
+      const fingertips = [landmarks[thumbTip], landmarks[indexTip], landmarks[middleTip], landmarks[ringTip], landmarks[pinkyTip]];
+      
+      let fistScore = 0;
+      fingertips.forEach(tip => {
+        if (tip) {
+          const distanceToPalm = Math.sqrt(
+            Math.pow(tip.x - palmCenter.x, 2) + 
+            Math.pow(tip.y - palmCenter.y, 2)
+          );
+          // Fingertips should be close to palm for a proper fist
+          if (distanceToPalm < 0.15) fistScore++;
+        }
+      });
+      
+      // Only return emergency if it's a proper closed fist (4/5 fingertips close to palm)
+      if (fistScore >= 4) {
+        console.log('[AnalyzeGesture] PROPER FIST detected - all fingers down and close to palm');
+        return 'emergency';
+      } else {
+        console.log(`[AnalyzeGesture] Partial fist detected but not proper (fistScore: ${fistScore}/5)`);
+        return null;
+      }
     }
     
-    // 🆘 Help: All fingers extended
+    // 🆘 Help: All fingers extended (must be very clear)
     if (upCount === 5 && thumbUp && indexUp && middleUp && ringUp && pinkyUp) {
+      console.log('[AnalyzeGesture] All 5 fingers extended - HELP gesture');
       return 'help';
     }
     
     // ✅ Yes: Thumbs up only
     if (thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp) {
-      console.log('[AnalyzeGesture] Condition for YES met: thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp. Returning "yes".');
+      console.log('[AnalyzeGesture] Thumbs up detected - YES gesture');
       return 'yes';
     }
     
@@ -283,16 +343,16 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
       return 'medicine';
     }
     
-    // ❌ No: Check if pointing downward (index finger with negative y velocity)
+    // ❌ No: Index finger pointing down
     if (!thumbUp && indexUp && !middleUp && !ringUp && !pinkyUp) {
-      // If index is pointing down (higher y value than normal)
-      if (landmarks[indexTip].y > landmarks[indexMcp].y + 0.02) {
+      // Check if index finger is pointing downward by comparing tip position to MCP
+      if (landmarks[indexTip].y > landmarks[indexMcp].y + 0.03) {
         return 'no';
       }
     }
 
     return null; // Unknown gesture
-  };  // Simplified and reliable confidence calculation
+  };// Simplified and reliable confidence calculation
   const calculateGestureConfidence = (landmarks: HandLandmark[]): number => {
     if (!landmarks || landmarks.length !== 21) return 0;
     
@@ -420,6 +480,10 @@ const SignLanguageDetector: React.FC<SignLanguageDetectorProps> = ({
         setEmergencyTimer(null);
         console.log('[SignLangDetector] Emergency timer cleared during cleanup.');
       }
+      // Clear emergency state on cleanup
+      setEmergencyStartTime(null);
+      setLastGestureTime({});
+      setGestureStabilityBuffer({});
     };
   }, [isActive, onResults]);
 
