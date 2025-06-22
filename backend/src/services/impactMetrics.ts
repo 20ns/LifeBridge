@@ -6,6 +6,7 @@ import { CloudWatchClient, PutMetricDataCommand } from '@aws-sdk/client-cloudwat
 import * as crypto from 'crypto';
 // Legacy AWS SDK v2 for integration tests
 import * as AWS from 'aws-sdk';
+import { AWS_REGION } from '../config';
 
 export interface MedicalOutcome {
   patientId: string; // Anonymized/tokenized
@@ -152,8 +153,9 @@ export class ImpactMetricsService {
   private cloudWatchClient: CloudWatchClient;
   private metricsTableName: string;
 
-  constructor() {    this.dynamoClient = new DynamoDBClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
-    this.cloudWatchClient = new CloudWatchClient({ region: process.env.REGION || process.env.AWS_REGION || 'eu-north-1' });
+  constructor() {
+    this.dynamoClient = new DynamoDBClient({ region: AWS_REGION });
+    this.cloudWatchClient = new CloudWatchClient({ region: AWS_REGION });
     this.metricsTableName = process.env.IMPACT_METRICS_TABLE || 'lifebridge-impact-metrics-dev';
   }
 

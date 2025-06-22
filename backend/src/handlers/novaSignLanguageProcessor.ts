@@ -1,10 +1,10 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import { AWS_REGION, BEDROCK_MODEL_ID } from '../config';
 import { createResponse, createErrorResponse, validateRequestBody } from '../utils/response';
 
 // Initialize Bedrock client
-const bedrockClient = new BedrockRuntimeClient({ region: 'eu-north-1' });
-const MODEL_ID = 'arn:aws:bedrock:eu-north-1:272942077493:inference-profile/eu.amazon.nova-micro-v1:0';
+const bedrockClient = new BedrockRuntimeClient({ region: AWS_REGION });
 
 interface SignLanguageRequest {
   landmarks: any[];
@@ -163,7 +163,7 @@ async function invokeNovaModel(prompt: string): Promise<string> {
   };
 
   const command = new InvokeModelCommand({
-    modelId: MODEL_ID,
+    modelId: BEDROCK_MODEL_ID,
     body: JSON.stringify(payload),
     contentType: 'application/json'
   });

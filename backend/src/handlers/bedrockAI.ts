@@ -1,6 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { translateText } from '../services/bedrock';
 import { createResponse, createErrorResponse, validateRequestBody } from '../utils/response';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import { AWS_REGION, BEDROCK_MODEL_ID } from '../config';
 
 // Advanced AI-powered medical translation validation
 export const validateMedicalTranslation = async (
@@ -132,10 +134,8 @@ const validateTranslationWithAI = async (
   reasoning: string;
 }> => {
   // This is where Bedrock AI shines - complex reasoning about medical accuracy
-  const { BedrockRuntimeClient, InvokeModelCommand } = await import('@aws-sdk/client-bedrock-runtime');
-  
-  const client = new BedrockRuntimeClient({ region: 'eu-north-1' });
-  const MODEL_ID = 'arn:aws:bedrock:eu-north-1:272942077493:inference-profile/eu.amazon.nova-micro-v1:0';
+  const client = new BedrockRuntimeClient({ region: AWS_REGION });
+  const MODEL_ID = BEDROCK_MODEL_ID;
 
   const prompt = `You are a medical translation safety expert. Analyze this translation for accuracy and potential medical risks.
 
@@ -195,10 +195,8 @@ const adaptCommunicationWithAI = async (
   communicationTips: string[];
   reasoning: string;
 }> => {
-  const { BedrockRuntimeClient, InvokeModelCommand } = await import('@aws-sdk/client-bedrock-runtime');
-  
-  const client = new BedrockRuntimeClient({ region: 'eu-north-1' });
-  const MODEL_ID = 'arn:aws:bedrock:eu-north-1:272942077493:inference-profile/eu.amazon.nova-micro-v1:0';
+  const client = new BedrockRuntimeClient({ region: AWS_REGION });
+  const MODEL_ID = BEDROCK_MODEL_ID;
 
   const prompt = `You are a cross-cultural medical communication expert. Adapt this medical communication for the target culture.
 
@@ -260,10 +258,8 @@ const validateEmergencyPhraseWithAI = async (
   alternativePhrasings: string[];
   culturalWarnings: string[];
 }> => {
-  const { BedrockRuntimeClient, InvokeModelCommand } = await import('@aws-sdk/client-bedrock-runtime');
-  
-  const client = new BedrockRuntimeClient({ region: 'eu-north-1' });
-  const MODEL_ID = 'arn:aws:bedrock:eu-north-1:272942077493:inference-profile/eu.amazon.nova-micro-v1:0';
+  const client = new BedrockRuntimeClient({ region: AWS_REGION });
+  const MODEL_ID = BEDROCK_MODEL_ID;
 
   const prompt = `You are an emergency medical communication expert. Analyze this emergency phrase for safety and effectiveness.
 
