@@ -298,68 +298,124 @@ export const detectLanguage = async (text: string): Promise<string> => {
   }
 };
 
-// Speech synthesis using backend text-to-speech service
+// Speech synthesis using browser text-to-speech service
 export const speakText = async (text: string, language: string): Promise<void> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/text-to-speech`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        text, 
-        language
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Backend TTS failed, falling back to browser speech');
+  console.log('Using browser text-to-speech for:', text);
+  
+  return new Promise((resolve, reject) => {
+    if (!('speechSynthesis' in window)) {
+      reject(new Error('Speech synthesis not supported in this browser'));
+      return;
     }
 
-    const data = await response.json();
-    
-    if (data.audioBase64) {
-      // Create audio from base64 data
-      const audioBlob = base64ToBlob(data.audioBase64, 'audio/mpeg');
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      const audio = new Audio(audioUrl);
-      return new Promise((resolve, reject) => {
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl); // Clean up
+    try {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
+      // Wait for voices to be loaded (they might not be available immediately)
+      const loadVoicesAndSpeak = () => {
+        const voices = window.speechSynthesis.getVoices();
+        console.log('Available voices:', voices.length, voices.map(v => `${v.name} (${v.lang})`));
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Configure voice based on language
+        if (voices.length > 0) {
+          // Try to find a voice for the target language
+          let targetVoice = voices.find(voice => 
+            voice.lang.toLowerCase() === language.toLowerCase()
+          );
+          
+          // If exact match not found, try partial match
+          if (!targetVoice) {
+            targetVoice = voices.find(voice => 
+              voice.lang.toLowerCase().startsWith(language.toLowerCase().split('-')[0])
+            );
+          }
+          
+          // If still no match, try Spanish voices specifically for "es" language
+          if (!targetVoice && language.startsWith('es')) {
+            targetVoice = voices.find(voice => 
+              voice.lang.toLowerCase().includes('es')
+            );
+          }
+          
+          if (targetVoice) {
+            console.log('Selected voice:', targetVoice.name, targetVoice.lang);
+            utterance.voice = targetVoice;
+          } else {
+            console.log('No specific voice found for language:', language, 'using default');
+          }
+        } else {
+          console.log('No voices available, using default');
+        }
+        
+        // Configure speech parameters for medical use
+        utterance.rate = 0.8; // Slightly slower for clarity
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0; // Full volume
+        utterance.lang = language;
+        
+        console.log('Speech settings:', {
+          text: utterance.text,
+          lang: utterance.lang,
+          voice: utterance.voice?.name,
+          rate: utterance.rate,
+          volume: utterance.volume
+        });
+        
+        utterance.onstart = () => {
+          console.log('Speech started');
+        };
+        
+        utterance.onend = () => {
+          console.log('Text-to-speech completed');
           resolve();
         };
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl); // Clean up
-          reject(new Error('Audio playback failed'));
+        
+        utterance.onerror = (event) => {
+          console.error('Text-to-speech error:', event);
+          reject(new Error(`Speech synthesis failed: ${event.error}`));
         };
-        audio.play().catch(reject);
-      });
-    } else {
-      throw new Error('No audio data returned from backend');
-    }
-    
-  } catch (error) {
-    console.warn('Backend TTS failed, falling back to browser speech:', error);
-    
-    // Fallback to browser speech synthesis
-    return new Promise((resolve, reject) => {
-      if (!('speechSynthesis' in window)) {
-        reject(new Error('Speech synthesis not supported'));
-        return;
-      }
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language;
-      utterance.rate = 0.8; // Slightly slower for medical context
-      utterance.volume = 0.9;
-      
-      utterance.onend = () => resolve();
-      utterance.onerror = (error) => reject(error);
-      
-      speechSynthesis.speak(utterance);
-    });
-  }
+        // Speak the text
+        console.log('Starting speech synthesis...');
+        window.speechSynthesis.speak(utterance);
+        
+        // Add a timeout as backup
+        setTimeout(() => {
+          if (window.speechSynthesis.speaking) {
+            console.log('Speech still in progress...');
+          } else {
+            console.log('Speech may have completed without onend event');
+            resolve();
+          }
+        }, 5000);
+      };
+
+      // Check if voices are already loaded
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        loadVoicesAndSpeak();
+      } else {
+        // Wait for voices to be loaded
+        console.log('Waiting for voices to load...');
+        window.speechSynthesis.onvoiceschanged = () => {
+          console.log('Voices loaded');
+          loadVoicesAndSpeak();
+        };
+        
+        // Fallback timeout in case onvoiceschanged doesn't fire
+        setTimeout(() => {
+          console.log('Voice loading timeout, proceeding anyway...');
+          loadVoicesAndSpeak();
+        }, 1000);
+      }
+        } catch (error) {
+      console.error('Error setting up text-to-speech:', error);
+      reject(error);
+    }
+  });
 };
 
 // Get emergency phrases from backend
