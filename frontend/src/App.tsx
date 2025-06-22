@@ -49,12 +49,17 @@ function App() {  const [sourceLanguage, setSourceLanguage] = useState('en');
       </div>
 
       <header className="app-header" role="banner">
-        <div className="header-content">
-          <div className="logo-section">
-            <Heart className="logo-icon" />
-            <h1>LifeBridge AI</h1>
+        <div className="header-content">          <div className="logo-section">
+            <img 
+              src="/logo.png" 
+              alt="LifeBridgeAI Logo" 
+              className="logo-image"
+              width="40" 
+              height="40"
+            />
+            <h1>LifeBridgeAI</h1>
             <p className="subtitle">Medical Translation Platform</p>
-          </div>          <nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
+          </div><nav className="header-controls" id="navigation" role="navigation" aria-label="Main navigation">
             <div className="controls-group">
               <div className="language-section">
                 <LanguageSelector
