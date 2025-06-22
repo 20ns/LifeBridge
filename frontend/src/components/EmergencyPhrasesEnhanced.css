@@ -64,7 +64,7 @@
 }
 
 .emergency-header::before {
-  content: '🚨';
+  /* content: '🚨'; */
   position: absolute;
   top: -20px;
   left: 50%;
@@ -181,27 +181,42 @@
 .emergency-phrase-button.critical {
   background: linear-gradient(135deg, var(--accent-red), #b91c1c);
   color: var(--text-inverse);
-  border-color: #991b1b;
-  animation: critical-pulse 2s ease-in-out infinite;
+  border-width: 4px; /* Increased border width */
+  border-color: #991b1b; /* Darker red border */
   font-size: var(--font-size-xl);
   min-height: 100px;
+  /* Base shadow for critical state, enhanced by pulse animation */
+  box-shadow:
+    0 8px 16px rgba(185, 28, 28, 0.3), /* Softer, larger base shadow */
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1); /* Subtle inset for depth */
+  animation: critical-pulse 2s ease-in-out infinite;
 }
 
 @keyframes critical-pulse {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+  0%, 100% {
+    /* Combines base shadow with a pulsing outer glow */
+    box-shadow:
+      0 8px 16px rgba(185, 28, 28, 0.3), /* Base shadow */
+      inset 0 -2px 4px rgba(0, 0, 0, 0.1), /* Base inset shadow */
+      0 0 20px rgba(220, 38, 38, 0.6); /* Pulsing outer glow */
   }
-  50% { 
-    box-shadow: 0 0 40px rgba(220, 38, 38, 0.8);
+  50% {
+    /* Enhanced shadows for the pulse peak */
+    box-shadow:
+      0 10px 20px rgba(185, 28, 28, 0.45), /* Slightly larger base shadow */
+      inset 0 -2px 4px rgba(0, 0, 0, 0.15), /* Slightly deeper inset */
+      0 0 40px rgba(220, 38, 38, 0.9); /* Stronger pulsing outer glow */
   }
 }
 
 .emergency-phrase-button.critical:hover {
-  background: linear-gradient(135deg, #ff4757, var(--accent-red));
-  transform: translateY(-6px) scale(1.05);
-  box-shadow: 
-    0 20px 40px rgba(220, 38, 38, 0.6),
-    0 0 0 6px rgba(220, 38, 38, 0.3);
+  background: linear-gradient(135deg, #ff4757, var(--accent-red)); /* Brighter red on hover */
+  transform: translateY(-6px) scale(1.05); /* Keep existing transform */
+  /* Enhanced hover shadow for critical buttons */
+  box-shadow:
+    0 12px 24px rgba(185, 28, 28, 0.5), /* More prominent outer shadow */
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15), /* Consistent inset */
+    0 0 0 6px rgba(220, 38, 38, 0.3); /* Ring effect */
 }
 
 /* Enhanced Emergency Icons */
@@ -302,6 +317,21 @@
   border-color: var(--primary-blue-dark);
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+/* Emergency mode styling for category headers */
+.emergency-mode .category-header {
+  background: var(--bg-secondary); /* Lighter background for emergency mode */
+  border: 2px solid var(--accent-red); /* Red border to signify emergency context */
+  color: var(--text-primary); /* Ensure text is readable */
+}
+
+.emergency-mode .category-header:hover {
+  background: linear-gradient(135deg, var(--accent-red), #b91c1c); /* Red gradient on hover */
+  color: var(--text-inverse); /* White text on hover */
+  border-color: #991b1b; /* Darker red border on hover */
+  transform: translateY(-2px); /* Keep existing transform */
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3); /* Red shadow */
 }
 
 .category-icon {
@@ -508,6 +538,17 @@
   background: linear-gradient(135deg, var(--bg-primary) 0%, #fef2f2 100%);
 }
 
+/*
+The following rules for .phrase-english and .phrase-translated were causing
+color conflicts in emergency mode, overriding the intended inherited colors
+from .emergency-phrase-button. Commenting them out allows the parent button's
+state-dependent color (which correctly switches between --text-primary and --text-inverse)
+to be properly inherited, ensuring correct contrast and thematic consistency.
+The .emergency-phrase-card class is distinct from .emergency-phrase-button,
+so these specific overrides for card text might have been intended for a different
+structure or are now redundant due to the button-centric approach.
+*/
+/*
 .emergency-mode .phrase-english {
   color: var(--text-primary);
   font-weight: 700;
@@ -522,7 +563,7 @@
   color: var(--accent-red);
   font-weight: 900;
 }
-
+*/
 .emergency-mode .phrase-action-button {
   background: var(--bg-primary);
   color: var(--text-primary);
