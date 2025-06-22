@@ -43,10 +43,17 @@ const VisualFeedbackSystem: React.FC<VisualFeedbackProps> = ({
     let title = 'Sign Detected';
     let message = `Detected: ${gesture}`;
 
-    if (confidence >= 0.8) {
+    // For emergency signs, show regardless of confidence
+    if (medicalPriority === 'critical') {
+      feedbackType = 'error'; // Use error styling for critical priority
+      title = '🚨 EMERGENCY SIGN DETECTED';
+      message = `URGENT: ${translationText || gesture}`;
+    }
+    // For non-emergency signs, use confidence thresholds
+    else if (confidence >= 0.5) {
       feedbackType = 'success';
       title = 'Clear Sign Detected';
-    } else if (confidence >= 0.6) {
+    } else if (confidence >= 0.3) {
       feedbackType = 'warning';
       title = 'Sign Detected (Low Confidence)';
       message += ` - Please hold steady`;
@@ -54,13 +61,6 @@ const VisualFeedbackSystem: React.FC<VisualFeedbackProps> = ({
       feedbackType = 'error';
       title = 'Unclear Sign';
       message = 'Please try again with clearer gesture';
-    }
-
-    // Emergency priority override
-    if (medicalPriority === 'critical') {
-      feedbackType = 'error'; // Use error styling for critical priority
-      title = '🚨 EMERGENCY SIGN DETECTED';
-      message = `URGENT: ${translationText || gesture}`;
     }
 
     const newMessage: FeedbackMessage = {
@@ -174,8 +174,8 @@ const VisualFeedbackSystem: React.FC<VisualFeedbackProps> = ({
     const percentage = Math.round(confidence * 100);
     let colorClass = 'bg-red-500';
     
-    if (percentage >= 80) colorClass = 'bg-green-500';
-    else if (percentage >= 60) colorClass = 'bg-yellow-500';
+    if (percentage >= 50) colorClass = 'bg-green-500';
+    else if (percentage >= 30) colorClass = 'bg-yellow-500';
     
     return (
       <div className="confidence-display">
@@ -202,98 +202,125 @@ const VisualFeedbackSystem: React.FC<VisualFeedbackProps> = ({
   }
 
   return (
-    <div className={`visual-feedback-system ${className}`}>
-      {/* Audio Toggle */}
-      <div className="feedback-controls">
-        <button
-          onClick={() => setIsAudioEnabled(!isAudioEnabled)}
-          className={`audio-toggle ${isAudioEnabled ? 'enabled' : 'disabled'}`}
-          title={`Audio feedback ${isAudioEnabled ? 'enabled' : 'disabled'}`}
+    <div className={`visual-feedback-system compact ${className}`} style={{
+      padding: '12px',
+      borderRadius: '8px',
+      backgroundColor: '#f0f0f0', // Light grey background for better visibility
+      border: '1px solid #e0e0e0',
+      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
+    }}>
+      {/* Only show the latest message or current sign */}
+      {messages.length > 0 ? (
+        <div
+          className={`feedback-message ${messages[0].type}`}
+          style={{
+            padding: '12px',
+            borderRadius: '6px',
+            fontSize: '0.9rem',
+            backgroundColor: messages[0].type === 'error' ? '#ffebee' :
+                           messages[0].type === 'warning' ? '#fff8e1' :
+                           messages[0].type === 'success' ? '#e8f5e9' : '#e3f2fd'
+          }}
         >
-          <Volume2 className="w-4 h-4" />
-          <span>{isAudioEnabled ? 'Audio On' : 'Audio Off'}</span>
-        </button>
-      </div>
-
-      {/* Active Detection Indicator */}
-      <div className="detection-status">
-        <div className="status-indicator active">
-          <div className="pulse-ring"></div>
-          <div className="pulse-dot"></div>
+          <div className="message-content">
+            <div className="message-header" style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {getMessageIcon(messages[0].type)}
+                <h5 className="message-title" style={{
+                  margin: '0 0 0 8px',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  color: messages[0].type === 'error' ? '#f44336' :
+                         messages[0].type === 'warning' ? '#ff9800' :
+                         messages[0].type === 'success' ? '#4CAF50' : '#2196F3'
+                }}>
+                  {messages[0].title}
+                </h5>
+              </div>
+              <button
+                onClick={() => dismissMessage(messages[0].id)}
+                className="dismiss-btn"
+                aria-label="Dismiss message"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  color: '#666'
+                }}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="message-text" style={{ margin: '8px 0 0', fontSize: '0.95rem' }}>
+              {messages[0].message}
+            </p>
+          </div>
         </div>
-        <span className="status-text">Watching for signs...</span>
-      </div>
-
-      {/* Current Sign Display */}
-      {signData && (
-        <div className="current-sign-display">
-          <div className="sign-info">
-            <h4 className="sign-name">{signData.gesture}</h4>
+      ) : signData ? (
+        <div className="current-sign-display" style={{
+          padding: '12px',
+          borderRadius: '6px',
+          backgroundColor: '#ffffff',
+          borderLeft: signData.medicalPriority === 'critical' ? '3px solid #f44336' : '3px solid #2196F3'
+        }}>
+          <div className="sign-info" style={{ marginBottom: '8px' }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h4 className="sign-name" style={{
+                margin: 0,
+                fontSize: '1.1rem',
+                fontWeight: 500,
+                color: signData.medicalPriority === 'critical' ? '#f44336' : '#333'
+              }}>
+                {signData.gesture}
+              </h4>
+              {signData.medicalPriority === 'critical' && (
+                <span style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  color: '#f44336',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: '#ffebee'
+                }}>EMERGENCY</span>
+              )}
+            </div>
             {signData.translationText && (
-              <p className="sign-translation">{signData.translationText}</p>
+              <p className="sign-translation" style={{
+                margin: '8px 0 0',
+                fontSize: '0.95rem',
+                color: '#666'
+              }}>{signData.translationText}</p>
             )}
           </div>
           {getConfidenceBar(signData.confidence)}
-          
-          {signData.medicalPriority === 'critical' && (
-            <div className="emergency-indicator">
-              <AlertCircle className="w-5 h-5" />
-              <span>EMERGENCY DETECTED</span>
-            </div>
-          )}
+        </div>
+      ) : (
+        <div className="detection-status" style={{
+          display: 'flex',
+          alignItems: 'center',
+          fontSize: '1rem',
+          color: '#1a73e8'
+        }}>
+          <div className="status-indicator" style={{
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            backgroundColor: '#4CAF50',
+            marginRight: '10px',
+            animation: 'pulse 1.5s infinite'
+          }}></div>
+          <span className="status-text">Watching for signs...</span>
         </div>
       )}
-
-      {/* Feedback Messages */}
-      <div className="feedback-messages">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`feedback-message ${message.type} ${
-              message.gesture?.toLowerCase().includes('emergency') ? 'emergency' : ''
-            }`}
-          >
-            <div className="message-content">
-              <div className="message-header">
-                {getMessageIcon(message.type)}
-                <h5 className="message-title">{message.title}</h5>
-                <button
-                  onClick={() => dismissMessage(message.id)}
-                  className="dismiss-btn"
-                  aria-label="Dismiss message"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <p className="message-text">{message.message}</p>
-              
-              {message.confidence !== undefined && (
-                <div className="message-confidence">
-                  {getConfidenceBar(message.confidence)}
-                </div>
-              )}
-              
-              <div className="message-timestamp">
-                {new Date(message.timestamp).toLocaleTimeString()}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Visual Cues */}
-      <div className="visual-cues">
-        <div className="gesture-hints">
-          <h5>Hold gestures steady for best detection:</h5>
-          <div className="hint-list">
-            <div className="hint-item critical">🚨 Emergency: Closed fist</div>
-            <div className="hint-item high">🆘 Help: Open palm wave</div>
-            <div className="hint-item high">😣 Pain: Two fingers pointing</div>
-            <div className="hint-item medium">👍 Yes: Thumbs up</div>
-            <div className="hint-item medium">👎 No: Point down</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
