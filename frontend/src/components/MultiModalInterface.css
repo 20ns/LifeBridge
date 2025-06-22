@@ -46,30 +46,34 @@
 
 /* Emergency mode button overrides */
 .multi-modal-interface.emergency-mode button {
-  background: rgba(0, 0, 0, 0.6) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #333333 !important;
+  text-shadow: none !important;
 }
 
 .multi-modal-interface.emergency-mode button:hover {
-  background: rgba(0, 0, 0, 0.8) !important;
-  color: #ffffff !important;
+  background: #f0f0f0 !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
 }
 
-.multi-modal-interface.emergency-mode button.active,
-.multi-modal-interface.emergency-mode button.recording {
-  background: rgba(220, 38, 38, 0.8) !important;
-  color: #ffffff !important;
+.multi-modal-interface.emergency-mode button.active {
+  background: #e0e0e0 !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
 }
 
 .multi-modal-interface.emergency-mode .speech-recording-btn {
-  background: rgba(59, 130, 246, 0.8) !important;
-  color: #ffffff !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #333333 !important;
 }
 
 .multi-modal-interface.emergency-mode .speech-recording-btn.recording {
-  background: rgba(220, 38, 38, 0.8) !important;
-  color: #ffffff !important;
+  background: #ffffff !important;
+  color: #dc2626 !important;
+  border-color: #dc2626 !important;
 }
 
 .multi-modal-interface.emergency-mode h2,
