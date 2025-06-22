@@ -146,19 +146,42 @@ body {
 
 .language-select {
   border: none !important;
-  background: transparent !important;
+  background: #ffffff !important;
   font-size: 0.9rem !important;
   cursor: pointer !important;
   outline: none !important;
   min-width: 140px !important;
   color: #1f2937 !important;
   font-weight: 500 !important;
+  -webkit-text-fill-color: #1f2937 !important;
+  -webkit-appearance: menulist !important;
+  appearance: menulist !important;
 }
 
 .language-select option {
   color: #1f2937 !important;
   background: #ffffff !important;
   font-weight: 500 !important;
+  padding: 8px !important;
+  -webkit-text-fill-color: #1f2937 !important;
+}
+
+/* Enhanced language selector visibility - override all conflicts */
+.language-selector select,
+.language-dropdown select,
+select.language-select {
+  color: #1f2937 !important;
+  background: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.language-selector select option,
+.language-dropdown select option,
+select.language-select option {
+  color: #1f2937 !important;
+  background: #ffffff !important;
+  font-weight: 500 !important;
+  padding: 8px !important;
 }
 
 .swap-button {
@@ -1207,10 +1230,118 @@ a:focus {
   color: #ffffff !important;
 }
 
+/* EXCEPTION: Keep language selector readable even in emergency mode */
+.emergency-mode .language-selector select,
+.emergency-mode .language-dropdown select,
+.emergency-mode select.language-select,
+.emergency-mode .language-selector select option,
+.emergency-mode .language-dropdown select option,
+.emergency-mode select.language-select option {
+  color: #1f2937 !important;
+  background: #ffffff !important;
+}
+
+/* EXCEPTION: Keep translation interface text readable in emergency mode */
+.emergency-mode .translation-interface .text-input,
+.emergency-mode .translation-interface .text-output,
+.emergency-mode .translation-interface .text-output p {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
 /* Ensure input and textarea have dark text */
 input,
 textarea,
 select {
   color: #1e293b !important;
   background: #ffffff !important;
+}
+
+/* Final override for all select elements and options to ensure visibility */
+select,
+select option {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
+/* ULTRA HIGH SPECIFICITY - Language Selector Fix */
+.language-selector .language-dropdown .language-select,
+.language-selector .language-pair .language-dropdown .language-select,
+div.language-selector div.language-dropdown select.language-select {
+  color: #1e293b !important;
+  background: #ffffff !important;
+  border: 2px solid #e2e8f0 !important;
+}
+
+.language-selector .language-dropdown .language-select option,
+.language-selector .language-pair .language-dropdown .language-select option,
+div.language-selector div.language-dropdown select.language-select option {
+  color: #1e293b !important;
+  background: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* Force select element visibility across all contexts */
+select[class*="language"],
+select.language-select,
+.language-dropdown select,
+.language-selector select {
+  color: #1e293b !important;
+  background: #ffffff !important;
+  -webkit-appearance: menulist !important;
+  -moz-appearance: menulist !important;
+  appearance: menulist !important;
+}
+
+/* Force option visibility */
+select[class*="language"] option,
+select.language-select option,
+.language-dropdown select option,
+.language-selector select option {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
+/* Ensure translation text is always visible */
+.text-output,
+.text-output p,
+.translated-text,
+.translation-result {
+  color: #1e293b !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* ULTIMATE OVERRIDE - FIX WHITE TEXT ON WHITE BACKGROUND */
+/* This should be the last CSS in the file to override everything */
+
+/* Language Selector - Nuclear Option */
+* [class*="language"] select,
+* select[class*="language"],
+* .language-selector select,
+* .language-dropdown select {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: #000000 !important;
+  text-shadow: none !important;
+}
+
+* [class*="language"] select option,
+* select[class*="language"] option,
+* .language-selector select option,
+* .language-dropdown select option {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: #000000 !important;
+  text-shadow: none !important;
+}
+
+/* Translation Text - Nuclear Option */
+* .text-output,
+* .text-output *,
+* [class*="translation"] .text-output,
+* [class*="translation"] .text-output * {
+  color: #000000 !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  -webkit-text-fill-color: #000000 !important;
+  text-shadow: none !important;
 }
