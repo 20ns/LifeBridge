@@ -244,3 +244,6 @@ dist/
 # Storybook build outputs
 .out
 .storybook-out
+
+# New Demo.md file
+Demo.md
