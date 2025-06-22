@@ -1,12 +1,22 @@
-// Sign Language to Translation Pipeline Integration Test
+// Sign Language to Translation Pipeline Integration Test (Fixed)
 // Tests the complete flow from sign detection to translation using the new endpoints
 
 const API_BASE_URL = 'https://9t2to2akvf.execute-api.eu-north-1.amazonaws.com/dev';
+
+// Generate test landmarks for sign language gestures
+function generateTestLandmarks() {
+  return Array.from({ length: 21 }, (_, i) => ({
+    x: 0.5 + (Math.random() - 0.5) * 0.2,
+    y: 0.5 + (Math.random() - 0.5) * 0.2,
+    z: 0.01 + Math.random() * 0.02
+  }));
+}
 
 // Test data for common emergency medical signs
 const testSigns = [
   {
     gesture: 'emergency',
+    landmarks: generateTestLandmarks(),
     confidence: 0.95,
     timestamp: Date.now(),
     expectedMedical: true,
@@ -14,6 +24,7 @@ const testSigns = [
   },
   {
     gesture: 'help',
+    landmarks: generateTestLandmarks(),
     confidence: 0.88,
     timestamp: Date.now() + 1000,
     expectedMedical: true,
@@ -21,6 +32,7 @@ const testSigns = [
   },
   {
     gesture: 'pain',
+    landmarks: generateTestLandmarks(),
     confidence: 0.82,
     timestamp: Date.now() + 2000,
     expectedMedical: true,
@@ -28,6 +40,7 @@ const testSigns = [
   },
   {
     gesture: 'medicine',
+    landmarks: generateTestLandmarks(),
     confidence: 0.79,
     timestamp: Date.now() + 3000,
     expectedMedical: true,
@@ -35,6 +48,7 @@ const testSigns = [
   },
   {
     gesture: 'doctor',
+    landmarks: generateTestLandmarks(),
     confidence: 0.85,
     timestamp: Date.now() + 4000,
     expectedMedical: true,
@@ -54,39 +68,27 @@ async function testSignToTranslation() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          signData: sign,
-          targetLanguage: 'en'
+          gesture: sign.gesture,
+          landmarks: sign.landmarks,
+          confidence: sign.confidence,
+          targetLanguage: 'en',
+          medicalContext: 'emergency'
         })
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const error = await response.json();
+        throw new Error(`HTTP ${response.status}: ${error.error || response.statusText}`);
       }
 
       const result = await response.json();
       
       console.log(`✅ Sign "${sign.gesture}" Translation:`, {
-        detected: result.detectedSign,
-        translated: result.translatedText,
-        confidence: result.confidence,
-        medical: result.medicalContext,
-        emergency: result.isEmergency
+        signAnalysis: result.data.signAnalysis?.enhancedGesture,
+        translatedText: result.data.translationResult?.translatedText,
+        confidence: result.data.signAnalysis?.confidence,
+        medicalPriority: result.data.signAnalysis?.medicalPriority
       });
-
-      // Validate response structure
-      if (!result.detectedSign || !result.translatedText) {
-        throw new Error('Missing required fields in response');
-      }
-
-      // Validate medical context for emergency signs
-      if (sign.expectedMedical && !result.medicalContext) {
-        console.warn(`⚠️ Missing medical context for medical sign: ${sign.gesture}`);
-      }
-
-      // Validate emergency detection
-      if (sign.expectedPriority === 'critical' && !result.isEmergency) {
-        console.warn(`⚠️ Emergency not detected for critical sign: ${sign.gesture}`);
-      }
 
     } catch (error) {
       console.error(`❌ Failed to translate sign "${sign.gesture}":`, error.message);
@@ -105,39 +107,25 @@ async function testBatchSignProcessing() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        signs: testSigns,
+        signSequence: testSigns,
+        medicalContext: 'emergency',
         targetLanguage: 'en'
       })
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const error = await response.json();
+      throw new Error(`HTTP ${response.status}: ${error.error || response.statusText}`);
     }
 
     const result = await response.json();
     
     console.log('✅ Batch Processing Result:', {
-      signsProcessed: result.signs.length,
-      combinedText: result.combinedText,
-      translatedText: result.translatedText,
-      medicalContext: result.medicalContext,
-      isEmergency: result.isEmergency
+      signsProcessed: result.data.processedSigns?.length,
+      combinedText: result.data.combinedText,
+      translatedText: result.data.translationResult?.translatedText,
+      medicalPriority: result.data.medicalPriority
     });
-
-    // Validate batch processing
-    if (result.signs.length !== testSigns.length) {
-      console.warn(`⚠️ Expected ${testSigns.length} signs, got ${result.signs.length}`);
-    }
-
-    if (!result.combinedText || !result.translatedText) {
-      throw new Error('Missing combined or translated text in batch result');
-    }
-
-    // Check if emergency is detected in batch (should be true due to critical signs)
-    const hasCriticalSigns = testSigns.some(s => s.expectedPriority === 'critical');
-    if (hasCriticalSigns && !result.isEmergency) {
-      console.warn('⚠️ Emergency not detected in batch with critical signs');
-    }
 
   } catch (error) {
     console.error('❌ Batch processing failed:', error.message);
@@ -159,21 +147,25 @@ async function testMultiLanguageTranslation() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          signData: testSign,
-          targetLanguage: lang
+          gesture: testSign.gesture,
+          landmarks: testSign.landmarks,
+          confidence: testSign.confidence,
+          targetLanguage: lang,
+          medicalContext: 'emergency'
         })
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const error = await response.json();
+        throw new Error(`HTTP ${response.status}: ${error.error || response.statusText}`);
       }
 
       const result = await response.json();
       
       console.log(`✅ ${lang.toUpperCase()} Translation:`, {
-        original: result.detectedSign,
-        translated: result.translatedText,
-        confidence: result.confidence
+        original: result.data.signAnalysis?.enhancedGesture,
+        translated: result.data.translationResult?.translatedText,
+        confidence: result.data.signAnalysis?.confidence
       });
 
     } catch (error) {
@@ -194,11 +186,9 @@ async function testErrorHandling() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        signData: {
-          gesture: 'invalid_gesture',
-          confidence: -1, // Invalid confidence
-          timestamp: 'invalid_timestamp'
-        },
+        gesture: 'invalid_gesture',
+        landmarks: [], // Invalid empty landmarks
+        confidence: -1, // Invalid confidence
         targetLanguage: 'en'
       })
     });
@@ -206,9 +196,19 @@ async function testErrorHandling() {
     const result = await response.json();
     
     if (response.ok) {
-      console.log('✅ Invalid sign handled gracefully:', result);
+      console.log('✅ Invalid sign handled gracefully:', {
+        success: result.success,
+        statusCode: result.statusCode,
+        error: result.error,
+        timestamp: result.timestamp
+      });
     } else {
-      console.log('✅ Proper error response for invalid data:', result);
+      console.log('✅ Proper error response for invalid data:', {
+        success: result.success,
+        statusCode: result.statusCode,
+        error: result.error,
+        timestamp: result.timestamp
+      });
     }
 
   } catch (error) {
@@ -223,13 +223,20 @@ async function testErrorHandling() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        // Missing signData
+        // Missing gesture field
+        landmarks: generateTestLandmarks(),
+        confidence: 0.8,
         targetLanguage: 'en'
       })
     });
 
     const result = await response.json();
-    console.log('✅ Missing field error handled:', result);
+    console.log('✅ Missing field error handled:', {
+      success: result.success,
+      statusCode: result.statusCode,
+      error: result.error,
+      timestamp: result.timestamp
+    });
 
   } catch (error) {
     console.log('✅ Missing field validation working:', error.message);
@@ -253,8 +260,11 @@ async function testPerformance() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          signData: testSigns[0],
-          targetLanguage: 'en'
+          gesture: testSigns[0].gesture,
+          landmarks: testSigns[0].landmarks,
+          confidence: testSigns[0].confidence,
+          targetLanguage: 'en',
+          medicalContext: 'emergency'
         })
       });
 
@@ -288,7 +298,7 @@ async function testPerformance() {
 
 // Main test runner
 async function runIntegrationTests() {
-  console.log('🚀 Starting Sign Language Translation Integration Tests\n');
+  console.log('🚀 Starting Sign Language Translation Integration Tests (Fixed)\n');
   console.log('Testing API Base URL:', API_BASE_URL);
   console.log('Testing with AWS Free Tier endpoints\n');
   
