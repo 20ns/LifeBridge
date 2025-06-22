@@ -127,3 +127,9 @@ jest.mock('@aws-sdk/client-sns', () => ({
   SNSClient: createAwsClientMock(),
   PublishCommand: jest.fn().mockImplementation((params) => params)
 }), { virtual: true });
+
+// Provide default environment variables for backend config validation
+process.env.USERS_TABLE = process.env.USERS_TABLE || 'UsersTableLocal';
+process.env.REVIEW_ALERTS_TOPIC_ARN = process.env.REVIEW_ALERTS_TOPIC_ARN || 'arn:aws:sns:local:123456789012:review-alerts';
+process.env.REVIEW_REQUESTS_TABLE = process.env.REVIEW_REQUESTS_TABLE || 'ReviewRequestsLocal';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_jwt_secret';
