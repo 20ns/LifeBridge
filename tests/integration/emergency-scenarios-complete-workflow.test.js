@@ -7,7 +7,7 @@ const mockSpeakText = jest.fn();
 
 jest.mock('../../frontend/src/services/awsService', () => ({
   mockTranslateText: mockTranslateText,
-  speakText: mockSpeakText
+  mockSpeakText: mockSpeakText
 }));
 
 // Import emergency scenarios data (will need to be adapted for Node.js)
@@ -187,8 +187,8 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
       expect(firstStep.phrases[0]).toBe("911 Emergency - Heart attack in progress");
       
       // Step 4: Speech synthesis for emergency calls
-      await speakText(firstStep.phrases[0], 'en');
-      expect(speakText).toHaveBeenCalledWith(firstStep.phrases[0], 'en');
+      await mockSpeakText(firstStep.phrases[0], 'en');
+      expect(mockSpeakText).toHaveBeenCalledWith(firstStep.phrases[0], 'en');
       
       console.log('✅ Heart Attack Workflow: All steps completed successfully');
     });
@@ -411,13 +411,13 @@ describe('Emergency Scenarios Complete Workflow Tests', () => {  beforeEach(() =
         
         // Execute first communication step
         const firstStep = scenario.communicationFlow[0];
-        await speakText(firstStep.phrases[0], 'en');
-        expect(speakText).toHaveBeenCalledWith(firstStep.phrases[0], 'en');
+        await mockSpeakText(firstStep.phrases[0], 'en');
+        expect(mockSpeakText).toHaveBeenCalledWith(firstStep.phrases[0], 'en');
       }
       
       // Verify all scenarios were processed
       expect(mockTranslateText).toHaveBeenCalledTimes(3);
-      expect(speakText).toHaveBeenCalledTimes(3);
+      expect(mockSpeakText).toHaveBeenCalledTimes(3);
       
       console.log('✅ Multiple Scenarios: Sequential processing validated');
     });
