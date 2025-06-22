@@ -4,7 +4,7 @@
   z-index: 1;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
 }
 
@@ -12,7 +12,7 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Ensure sign interface doesn't overlap with other elements */
