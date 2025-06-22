@@ -362,35 +362,52 @@ export const speakText = async (text: string, language: string): Promise<void> =
           voice: utterance.voice?.name,
           rate: utterance.rate,
           volume: utterance.volume
-        });
-        
-        utterance.onstart = () => {
+        });        utterance.onstart = () => {
           console.log('Speech started');
         };
         
+        let hasResolved = false;
+        
         utterance.onend = () => {
-          console.log('Text-to-speech completed');
-          resolve();
+          console.log('Text-to-speech completed via onend');
+          if (!hasResolved) {
+            hasResolved = true;
+            resolve();
+          }
         };
         
         utterance.onerror = (event) => {
           console.error('Text-to-speech error:', event);
-          reject(new Error(`Speech synthesis failed: ${event.error}`));
+          if (!hasResolved) {
+            hasResolved = true;
+            reject(new Error(`Speech synthesis failed: ${event.error}`));
+          }
         };
 
         // Speak the text
         console.log('Starting speech synthesis...');
         window.speechSynthesis.speak(utterance);
         
-        // Add a timeout as backup
+        // Simple timeout-based resolution as backup
+        // Estimate speech duration: average 150 words per minute, 5 chars per word
+        const estimatedDuration = Math.max(2000, (text.length * 60) / (150 * 5) * 1000);
+        const maxDuration = Math.min(estimatedDuration * 2, 15000); // Cap at 15 seconds
+        
+        console.log(`Estimated speech duration: ${estimatedDuration}ms, max timeout: ${maxDuration}ms`);
+        
         setTimeout(() => {
-          if (window.speechSynthesis.speaking) {
-            console.log('Speech still in progress...');
-          } else {
-            console.log('Speech may have completed without onend event');
-            resolve();
+          console.log('Checking speech status after estimated duration...');
+          if (!hasResolved) {
+            // Give a bit more time, then resolve
+            setTimeout(() => {
+              if (!hasResolved) {
+                console.log('Speech timeout - resolving promise');
+                hasResolved = true;
+                resolve();
+              }
+            }, 1000);
           }
-        }, 5000);
+        }, estimatedDuration);
       };
 
       // Check if voices are already loaded
@@ -408,10 +425,10 @@ export const speakText = async (text: string, language: string): Promise<void> =
         // Fallback timeout in case onvoiceschanged doesn't fire
         setTimeout(() => {
           console.log('Voice loading timeout, proceeding anyway...');
-          loadVoicesAndSpeak();
-        }, 1000);
+          loadVoicesAndSpeak();        }, 1000);
       }
-        } catch (error) {
+      
+    } catch (error) {
       console.error('Error setting up text-to-speech:', error);
       reject(error);
     }
