@@ -601,6 +601,141 @@ body {
   opacity: 0.7;
 }
 
+/* Real-time Translation Features */
+.realtime-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.realtime-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--neutral-300);
+  border-radius: 0.5rem;
+  background: var(--white);
+  color: var(--neutral-700);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.realtime-button:hover {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+}
+
+.realtime-button.active {
+  border-color: var(--secondary-green);
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--secondary-green);
+}
+
+.realtime-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Status Indicators */
+.status-indicators {
+  margin-top: 0.75rem;
+}
+
+.typing-indicator,
+.translating-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  background: rgba(37, 99, 235, 0.05);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  font-size: 0.85rem;
+  color: var(--primary-blue);
+  margin-bottom: 0.5rem;
+}
+
+.error-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  background: rgba(220, 38, 38, 0.05);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  font-size: 0.85rem;
+  color: var(--accent-red);
+  margin-bottom: 0.5rem;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Real-time connection status */
+.context-selector {
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Emergency Quick Actions */
+.emergency-quick-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(220, 38, 38, 0.05);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 0.5rem;
+}
+
+.emergency-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--accent-red);
+  color: var(--white);
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emergency-button:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.emergency-button:active {
+  transform: translateY(0);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-content {
