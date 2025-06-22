@@ -33,3 +33,15 @@ body {
 .skip-link:focus {
   top: 0;
 }
+
+/* Smooth fade-in for main application after login */
+.app-fade-in {
+  opacity: 0;
+  animation: appFadeIn 0.45s ease-out forwards;
+}
+
+@keyframes appFadeIn {
+  to {
+    opacity: 1;
+  }
+}
