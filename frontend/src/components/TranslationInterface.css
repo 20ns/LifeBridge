@@ -1362,13 +1362,15 @@
 }
 
 .sign-language-interface {
-  max-width: 600px;
+  max-width: 800px; /* Made wider to accommodate wider visual feedback */
   width: 100%;
   text-align: center;
 }
 
 .sign-controls {
   margin-bottom: var(--spacing-lg);
+  display: flex;
+  justify-content: flex-end; /* Align button to the right */
 }
 
 .sign-btn {
@@ -1415,6 +1417,34 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* Make visual feedback system more compact and wider */
+.detection-area .visual-feedback-system {
+  width: 100%;
+  max-width: 700px; /* Wider visual feedback */
+  margin-bottom: var(--spacing-md);
+}
+
+/* Override any existing visual feedback styles to make it more compact */
+.visual-feedback-system .feedback-container {
+  padding: var(--spacing-sm) var(--spacing-md); /* More compact padding */
+  min-height: auto; /* Remove fixed height constraints */
+  display: flex;
+  flex-direction: row; /* Horizontal layout for compactness */
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.visual-feedback-system .feedback-item {
+  flex: 1;
+  text-align: center;
+  padding: var(--spacing-xs); /* Compact padding */
 }
 
 .camera-placeholder {
