@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Send, Volume2, Copy, Check } from 'lucide-react';
-import { translateText, detectLanguage } from '../services/awsService';
+import { translateText, detectLanguage, speakText } from '../services/awsService';
 
 interface TranslationInterfaceProps {
   sourceLanguage: string;
@@ -51,12 +51,19 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       }
     }
   };
-
-  const handleSpeak = () => {
-    if (translatedText && 'speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(translatedText);
-      utterance.lang = targetLanguage;
-      speechSynthesis.speak(utterance);
+  const handleSpeak = async () => {
+    if (translatedText) {
+      try {
+        await speakText(translatedText, targetLanguage);
+      } catch (error) {
+        console.error('Text-to-speech failed:', error);
+        // Fallback to browser speech synthesis
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(translatedText);
+          utterance.lang = targetLanguage;
+          speechSynthesis.speak(utterance);
+        }
+      }
     }
   };
 

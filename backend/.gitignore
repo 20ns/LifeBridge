@@ -1,0 +1,21 @@
+# Backend-specific .gitignore
+# Main .gitignore is at project root
+
+# Serverless Framework
+.serverless/
+.webpack/
+serverless-state.json
+
+# TypeScript build output
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# AWS credentials
+.aws/
+
+# Local development
+*.local.json
