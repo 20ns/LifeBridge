@@ -736,6 +736,426 @@ body {
   transform: translateY(0);
 }
 
+/* Interface Tabs Styles */
+.interface-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--neutral-600);
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.tab-button:hover {
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  transform: translateY(-2px);
+}
+
+.tab-button.active {
+  background: var(--primary-blue);
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.tab-button.active:hover {
+  background: var(--primary-blue-dark);
+}
+
+.interface-content {
+  min-height: 500px;
+}
+
+.sign-language-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Sign Language Detector Styles */
+.sign-language-detector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.video-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.detection-info {
+  text-align: center;
+  max-width: 600px;
+}
+
+.status {
+  padding: 0.5rem 1rem;
+  background: #e3f2fd;
+  border-radius: 20px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.gesture-guide {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.gesture-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.gesture-item {
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.priority-critical {
+  background: #ffebee;
+  border-left: 4px solid #f44336;
+}
+
+.priority-high {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+}
+
+.priority-medium {
+  background: #f3e5f5;
+  border-left: 4px solid #9c27b0;
+}
+
+.priority {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Sign Language Interface Styles */
+.sign-language-interface {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.interface-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.interface-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detection-toggle {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #3498db;
+  color: white;
+}
+
+.detection-toggle:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+.detection-toggle.active {
+  background: #e74c3c;
+}
+
+.detection-toggle.active:hover {
+  background: #c0392b;
+}
+
+.detection-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auto-translate-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.detection-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.current-detection {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.current-detection h4 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+}
+
+.detected-text {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+.detected-text .text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  flex: 1;
+}
+
+.detected-text .confidence {
+  background: #27ae60;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.emergency-badge {
+  background: #e74c3c;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.translate-btn {
+  padding: 0.75rem 1.5rem;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.translate-btn:hover:not(:disabled) {
+  background: #229954;
+  transform: translateY(-2px);
+}
+
+.translate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.clear-btn {
+  padding: 0.75rem 1.5rem;
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+  background: #7f8c8d;
+}
+
+.detection-history {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detection-history h4 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+}
+
+.signs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sign-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #3498db;
+}
+
+.sign-text {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.sign-time {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.detection-stats {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detection-stats h4 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.usage-tips {
+  background: #fff3cd;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ffeaa7;
+}
+
+.usage-tips h4 {
+  margin: 0 0 1rem 0;
+  color: #856404;
+}
+
+.usage-tips ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.usage-tips li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #fff2cc;
+  color: #856404;
+}
+
+.usage-tips li:last-child {
+  border-bottom: none;
+}
+
+.tip-note {
+  margin: 0;
+  font-style: italic;
+  color: #856404;
+  background: #fff2cc;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-content {
@@ -776,5 +1196,36 @@ body {
   .phrase-actions {
     margin-left: 0;
     align-self: flex-end;
+  }
+
+  .interface-tabs {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .tab-button {
+    justify-content: center;
+    padding: 1rem;
+  }
+}
+
+/* Sign Language Interface Media Queries */
+@media (max-width: 768px) {
+  .interface-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .controls {
+    justify-content: space-between;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
 }

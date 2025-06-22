@@ -4,7 +4,7 @@ import {
   ChatSyncCommand, 
   ListApplicationsCommand 
 } from '@aws-sdk/client-qbusiness';
-import { formatResponse } from '../utils/response';
+import { createResponse, createErrorResponse } from '../utils/response';
 
 // Configure AWS Q Business client
 const qBusinessClient = new QBusinessClient({
@@ -45,7 +45,7 @@ export const getEmergencyProtocol = async (
       JSON.parse(event.body || '{}');
 
     if (!symptoms) {
-      return formatResponse(400, { error: 'Symptoms are required' });
+      return createErrorResponse(400, 'Symptoms are required');
     }
 
     // Build emergency protocol query
@@ -76,11 +76,11 @@ export const getEmergencyProtocol = async (
     
     if (!applications.applications || applications.applications.length === 0) {
       // Return fallback protocol if Q Business not available
-      return formatResponse(200, {
+      return createResponse(200, {
         recommendations: getFallbackEmergencyProtocol(symptoms, severity),
         source: 'Fallback Emergency Guidelines',
         confidence: 0.7
-      });
+      }, 'Emergency protocol retrieved (fallback)');
     }
 
     const applicationId = applications.applications[0].applicationId;
@@ -88,9 +88,7 @@ export const getEmergencyProtocol = async (
     // Query Q Business
     const chatCommand = new ChatSyncCommand({
       applicationId,
-      userMessage: {
-        body: query
-      }
+      userMessage: query
     });
 
     const response = await qBusinessClient.send(chatCommand);
@@ -98,24 +96,24 @@ export const getEmergencyProtocol = async (
     // Parse and structure the response
     const recommendations = parseEmergencyProtocolResponse(response, symptoms);
 
-    return formatResponse(200, {
+    return createResponse(200, {
       recommendations,
       source: 'Amazon Q Medical Knowledge Base',
       confidence: 0.9,
       conversationId: response.conversationId
-    });
+    }, 'Emergency protocol retrieved successfully');
 
   } catch (error) {
     console.error('Error getting emergency protocol:', error);
     
     // Return fallback on error
     const { symptoms, severity } = JSON.parse(event.body || '{}');
-    return formatResponse(200, {
+    return createResponse(200, {
       recommendations: getFallbackEmergencyProtocol(symptoms, severity),
       source: 'Fallback Emergency Guidelines',
       confidence: 0.6,
       error: 'Q Business unavailable, using fallback protocols'
-    });
+    }, 'Emergency protocol retrieved (fallback due to error)');
   }
 };
 
@@ -127,7 +125,7 @@ export const getTriageSuggestion = async (
       JSON.parse(event.body || '{}');
 
     if (!chiefComplaint) {
-      return formatResponse(400, { error: 'Chief complaint is required' });
+      return createErrorResponse(400, 'Chief complaint is required');
     }
 
     // Build triage query
@@ -159,11 +157,11 @@ export const getTriageSuggestion = async (
     
     if (!applications.applications || applications.applications.length === 0) {
       // Return fallback triage if Q Business not available
-      return formatResponse(200, {
+      return createResponse(200, {
         triage: getFallbackTriage(chiefComplaint, vitalSigns, painScale),
         source: 'Fallback Triage Guidelines',
         confidence: 0.7
-      });
+      }, 'Triage suggestion retrieved (fallback)');
     }
 
     const applicationId = applications.applications[0].applicationId;
@@ -171,9 +169,7 @@ export const getTriageSuggestion = async (
     // Query Q Business
     const chatCommand = new ChatSyncCommand({
       applicationId,
-      userMessage: {
-        body: query
-      }
+      userMessage: query
     });
 
     const response = await qBusinessClient.send(chatCommand);
@@ -181,24 +177,24 @@ export const getTriageSuggestion = async (
     // Parse and structure the response
     const triage = parseTriageResponse(response, chiefComplaint, vitalSigns, painScale);
 
-    return formatResponse(200, {
+    return createResponse(200, {
       triage,
       source: 'Amazon Q Medical Triage System',
       confidence: 0.9,
       conversationId: response.conversationId
-    });
+    }, 'Triage suggestion retrieved successfully');
 
   } catch (error) {
     console.error('Error getting triage suggestion:', error);
     
     // Return fallback on error
     const { chiefComplaint, vitalSigns, painScale } = JSON.parse(event.body || '{}');
-    return formatResponse(200, {
+    return createResponse(200, {
       triage: getFallbackTriage(chiefComplaint, vitalSigns, painScale),
       source: 'Fallback Triage Guidelines',
       confidence: 0.6,
       error: 'Q Business unavailable, using fallback triage'
-    });
+    }, 'Triage suggestion retrieved (fallback due to error)');
   }
 };
 
@@ -210,9 +206,7 @@ export const getContextualAdvice = async (
       JSON.parse(event.body || '{}');
 
     if (!medicalText || !sourceLanguage || !targetLanguage) {
-      return formatResponse(400, { 
-        error: 'Medical text, source language, and target language are required' 
-      });
+      return createErrorResponse(400, 'Medical text, source language, and target language are required');
     }
 
     // Build contextual advice query
@@ -237,11 +231,11 @@ Please provide:
     
     if (!applications.applications || applications.applications.length === 0) {
       // Return fallback advice if Q Business not available
-      return formatResponse(200, {
+      return createResponse(200, {
         advice: getFallbackContextualAdvice(medicalText, sourceLanguage, targetLanguage, context),
         source: 'Fallback Medical Translation Guidelines',
         confidence: 0.7
-      });
+      }, 'Contextual advice retrieved (fallback)');
     }
 
     const applicationId = applications.applications[0].applicationId;
@@ -249,9 +243,7 @@ Please provide:
     // Query Q Business
     const chatCommand = new ChatSyncCommand({
       applicationId,
-      userMessage: {
-        body: query
-      }
+      userMessage: query
     });
 
     const response = await qBusinessClient.send(chatCommand);
@@ -259,24 +251,24 @@ Please provide:
     // Parse and structure the response
     const advice = parseContextualAdviceResponse(response, context);
 
-    return formatResponse(200, {
+    return createResponse(200, {
       advice,
       source: 'Amazon Q Medical Translation Advisor',
       confidence: 0.9,
       conversationId: response.conversationId
-    });
+    }, 'Contextual advice retrieved successfully');
 
   } catch (error) {
     console.error('Error getting contextual advice:', error);
     
     // Return fallback on error
     const { medicalText, sourceLanguage, targetLanguage, context } = JSON.parse(event.body || '{}');
-    return formatResponse(200, {
+    return createResponse(200, {
       advice: getFallbackContextualAdvice(medicalText, sourceLanguage, targetLanguage, context),
       source: 'Fallback Medical Translation Guidelines',
       confidence: 0.6,
       error: 'Q Business unavailable, using fallback advice'
-    });
+    }, 'Contextual advice retrieved (fallback due to error)');
   }
 };
 
