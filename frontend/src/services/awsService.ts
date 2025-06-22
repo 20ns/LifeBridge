@@ -253,8 +253,10 @@ export const speakText = async (text: string, language: string): Promise<void> =
 // Get emergency phrases from backend
 export const getEmergencyPhrases = async (language?: string): Promise<any[]> => {
   try {
+    // Add translate=true parameter when language is specified and not English
+    const needsTranslation = language && language !== 'en';
     const url = language 
-      ? `${API_BASE_URL}/emergency-phrases?language=${language}`
+      ? `${API_BASE_URL}/emergency-phrases?language=${language}${needsTranslation ? '&translate=true' : ''}`
       : `${API_BASE_URL}/emergency-phrases`;
       
     const response = await fetch(url, {
