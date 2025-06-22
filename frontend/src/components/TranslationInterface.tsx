@@ -179,7 +179,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     performanceMonitor.startOperation('translation');
     
     setIsTranslating(true);
-    setAutoTranslating(true); // Start auto-translation feedback
+    // Removed autoTranslating flag here to avoid duplicate UI during manual translation
     try {
       const result = await translateText(text, sourceLanguage, targetLanguage, context, performanceMode);
       
