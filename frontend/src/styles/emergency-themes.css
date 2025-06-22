@@ -712,3 +712,58 @@
   background-color: #595959; /* Exactly 7:1 with white text */
   color: #ffffff;
 }
+
+/* Emergency Mode Global Button Overrides for Maximum Contrast */
+.emergency-mode .emergency-btn,
+.emergency-mode .emergency-btn-primary,
+.emergency-mode .emergency-btn-secondary {
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.emergency-mode .emergency-btn:hover,
+.emergency-mode .emergency-btn-primary:hover,
+.emergency-mode .emergency-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.9) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  transform: scale(1.05);
+}
+
+.emergency-mode .emergency-btn-critical {
+  background: rgba(220, 38, 38, 0.9) !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.emergency-mode .emergency-btn-critical:hover {
+  background: rgba(220, 38, 38, 1) !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.emergency-mode .speech-recording-btn {
+  background: rgba(59, 130, 246, 0.9) !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.emergency-mode .speech-recording-btn.recording {
+  background: rgba(220, 38, 38, 0.9) !important;
+  color: #ffffff !important;
+}
+
+.emergency-mode .performance-btn {
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.emergency-mode .performance-btn.active {
+  background: rgba(46, 213, 115, 0.9) !important;
+  color: #ffffff !important;
+}
