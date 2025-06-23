@@ -36,7 +36,7 @@ LifeBridge AI is a production-ready, multilingual communication platform designe
 
 ## Features
 ### Medical-Grade Translation
-* Real-time speech-to-speech, speech-to-text, and text-to-text translations in **40+ languages**.
+* Real-time speech-to-speech, speech-to-text, and text-to-text translations covering **more than half of the world**.
 * **Sign-language detection** (static and dynamic gestures) for critical medical commands.
 * **Context preservation** for medical terminology and abbreviations.
 
@@ -81,7 +81,7 @@ flowchart TB
   subgraph Data
     H --> K[DynamoDB + Streams]
     J --> L[SNS & SES Notifications]
-    K --> M[S3 Glacier (7-Year Retention)]
+    K --> M["S3 Glacier (7-Year Retention)"]
   end
 
   style A fill:#61DAFB,stroke:#333,stroke-width:1px
@@ -141,7 +141,7 @@ After deployment, run `scripts/deployment_verification.py` to perform post-deplo
 ---
 
 ## Compliance & Security
-LifeBridge AI incorporates best practices outlined in the [AWS HIPAA Security & Compliance whitepaper](https://d1.awsstatic.com/whitepapers/compliance/AWS_HIPAA_Compliance_Whitepaper.pdf). See [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) for a full controls matrix.
+LifeBridge AI incorporates best practices outlined in the [AWS HIPAA Security & Compliance whitepaper](https://d1.awsstatic.com/whitepapers/compliance/AWS_HIPAA_Compliance_Whitepaper.pdf).
 
 Key controls include:
 * **Encryption**: TLS 1.3 in transit; AES-256 + KMS at rest.
@@ -157,8 +157,6 @@ Key controls include:
 - [ ] **Multilingual Triage Bot** powered by Bedrock Chat API
 - [ ] **ISO 27001 Certification** audit & gap analysis
 
-Open the [Roadmap Board](https://github.com/<your-org>/lifebridge-ai/projects/1) to track progress.
-
 ---
 
 ## Contributing
@@ -169,8 +167,6 @@ We value the expertise of both healthcare professionals and software engineers.
 3. Commit your code following [Conventional Commits](https://www.conventionalcommits.org/).
 4. Run `npm run test` **&** `npm run lint` before pushing.
 5. Open a PR and fill in the pull-request template.
-
-Please review our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contribution Guidelines](CONTRIBUTING.md) before submitting.
 
 ---
 
