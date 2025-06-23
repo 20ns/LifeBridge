@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { translateText } from '../services/awsService';
 
 interface RealTimeTranslationHookProps {
   sourceLanguage: string;
@@ -95,26 +96,22 @@ export const useRealTimeTranslation = ({
       setIsTranslating(true);
       
       try {
-        // Use the existing translateText function with enhanced medical context
-        const response = await fetch('http://localhost:3001/dev/translate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: textToTranslate,
-            sourceLanguage,
-            targetLanguage,
-            context
-          })
+        // Use the shared translateText utility to leverage existing
+        // caching, retry and error-handling logic as well as the
+        // environment-aware API base URL.
+        const result = await translateText(
+          textToTranslate,
+          sourceLanguage,
+          targetLanguage,
+          context,
+          'standard'
+        );
+
+        setLastTranslation({
+          ...result,
+          sourceLanguage,
+          targetLanguage
         });
-
-        if (!response.ok) {
-          throw new Error(`Translation failed: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        setLastTranslation(result.data);
         
       } catch (err) {
         console.error('Real-time translation error:', err);
