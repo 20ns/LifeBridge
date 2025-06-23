@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { Hand, Info } from 'lucide-react';
+import { Hand, Info, Video, VideoOff } from 'lucide-react';
 import SignLanguageDetector from './SignLanguageDetector';
 import SignAnimationPlayer from './SignAnimationPlayer';
 import VisualFeedbackSystem from './VisualFeedbackSystem';
@@ -126,13 +126,22 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
       <div className="input-section">
         <div className="section-header">
           <h3>Sign Language Input</h3>
+          {/* Detection toggle button */}
+          <button
+            className="performance-info-btn detection-toggle"
+            title={isActive ? 'Stop Detection' : 'Start Detection'}
+            onClick={isActive ? handleStopDetection : handleStartDetection}
+            style={{ marginLeft: 'auto', marginRight: '8px' }}
+          >
+            {isActive ? <VideoOff size={14} aria-hidden="true" /> : <Video size={14} aria-hidden="true" />}
+          </button>
+
           {/* Info button to show recognised gesture list */}
           <button
             ref={infoButtonRef}
             className="performance-info-btn"
             title="Show recognised gestures"
             onClick={() => setShowSignTooltip((p) => !p)}
-            style={{ marginLeft: 'auto' }}
           >
             <Info size={12} aria-hidden="true" />
           </button>
