@@ -8,6 +8,7 @@
   <a href="https://react.dev"><img src="https://img.shields.io/badge/Frontend-React_&_TypeScript-61DAFB?style=for-the-badge&logo=react" alt="React" /></a>
   <a href="backend/serverless.yml"><img src="https://img.shields.io/badge/Backend-AWS_Lambda-FF9900?style=for-the-badge&logo=awslambda" alt="Lambda" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT" /></a>
+<a href="https://main.d3q4a2yer0r4c5.amplifyapp.com"><img src="https://img.shields.io/badge/Live-Website-blue?style=for-the-badge" alt="Live Website" /></a>
 
   <p><strong>Breaking language barriers in healthcare—securely, reliably, and at scale.</strong></p>
 </div>
