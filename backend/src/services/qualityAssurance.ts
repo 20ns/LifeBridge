@@ -1,7 +1,7 @@
 // Quality assurance service with human-in-the-loop review for medical translations
 // Implements bias detection, hallucination prevention, and quality scoring
 
-import { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import { auditLogger } from './auditLogger';
 import * as crypto from 'crypto';
@@ -437,35 +437,32 @@ export class QualityAssuranceService {
       console.error('Failed to send reviewer alert:', error);
     }
   }
-
   // Get pending reviews for human reviewers
   async getPendingReviews(priority?: 'low' | 'medium' | 'high' | 'critical', emergency?: boolean): Promise<ReviewRequest[]> {
-    try {
-      // Query DynamoDB for pending reviews
-      const queryParams: any = {
+    try {      // Use Scan operation for more reliable results (temporary fix for demo)
+      const scanParams: any = {
         TableName: this.reviewTableName,
-        IndexName: 'reviewStatus-timestamp-index',
-        KeyConditionExpression: 'reviewStatus = :status',
+        FilterExpression: 'reviewStatus = :status OR reviewStatus = :inReview OR reviewStatus = :requiresRevision',
         ExpressionAttributeValues: {
-          ':status': { S: 'pending' }
+          ':status': { S: 'pending' },
+          ':inReview': { S: 'in_review' },
+          ':requiresRevision': { S: 'requires_revision' }
         }
       };
 
       if (priority) {
-        queryParams.FilterExpression = 'priority = :priority';
-        queryParams.ExpressionAttributeValues[':priority'] = { S: priority };
+        scanParams.FilterExpression += ' AND priority = :priority';
+        scanParams.ExpressionAttributeValues[':priority'] = { S: priority };
       }
 
       if (emergency) {
         const emergencyFilter = 'priority = :critical OR context = :emergency';
-        queryParams.FilterExpression = queryParams.FilterExpression 
-          ? `(${queryParams.FilterExpression}) AND (${emergencyFilter})`
-          : emergencyFilter;
-        queryParams.ExpressionAttributeValues[':critical'] = { S: 'critical' };
-        queryParams.ExpressionAttributeValues[':emergency'] = { S: 'emergency' };
+        scanParams.FilterExpression = `(${scanParams.FilterExpression}) AND (${emergencyFilter})`;
+        scanParams.ExpressionAttributeValues[':critical'] = { S: 'critical' };
+        scanParams.ExpressionAttributeValues[':emergency'] = { S: 'emergency' };
       }
 
-      const command = new QueryCommand(queryParams);
+      const command = new ScanCommand(scanParams);
       const response = await this.dynamoClient.send(command);
 
       const reviews: ReviewRequest[] = (response.Items || []).map(item => ({
@@ -475,21 +472,19 @@ export class QualityAssuranceService {
         sourceLanguage: item.sourceLanguage?.S || '',
         targetLanguage: item.targetLanguage?.S || '',
         context: item.context?.S || '',
-        priority: item.priority?.S as 'low' | 'medium' | 'high' | 'critical',
-        qualityMetrics: {
-          confidence: parseFloat(item.qualityScore?.N || '0'),
-          medical_accuracy: parseFloat(item.qualityScore?.N || '0'),
-          cultural_appropriateness: 0.8,
-          emergency_urgency_preserved: true,
-          terminology_consistency: 0.8,
+        priority: item.priority?.S as 'low' | 'medium' | 'high' | 'critical',        qualityMetrics: {
+          confidence: parseFloat(item.confidence?.N || '0'),
+          medical_accuracy: parseFloat(item.medicalAccuracy?.N || '0'),
+          cultural_appropriateness: parseFloat(item.culturalAppropriate?.N || '0'),
+          emergency_urgency_preserved: item.emergencyUrgency?.BOOL || false,
+          terminology_consistency: parseFloat(item.terminologyConsistency?.N || '0'),
           bias_score: parseFloat(item.biasScore?.N || '0'),
           hallucination_risk: parseFloat(item.hallucinationRisk?.N || '0'),
           overall_quality: parseFloat(item.qualityScore?.N || '0')
-        },
-        flaggedIssues: item.flaggedIssues?.SS || [],
+        },        flaggedIssues: item.flaggedIssues?.SS || [],
         timestamp: item.timestamp?.S || '',
         sessionId: item.sessionId?.S || '',
-        reviewStatus: 'pending'
+        reviewStatus: item.reviewStatus?.S as 'pending' | 'in_review' | 'approved' | 'rejected' | 'requires_revision' || 'pending'
       }));
 
       return reviews.sort((a, b) => {
