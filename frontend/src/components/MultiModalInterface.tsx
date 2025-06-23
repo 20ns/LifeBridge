@@ -215,7 +215,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         aria-label="Toggle performance metrics"
         title="Performance Metrics"
       >
-        <Settings size={18} />
+        <Settings size={14} />
       </button>
     </div>
   );
