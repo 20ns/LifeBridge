@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { Hand } from 'lucide-react';
+import { Hand, Info } from 'lucide-react';
 import SignLanguageDetector from './SignLanguageDetector';
 import SignAnimationPlayer from './SignAnimationPlayer';
 import VisualFeedbackSystem from './VisualFeedbackSystem';
@@ -46,6 +46,9 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
   } = useSignLanguageDetection();
   
   const [lastTranslationTime, setLastTranslationTime] = useState(0);
+  const [showSignTooltip, setShowSignTooltip] = useState(false);
+  const infoButtonRef = useRef<HTMLButtonElement>(null);
+  const signTooltipRef = useRef<HTMLDivElement>(null);
 
   const prevPropsRef = useRef<SignLanguageInterfaceProps | undefined>(undefined);
   // Show success notification when translation completes
@@ -102,12 +105,63 @@ const SignLanguageInterface = forwardRef<SignLanguageInterfaceHandle, SignLangua
     isDetectionActive: () => isActive
   }));
 
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        showSignTooltip &&
+        signTooltipRef.current &&
+        !signTooltipRef.current.contains(e.target as Node) &&
+        !infoButtonRef.current?.contains(e.target as Node)
+      ) {
+        setShowSignTooltip(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSignTooltip]);
+
   return (
     <div className="translation-interface">
       <div className="input-section">
         <div className="section-header">
           <h3>Sign Language Input</h3>
+          {/* Info button to show recognised gesture list */}
+          <button
+            ref={infoButtonRef}
+            className="performance-info-btn"
+            title="Show recognised gestures"
+            onClick={() => setShowSignTooltip((p) => !p)}
+            style={{ marginLeft: 'auto' }}
+          >
+            <Info size={12} aria-hidden="true" />
+          </button>
         </div>
+        {/* Tooltip listing recognised gestures */}
+        {showSignTooltip && (
+          <div
+            ref={signTooltipRef}
+            className="performance-tooltip"
+            style={{ top: '60px', right: '20px', width: '300px', zIndex: 9999 }}
+          >
+            <div className="tooltip-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4 style={{ margin: 0 }}>Recognised Gestures</h4>
+              <button className="tooltip-close" onClick={() => setShowSignTooltip(false)}>×</button>
+            </div>
+            <div className="tooltip-content">
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <li>✊ <strong>Emergency</strong> – closed fist</li>
+                <li>🖐️ <strong>Help</strong> – open palm raised</li>
+                <li>🤚 <strong>Pain</strong> – hand to chest</li>
+                <li>💊 <strong>Medicine</strong> – pinch fingers</li>
+                <li>👨‍⚕️ <strong>Doctor</strong> – index taps wrist</li>
+                <li>💧 <strong>Water</strong> – "W" gesture</li>
+                <li>👍 <strong>Yes</strong> – thumbs up</li>
+                <li>👎 <strong>No</strong> – shake hand side-to-side</li>
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* Main Detection Area */}
         <div className="sign-detection-area">
