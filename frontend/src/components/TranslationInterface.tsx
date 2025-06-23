@@ -7,6 +7,7 @@ import { analyzeMedicalContent, MedicalAnalysis } from '../utils/medicalTerminol
 import SpeechInterface from './SpeechInterface';
 import QRecommendations from './QRecommendations';
 import './TranslationInterface.css';
+import { getCachedTranslation as getLocalCached, putCachedTranslation as putLocalCached } from '../utils/localTranslationCache';
 
 interface TranslationInterfaceProps {
   sourceLanguage: string;
@@ -157,6 +158,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
           
           setTranslatedText(result.translatedText);
           setConfidence(result.confidence);
+          putLocalCached(text, result.translatedText, sourceLanguage, targetLanguage, result.confidence);
         } catch (error) {
           console.error('Auto-translation error:', error);
           setTranslatedText('Auto-translation failed. Please try again.');
@@ -178,6 +180,17 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     const text = textToTranslate || inputText;
     if (!text.trim()) return;
 
+    // If offline, try local cache first
+    if (!navigator.onLine) {
+      const cached = getLocalCached(text, sourceLanguage, targetLanguage);
+      if (cached) {
+        setTranslatedText(cached.translatedText);
+        setConfidence(cached.confidence);
+        trackPerformance?.('translation', startTime);
+        return;
+      }
+    }
+
     // Start performance monitoring for translation
     performanceMonitor.startOperation('translation');
     
@@ -191,6 +204,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
       
       setTranslatedText(result.translatedText);
       setConfidence(result.confidence);
+      putLocalCached(text, result.translatedText, sourceLanguage, targetLanguage, result.confidence);
       
       // Update medical analysis from API response if available
       if (result.medicalAnalysis) {
