@@ -869,20 +869,36 @@
   }
 }
 
-/* Hide unused elements for clean interface */
-.multi-modal-interface .interface-header,
-.multi-modal-interface .connection-status,
-.multi-modal-interface .interface-controls {
-  display: none;
+/* Settings quick access button */
+.settings-quick-access {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-blue);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  z-index: 1000;
 }
 
-.multi-modal-interface .interface-content {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  border: none;
-  box-shadow: none;
+.settings-quick-access:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.settings-quick-access.active {
+  background: var(--primary-blue);
+  color: var(--white);
+  border-color: var(--primary-blue-dark);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
 }
 
 /* Performance Mode Indicator */

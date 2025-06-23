@@ -1,5 +1,5 @@
 import React from 'react';
-import { Smartphone } from 'lucide-react';
+import { Smartphone, Settings } from 'lucide-react';
 import ConnectionIndicator from './ConnectionIndicator';
 import { ConnectionQuality } from '../hooks/useConnectionQuality';
 
@@ -27,8 +27,13 @@ const InterfaceHeader: React.FC<InterfaceHeaderProps> = ({
       <h2>LifeBridge Communication</h2>
     </div>
     <div className="header-right">
-      <button className="performance-toggle" onClick={onTogglePerformance}>
-        ⚙️
+      <button
+        className="performance-toggle"
+        onClick={onTogglePerformance}
+        aria-label="Toggle performance metrics"
+        title="Performance Metrics"
+      >
+        <Settings size={18} style={{ color: 'var(--primary-blue)' }} />
       </button>
       <button
         className={`emergency-toggle ${isEmergencyMode ? 'active' : ''}`}
@@ -41,4 +46,4 @@ const InterfaceHeader: React.FC<InterfaceHeaderProps> = ({
   </div>
 );
 
-export default InterfaceHeader; 
+export default InterfaceHeader;

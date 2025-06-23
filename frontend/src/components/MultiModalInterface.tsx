@@ -10,8 +10,8 @@ import { usePerformanceMetrics } from '../hooks/usePerformanceMetrics';
 import { useNotifications } from '../hooks/useNotifications';
 import { translateText } from '../services/awsService';
 import { audioManager } from '../utils/audioManager';
-import InterfaceHeader from './InterfaceHeader';
 import ModeSelector from './ModeSelector';
+import { Settings } from 'lucide-react';
 import './MultiModalInterface.css';
 
 type CommunicationMode = 'text' | 'speech' | 'sign' | 'emergency';
@@ -50,7 +50,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   /* ------------------------------------------------------------------ */
   /* hooks                                                              */
   /* ------------------------------------------------------------------ */
-  const { connectionQuality, offlineMode } = useConnectionQuality();
+  const { offlineMode } = useConnectionQuality();
   const { performanceMetrics, trackPerformance, incrementCacheHit } = usePerformanceMetrics();
   const { currentNotification, addNotification } = useNotifications();
 
@@ -135,13 +135,6 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
   /* ------------------------------------------------------------------ */
   return (
     <div className={`multi-modal-interface ${isEmergencyMode ? 'emergency-mode' : ''}`}>
-      <InterfaceHeader
-        connectionQuality={connectionQuality}
-        isEmergencyMode={isEmergencyMode}
-        onTogglePerformance={() => setShowPerformancePanel(p => !p)}
-        onToggleEmergency={handleEmergencyToggle}
-      />
-
       {/* Notifications */}
       {currentNotification && (
         <div className={`single-notification ${currentNotification.isVisible ? 'visible' : ''} ${currentNotification.isLeaving ? 'leaving' : ''}`}>
@@ -211,6 +204,16 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
       {/* Quick emergency button */}
       <button className={`emergency-quick-access ${isEmergencyMode ? 'active' : ''} ${isTransitioning ? 'transitioning' : ''}`} onClick={handleEmergencyToggle}>
         {isTransitioning ? '⟳' : isEmergencyMode ? '✕' : '🚨'}
+      </button>
+
+      {/* Settings / performance quick button */}
+      <button
+        className={`settings-quick-access ${showPerformancePanel ? 'active' : ''}`}
+        onClick={() => setShowPerformancePanel(p => !p)}
+        aria-label="Toggle performance metrics"
+        title="Performance Metrics"
+      >
+        <Settings size={22} />
       </button>
     </div>
   );
