@@ -11,7 +11,7 @@ import { useNotifications } from '../hooks/useNotifications';
 import { translateText } from '../services/awsService';
 import { audioManager } from '../utils/audioManager';
 import ModeSelector from './ModeSelector';
-import { Settings } from 'lucide-react';
+import { Settings, WifiOff } from 'lucide-react';
 import './MultiModalInterface.css';
 
 type CommunicationMode = 'text' | 'speech' | 'sign' | 'emergency';
@@ -148,56 +148,57 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         onSelectMode={handleModeSwitch}
       />
 
-      {/* Main content */}
-      <div className="interface-content">
-        {offlineMode ? (
-          <OfflineFallback />
-        ) : (
-          <>
-            {activeMode === 'text' && (
-              <TranslationInterface
-                sourceLanguage={sourceLanguage}
-                targetLanguage={targetLanguage}
-                isListening={isListening}
-                setIsListening={setIsListening}
-                performanceMode={performanceMode}
-                medicalContext={isEmergencyMode ? 'emergency' : 'general'}
-                trackPerformance={trackPerformance}
-              />
-            )}
-            {activeMode === 'speech' && (
-              <SpeechInterface
-                language={sourceLanguage}
-                sourceLanguage={sourceLanguage}
-                targetLanguage={targetLanguage}
-                onSpeechToText={() => trackPerformance('speechRecognition', Date.now())}
-                medicalContext={isEmergencyMode ? 'emergency' : 'general'}
-                realTimeMode
-                voiceActivityDetection
-              />
-            )}
-            <div style={{ display: activeMode === 'sign' ? 'block' : 'none' }}>
-              <SignLanguageInterface
-                ref={signLanguageInterfaceRef}
-                onEmergencyDetected={handleSignEmergencyDetected}
-                onTranslationRequest={handleSignTranslationRequest}
-                addNotification={addNotification}
-                isTranslating={false}
-                currentLanguage={targetLanguage}
-                translatedText={translatedText}
-              />
-            </div>
-            {activeMode === 'emergency' && (
-              <EmergencyPhrasesEnhanced
-                sourceLanguage={sourceLanguage}
-                targetLanguage={targetLanguage}
-                largeButtons
-                accessibilityMode
-              />
-            )}
-          </>
+      {/* Offline notice banner */}
+      {offlineMode && (
+        <div className="offline-banner" role="status">
+          <WifiOff size={18} className="offline-banner-icon" /> Offline mode: using cached translations
+        </div>
+      )}
+
+      {/* Main content always rendered */}
+      <>
+        {activeMode === 'text' && (
+          <TranslationInterface
+            sourceLanguage={sourceLanguage}
+            targetLanguage={targetLanguage}
+            isListening={isListening}
+            setIsListening={setIsListening}
+            performanceMode={performanceMode}
+            medicalContext={isEmergencyMode ? 'emergency' : 'general'}
+            trackPerformance={trackPerformance}
+          />
         )}
-      </div>
+        {activeMode === 'speech' && (
+          <SpeechInterface
+            language={sourceLanguage}
+            sourceLanguage={sourceLanguage}
+            targetLanguage={targetLanguage}
+            onSpeechToText={() => trackPerformance('speechRecognition', Date.now())}
+            medicalContext={isEmergencyMode ? 'emergency' : 'general'}
+            realTimeMode
+            voiceActivityDetection
+          />
+        )}
+        <div style={{ display: activeMode === 'sign' ? 'block' : 'none' }}>
+          <SignLanguageInterface
+            ref={signLanguageInterfaceRef}
+            onEmergencyDetected={handleSignEmergencyDetected}
+            onTranslationRequest={handleSignTranslationRequest}
+            addNotification={addNotification}
+            isTranslating={false}
+            currentLanguage={targetLanguage}
+            translatedText={translatedText}
+          />
+        </div>
+        {activeMode === 'emergency' && (
+          <EmergencyPhrasesEnhanced
+            sourceLanguage={sourceLanguage}
+            targetLanguage={targetLanguage}
+            largeButtons
+            accessibilityMode
+          />
+        )}
+      </>
 
       {/* Performance panel */}
       <PerformancePanel metrics={performanceMetrics} visible={showPerformancePanel} offlineMode={offlineMode} onClose={() => setShowPerformancePanel(false)} />

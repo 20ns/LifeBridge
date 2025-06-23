@@ -1162,3 +1162,24 @@
     font-size: 0.8rem;
   }
 }
+
+/* Offline banner */
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-yellow);
+  color: var(--black);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  z-index: 1100;
+  font-weight: 500;
+}
+.offline-banner-icon {
+  color: var(--black);
+}

@@ -3,16 +3,20 @@ import { WifiOff, RotateCcw } from 'lucide-react';
 import './OfflineFallback.css';
 
 const OfflineFallback: React.FC = () => (
-  <div className="offline-fallback">
+  <section className="offline-fallback" role="alert" aria-live="assertive">
     <WifiOff className="offline-icon" />
     <div className="offline-content">
       <h3>Connection Lost</h3>
       <p>Using cached translations and offline features</p>
-      <button className="retry-connection-button" onClick={() => window.location.reload()}>
+      <button
+        className="retry-connection-button"
+        onClick={() => window.location.reload()}
+        aria-label="Retry connection"
+      >
         <RotateCcw className="button-icon" /> Retry Connection
       </button>
     </div>
-  </div>
+  </section>
 );
 
 export default OfflineFallback; 
