@@ -65,9 +65,8 @@ const ReviewDashboard: React.FC = () => {
       })}`);
       
       if (!response.ok) throw new Error('Failed to load pending reviews');
-      
-      const data = await response.json();
-      setPendingReviews(data.pendingReviews || []);
+        const data = await response.json();
+      setPendingReviews(data.data?.pendingReviews || []);
     } catch (err) {
       setError('Failed to load pending reviews');
       console.error('Error loading reviews:', err);
@@ -79,9 +78,8 @@ const ReviewDashboard: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/review/metrics`);
       if (!response.ok) throw new Error('Failed to load metrics');
-      
-      const data = await response.json();
-      setMetrics(data.metrics);
+        const data = await response.json();
+      setMetrics(data.data?.metrics || data.metrics);
     } catch (err) {
       console.error('Error loading metrics:', err);
     }

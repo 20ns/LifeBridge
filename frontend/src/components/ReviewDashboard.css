@@ -571,57 +571,182 @@
 /* Review Actions */
 .review-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
+  padding: 20px 0;
+  border-top: 1px solid #e9ecef;
+  margin-top: 20px;
 }
 
 .action-button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-width: 140px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.action-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.action-button:hover::before {
+  left: 100%;
+}
+
+.action-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.action-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Approve Button - Green with medical cross theme */
 .action-button.approve {
-  background: #27ae60;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
   color: white;
+  border-color: #27ae60;
 }
 
 .action-button.approve:hover {
-  background: #229954;
+  background: linear-gradient(135deg, #27ae60, #229954);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
 }
 
+.action-button.approve:focus {
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.4);
+}
+
+/* Requires Revision Button - Orange/Amber */
 .action-button.revise {
-  background: #f39c12;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
   color: white;
+  border-color: #e67e22;
 }
 
 .action-button.revise:hover {
-  background: #e67e22;
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(243, 156, 18, 0.3);
 }
 
+.action-button.revise:focus {
+  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.4);
+}
+
+/* Reject Button - Red with warning theme */
 .action-button.reject {
-  background: #e74c3c;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
   color: white;
+  border-color: #c0392b;
 }
 
 .action-button.reject:hover {
-  background: #c0392b;
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
 }
 
+.action-button.reject:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.4);
+}
+
+/* Escalate Button - Purple with alert theme */
 .action-button.escalate {
-  background: #9b59b6;
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
   color: white;
+  border-color: #8e44ad;
 }
 
 .action-button.escalate:hover {
-  background: #8e44ad;
+  background: linear-gradient(135deg, #8e44ad, #7d3c98);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(155, 89, 182, 0.3);
+}
+
+.action-button.escalate:focus {
+  box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.4);
+}
+
+/* Disabled state for all buttons */
+.action-button:disabled {
+  background: #bdc3c7 !important;
+  color: #7f8c8d !important;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.action-button:disabled::before {
+  display: none;
+}
+
+/* Icon styling within buttons */
+.action-button svg {
+  transition: transform 0.3s ease;
+}
+
+.action-button:hover svg {
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .review-actions {
+    gap: 12px;
+  }
+  
+  .action-button {
+    min-width: 120px;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .action-button {
+    border-width: 3px;
+    font-weight: 700;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .action-button {
+    transition: none;
+  }
+  
+  .action-button::before {
+    display: none;
+  }
+  
+  .action-button:hover {
+    transform: none;
+  }
 }
 
 /* Escalation Modal */
@@ -632,6 +757,16 @@
   right: 0;
   bottom: 0;
   z-index: 1000;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-backdrop {
@@ -640,60 +775,148 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
 .modal-content {
   background: white;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
-  width: 90%;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  animation: modalSlideIn 0.3s ease-out;
+  border: 1px solid #e9ecef;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-content h4 {
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   color: #2c3e50;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-content h4::before {
+  content: '⚠️';
+  font-size: 24px;
 }
 
 .modal-content textarea {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 15px;
   font-family: inherit;
   resize: vertical;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  transition: border-color 0.3s ease;
+  min-height: 100px;
+}
+
+.modal-content textarea:focus {
+  outline: none;
+  border-color: #9b59b6;
+  box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.15);
+}
+
+.modal-content textarea::placeholder {
+  color: #6c757d;
+  font-style: italic;
 }
 
 .modal-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: flex-end;
 }
 
 .modal-actions button {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 12px 24px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-actions button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 .escalate-confirm {
-  background: #e74c3c !important;
+  background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
   color: white !important;
-  border-color: #e74c3c !important;
+  border-color: #c0392b !important;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
 .escalate-confirm:hover {
-  background: #c0392b !important;
+  background: linear-gradient(135deg, #c0392b, #a93226) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+}
+
+.escalate-confirm:active {
+  transform: translateY(0);
+}
+
+.modal-actions button:not(.escalate-confirm) {
+  background: #f8f9fa;
+  color: #495057;
+  border-color: #dee2e6;
+}
+
+.modal-actions button:not(.escalate-confirm):hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Close button for modal */
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: #f8f9fa;
+  color: #495057;
 }
 
 /* Responsive Design */
