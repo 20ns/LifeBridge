@@ -15,6 +15,7 @@ interface TranslationInterfaceProps {
   setIsListening: (listening: boolean) => void;
   performanceMode: 'standard' | 'optimized';
   medicalContext?: 'emergency' | 'consultation' | 'medication' | 'general';
+  trackPerformance?: (operation: string, startTime: number) => void;
 }
 
 const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
@@ -23,7 +24,8 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
   isListening,
   setIsListening,
   performanceMode,
-  medicalContext = 'general'
+  medicalContext = 'general',
+  trackPerformance
 }) => {
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
@@ -172,6 +174,7 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     }
   }, [sourceLanguage, targetLanguage, inputText, translatedText, isTranslating, realTimeMode, isTyping, context, performanceMode]); // Dependencies are safe now
   const handleTranslate = useCallback(async (textToTranslate?: string) => {
+    const startTime = Date.now();
     const text = textToTranslate || inputText;
     if (!text.trim()) return;
 
@@ -230,8 +233,10 @@ const TranslationInterface: React.FC<TranslationInterfaceProps> = ({
     } finally {
       setIsTranslating(false);
       setAutoTranslating(false); // Stop auto-translation feedback
+      // Report latency to global performance panel
+      trackPerformance?.('translation', startTime);
     }
-  }, [inputText, sourceLanguage, targetLanguage, context, performanceMonitor, realTimeMode]);
+  }, [inputText, sourceLanguage, targetLanguage, context, performanceMonitor, realTimeMode, trackPerformance]);
 
   const handleCopy = async () => {
     if (translatedText) {

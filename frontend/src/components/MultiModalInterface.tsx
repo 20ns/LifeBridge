@@ -162,6 +162,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
                 setIsListening={setIsListening}
                 performanceMode={performanceMode}
                 medicalContext={isEmergencyMode ? 'emergency' : 'general'}
+                trackPerformance={trackPerformance}
               />
             )}
             {activeMode === 'speech' && (
@@ -213,7 +214,7 @@ const MultiModalInterface: React.FC<MultiModalInterfaceProps> = ({
         aria-label="Toggle performance metrics"
         title="Performance Metrics"
       >
-        <Settings size={22} />
+        <Settings size={18} />
       </button>
     </div>
   );
